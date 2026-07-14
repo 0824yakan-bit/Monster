@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Roguelike.vcxproj" Id="4e99be96-9695-404d-b661-aa54b6be9b2d" />
+</Solution>
