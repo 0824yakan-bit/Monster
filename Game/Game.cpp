@@ -24,8 +24,9 @@
  * @param なし
  */
 Game::Game()
-	: m_key{ 0 }
-	, m_oldKey{ 0 }
+	: m_key		 { 0 }
+	, m_oldKey	 { 0 }
+	,m_WorldTimer{ 0 }
 {
 	// 乱数の初期値を設定
 	SRand(static_cast<int>(time(nullptr)));
@@ -82,9 +83,12 @@ void Game::Update(float elapsedTime)
 	// ゲームの更新
 	m_playerManager.Update(&m_map);
 	m_enemyManager.Update();
-	if (Collisionall::HitCharacter(m_playerManager, m_enemyManager))
+	for (auto& enemy : m_enemyManager.m_enemies)
 	{
-		printfDx(L"Hit!!");
+		if (Collisionall::HitCharacter( m_playerManager,enemy.get()))
+		{
+			enemy->OnHit(m_playerManager);
+		}
 	}
 }
 

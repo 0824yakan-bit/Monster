@@ -141,6 +141,7 @@
     <!-- プリコンパイル済みヘッダー -->
     <ClCompile Include="Game\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Game\Enemy\Slime.cpp" />
+    <ClCompile Include="Game\Enemy\Wolf.cpp" />
     <ClCompile Include="Game\Inputmanager\InputManager.cpp" />
     <ClCompile Include="Game\Map\Map.cpp" />
     <ClCompile Include="Game\Maths\Collisionall.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="Game\Enemy\Enemy.h" />
     <ClInclude Include="Game\Enemy\EnemyManager.h" />
     <ClInclude Include="Game\Enemy\Slime.h" />
+    <ClInclude Include="Game\Enemy\Wolf.h" />
     <ClInclude Include="Game\Inputmanager\InputManager.h" />
     <ClInclude Include="Game\Map\Map.h" />
     <ClInclude Include="Game\Maths\Collisionall.h" />

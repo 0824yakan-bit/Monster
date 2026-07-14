@@ -17,7 +17,7 @@ public:
         float x2, float y2,
         float w2, float h2);
 
-    static bool HitCharacter(PlayerManager& player, EnemyManager& enemymanager);
+    static bool HitCharacter(PlayerManager& player, Enemy* enemy);
 
     //static bool HitShotEnemy(Shot& shot, Character& enemy);
 

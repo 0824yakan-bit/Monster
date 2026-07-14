@@ -5,7 +5,6 @@
 #include"Game/Map/Map.h"
 #include"Game/Maths/Collisionall.h"
 Slime::Slime()
-    : m_moveTimer{0}
 {
 }
 Slime::~Slime()
@@ -27,11 +26,11 @@ void Slime::Initialize(Map& map)
 void Slime::Update()
 {
    
-	//m_moveTimer++;
-	//if (m_moveTimer == 30)
+	//moveTimer++;
+	//if (moveTimer == 30)
 	//{
-	//	m_moveTimer = 0;
-	//	m_position.x += m_size;
+	//	moveTimer = 0;
+	//	position.x += m_size;
 	//
 	//}
 }
@@ -39,15 +38,15 @@ void Slime::Update()
 void Slime::Render()
 {
     DrawBox(
-        position.x,
-        position.y,
-        position.x + size.x,
-        position.y + size.y,
-        GetColor(0, 0, 0),
-        TRUE);
+        position.x,position.y,position.x + size.x,position.y + size.y,GetColor(0, 0, 0),TRUE);
 }
 
 void Slime::Finalize()
 {
 
+}
+
+void Slime::OnHit(PlayerManager&playermanager)
+{
+	printfDx(L"SlimeHit!!");
 }
