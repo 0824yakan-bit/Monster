@@ -14,7 +14,7 @@ FieldScene::~FieldScene()
 
 void FieldScene::Initialize(InputManager& inputmanager)
 {
-
+    
     m_hitEnemy = nullptr;
     m_isBattleRequested = false;
 
@@ -22,6 +22,7 @@ void FieldScene::Initialize(InputManager& inputmanager)
 
 void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map&map)
 {
+    map.Update(inputManager,playerManager);
     playerManager.Update(&map);
     enemyManager.Update();
     Enemy* enemy = enemyManager.CheckHit(playerManager);

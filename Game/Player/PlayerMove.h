@@ -8,8 +8,15 @@ class PlayerMove
 {
 private:
 	Vector2 m_maponposition;
+	Map::TileType type;
+	Map::TileType nexttile;
 	InputManager m_inputManager;
 	TileRole m_tileRole;
+
+	int m_mapX;
+	int m_mapY;
+	int m_nextmapX;
+	int m_nextmapY;
 
 	int m_speed;
 	int m_movetimer;

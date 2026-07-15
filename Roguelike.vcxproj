@@ -194,6 +194,7 @@
     <!-- リソースファイル -->
     <None Include="packages.config" />
     <None Include="Resources\CSV\map.csv" />
+    <None Include="Resources\CSV\object.csv" />
     <None Include="Resources\Sounds\SE00.ogg" />
     <Image Include="Resources\Textures\testmapchip.png" />
     <Image Include="Resources\Textures\TridentLogo.png" />
