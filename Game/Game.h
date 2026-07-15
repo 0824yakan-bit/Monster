@@ -16,9 +16,11 @@
 
 // ヘッダファイルの読み込み ===================================================
 #include"Game/Map/Map.h"
-#include"Player/PlayerManager.h"
-#include"Enemy/EnemyManager.h"
-#include"Maths/Collisionall.h"
+#include"Game/Player/PlayerManager.h"
+#include"Game/Enemy/EnemyManager.h"
+#include"Game/Inputmanager/InputManager.h"
+#include"Game/Scene/SceneManager.h"
+
 // クラスの宣言 ===============================================================
 
 
@@ -34,9 +36,11 @@ public:
 	// システム関連
 	static constexpr const wchar_t* TITLE = L"Sample Game";   ///< ゲームタイトル
 	//後にほかのマネージャに移す
-	Map m_map;
 	PlayerManager m_playerManager;
-	EnemyManager  m_enemyManager ;
+	EnemyManager m_enemyManager;
+	Map m_map;
+	InputManager m_inputManager;
+	SceneManager m_sceneManager;
 
 	//
 

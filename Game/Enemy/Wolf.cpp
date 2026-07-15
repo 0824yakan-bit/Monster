@@ -14,6 +14,7 @@ Wolf::~Wolf()
 }
 void Wolf::Initialize(Map& map)
 {
+	type = EnemyType::Wolf;
 	position.x = 20 * map.m_chipSize;
 	position.y = 20 * map.m_chipSize;
 
@@ -47,5 +48,7 @@ void Wolf::Finalize()
 
 void Wolf::OnHit(PlayerManager&playermanager)
 {
+
 	printfDx(L"WolfHit!!");
 }
+

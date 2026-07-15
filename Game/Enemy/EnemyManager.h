@@ -6,7 +6,7 @@
 #include "Game/Enemy/Enemy.h"
 
 class Map;
-
+class PlayerManager;
 class EnemyManager
 {
 private:
@@ -22,4 +22,8 @@ public:
     void Update();
     void Render();
     void Finalize();
+
+    Enemy* CheckHit(PlayerManager& playermanager);
+
+    void RemoveEnemy(Enemy* enemy);
 };

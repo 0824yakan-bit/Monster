@@ -7,12 +7,19 @@ class PlayerManager;
 class Enemy
 {
 public:
+    enum class EnemyType
+    {
+        Slime,
+        Wolf
+    };
+    EnemyType type;
 
     Vector2 position;
     Vector2 size;
     int hp;
     int moveTimer;
 
+    
     virtual ~Enemy() = default;
 
     virtual void Initialize(Map& map) = 0;
@@ -21,4 +28,5 @@ public:
     virtual void Finalize() = 0;
 
     virtual void OnHit(PlayerManager& player) = 0;
+
 };

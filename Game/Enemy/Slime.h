@@ -1,15 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include"Enemy.h"
 
 class Map;
 class Slime: public Enemy
 {
-private:
-
-public:
-	
-
 public:
 	Slime();
 	~Slime();
@@ -20,5 +15,6 @@ public:
 	void Finalize()override;
 
 	virtual void OnHit(PlayerManager& playermanager)override;
+
 };
 

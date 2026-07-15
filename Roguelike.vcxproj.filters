@@ -48,6 +48,12 @@
     <Filter Include="Resources\CSV">
       <UniqueIdentifier>{57941a25-3229-4ed6-b7e6-736bd0e791eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game\Scene">
+      <UniqueIdentifier>{ab031f55-255a-4012-9ebb-ff926e10e616}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Party">
+      <UniqueIdentifier>{c63939e2-d0a7-45c1-b4d2-88fa5e661353}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <!-- ファイル -->
   <ItemGroup>
@@ -129,6 +135,21 @@
     <ClCompile Include="Game\Enemy\Wolf.cpp">
       <Filter>Game\Enemy</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Scene\BattleScene.cpp">
+      <Filter>Game\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scene\SceneManager.cpp">
+      <Filter>Game\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scene\TitleScene.cpp">
+      <Filter>Game\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scene\FieldScene.cpp">
+      <Filter>Game\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Party\PartyManager.cpp">
+      <Filter>Game\Party</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Player\PlayerManager.h">
@@ -163,6 +184,24 @@
     </ClInclude>
     <ClInclude Include="Game\Enemy\Wolf.h">
       <Filter>Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\BattleScene.h">
+      <Filter>Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\SceneManager.h">
+      <Filter>Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\TitleScene.h">
+      <Filter>Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\Scene.h">
+      <Filter>Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\FieldScene.h">
+      <Filter>Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Party\PartyManager.h">
+      <Filter>Game\Party</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

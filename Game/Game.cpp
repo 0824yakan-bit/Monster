@@ -24,7 +24,8 @@
  * @param なし
  */
 Game::Game()
-	: m_key		 { 0 }
+	:m_inputManager{}
+	,m_key		 { 0 }
 	, m_oldKey	 { 0 }
 	,m_WorldTimer{ 0 }
 {
@@ -60,6 +61,8 @@ void Game::Initialize()
 	m_map.Initialize(L"Resources/map.csv");
 	m_playerManager.Initialize(&m_map);
 	m_enemyManager.Initialize(m_map);
+	m_inputManager.Initialize();
+	m_sceneManager.Initialize(m_inputManager,m_map);
 }
 
 
@@ -81,15 +84,7 @@ void Game::Update(float elapsedTime)
 
 
 	// ゲームの更新
-	m_playerManager.Update(&m_map);
-	m_enemyManager.Update();
-	for (auto& enemy : m_enemyManager.m_enemies)
-	{
-		if (Collisionall::HitCharacter( m_playerManager,enemy.get()))
-		{
-			enemy->OnHit(m_playerManager);
-		}
-	}
+	m_sceneManager.Update(m_inputManager,m_playerManager,m_enemyManager,m_map);
 }
 
 
@@ -104,9 +99,7 @@ void Game::Update(float elapsedTime)
 void Game::Render()
 {
 	// ゲームの描画
-	m_map.Render();
-	m_playerManager.Render(&m_map);
-	m_enemyManager.Render();
+	m_sceneManager.Render(m_playerManager,m_enemyManager,m_map);
 
 }
 
@@ -123,6 +116,4 @@ void Game::Finalize()
 {
 	// ゲームの終了処理
 	m_map.Finalize();
-	m_playerManager.Finalize();
-	m_enemyManager.Finalize();
 }
