@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Game/Enemy/Slime.h"
 
 #include"Game/Enemy/EnemyManager.h"
@@ -12,18 +12,19 @@ Slime::~Slime()
 
 }
 
-void Slime::Initialize(Map& map)
+void Slime::Initialize(Map& map, int x, int y)
 {
+	type = EnemyType::Slime;
 
-		type = EnemyType::Slime;
-		position.x = 10 * map.m_chipSize;
-		position.y = 10 * map.m_chipSize;
+	name = L"スライム";
 
-		size.x = map.m_chipSize;
-		size.y = map.m_chipSize;
+	position.x = x*map.m_chipSize;
+	position.y = y*map.m_chipSize;
 
-		hp = 10;
+	size.x = map.m_chipSize;
+	size.y = map.m_chipSize;
 
+	hp = 10;
 }
 
 void Slime::Update()
@@ -51,4 +52,9 @@ void Slime::Finalize()
 void Slime::OnHit(PlayerManager&playermanager)
 {
 	printfDx(L"SlimeHit!!");
+}
+
+void Slime::RenderBattle()
+{
+	DrawBox(500, 150, 650, 300,GetColor(0, 255, 0), TRUE);
 }

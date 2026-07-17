@@ -20,6 +20,7 @@
 #include"Game/Enemy/EnemyManager.h"
 #include"Game/Inputmanager/InputManager.h"
 #include"Game/Scene/SceneManager.h"
+#include"Game/Party/Party.h"
 
 // クラスの宣言 ===============================================================
 
@@ -41,6 +42,7 @@ public:
 	Map m_map;
 	InputManager m_inputManager;
 	SceneManager m_sceneManager;
+	Party m_party;
 
 	//
 

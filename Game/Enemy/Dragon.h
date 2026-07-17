@@ -1,15 +1,15 @@
-﻿#pragma once
+#pragma once
 
 #include"Enemy.h"
 
 class Map;
-class Slime: public Enemy
+class Dragon : public Enemy
 {
 public:
-	Slime();
-	~Slime();
+	Dragon();
+	~Dragon();
 
-	void Initialize(Map&map,int x,int y)override;
+	void Initialize(Map& map, int x, int y)override;
 	void Update()override;
 	void Render()override;
 	void Finalize()override;

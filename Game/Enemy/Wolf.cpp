@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Game/Enemy/Wolf.h"
 
 #include"Game/Map/Map.h"
@@ -12,11 +12,14 @@ Wolf::~Wolf()
 {
 
 }
-void Wolf::Initialize(Map& map)
+void Wolf::Initialize(Map& map, int x, int y)
 {
 	type = EnemyType::Wolf;
-	position.x = 20 * map.m_chipSize;
-	position.y = 20 * map.m_chipSize;
+
+	name = L"ウルフ";
+
+	position.x = x*map.m_chipSize;
+	position.y = y*map.m_chipSize;
 
 	size.x = map.m_chipSize;
 	size.y = map.m_chipSize;
@@ -52,3 +55,7 @@ void Wolf::OnHit(PlayerManager&playermanager)
 	printfDx(L"WolfHit!!");
 }
 
+void Wolf::RenderBattle()
+{
+	DrawBox(500, 150, 650, 300,GetColor(255, 255, 0), TRUE);
+}

@@ -32,17 +32,17 @@ public:
 	SceneManager();
 	~SceneManager();
 
-	void Initialize(InputManager& inputmanager,Map&map);
-	void Update(InputManager& inputmanager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map);
-	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map);
+	void Initialize(InputManager& inputmanager,Map&map,Party&party);
+	void Update(InputManager& inputmanager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
+	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
 	void Finalize();
 
 	void NextSceneID(SceneID nextSceneID);
-	void ChangeScene(InputManager& inputmanager,Map&map);
+	void ChangeScene(InputManager& inputmanager,Map&map,Party&party);
 
-	void InitializeCurrentScene(InputManager& inputmanager,Map&map);
-	void UpdateCurrentScene(InputManager& inputmanager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map);
-	void RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map);
+	void InitializeCurrentScene(InputManager& inputmanager,Map&map,Party&party);
+	void UpdateCurrentScene(InputManager& inputmanager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
+	void RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
 	void FinalizeCurrentScene();
 };
 

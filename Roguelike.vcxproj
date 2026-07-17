@@ -139,6 +139,9 @@
   <!-- ファイル -->
   <ItemGroup>
     <!-- プリコンパイル済みヘッダー -->
+    <ClCompile Include="Game\Battle\Battle.cpp" />
+    <ClCompile Include="Game\Enemy\Dragon.cpp" />
+    <ClCompile Include="Game\Enemy\Enemy.cpp" />
     <ClCompile Include="Game\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Game\Enemy\Slime.cpp" />
     <ClCompile Include="Game\Enemy\Wolf.cpp" />
@@ -146,7 +149,8 @@
     <ClCompile Include="Game\Map\Map.cpp" />
     <ClCompile Include="Game\Maths\Collisionall.cpp" />
     <ClCompile Include="Game\Maths\Vector2.cpp" />
-    <ClCompile Include="Game\Party\PartyManager.cpp" />
+    <ClCompile Include="Game\Party\Monster.cpp" />
+    <ClCompile Include="Game\Party\Party.cpp" />
     <ClCompile Include="Game\Player\PlayerManager.cpp" />
     <ClCompile Include="Game\Player\PlayerMove.cpp" />
     <ClCompile Include="Game\Scene\BattleScene.cpp" />
@@ -157,6 +161,8 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClInclude Include="Game\Battle\Battle.h" />
+    <ClInclude Include="Game\Enemy\Dragon.h" />
     <ClInclude Include="Game\Enemy\Enemy.h" />
     <ClInclude Include="Game\Enemy\EnemyManager.h" />
     <ClInclude Include="Game\Enemy\Slime.h" />
@@ -165,7 +171,7 @@
     <ClInclude Include="Game\Map\Map.h" />
     <ClInclude Include="Game\Maths\Collisionall.h" />
     <ClInclude Include="Game\Maths\Vector2.h" />
-    <ClInclude Include="Game\Party\PartyManager.h" />
+    <ClInclude Include="Game\Party\Monster.h" />
     <ClInclude Include="Game\Player\PlayerManager.h" />
     <ClInclude Include="Game\Player\PlayerMove.h" />
     <ClInclude Include="Game\Scene\BattleScene.h" />
@@ -174,6 +180,7 @@
     <ClInclude Include="Game\Scene\SceneManager.h" />
     <ClInclude Include="Game\Scene\TitleScene.h" />
     <ClInclude Include="Game\TileRole\TileRole.h" />
+    <ClInclude Include="Party.h" />
     <ClInclude Include="pch.h" />
     <!-- メイン -->
     <ClCompile Include="WinMain.cpp" />

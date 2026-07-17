@@ -1,10 +1,11 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Game/Enemy/EnemyManager.h"
 
 #include"Game/Maths/Collisionall.h"
 #include"Game/Enemy/Enemy.h"
 #include "Game/Enemy/Slime.h"
 #include "Game/Enemy/Wolf.h"
+#include"Game/Enemy/Dragon.h"
 EnemyManager::EnemyManager()
 {
 }
@@ -15,14 +16,16 @@ EnemyManager::~EnemyManager()
 
 void EnemyManager::Initialize(Map& map)
 {
-    auto slime = std::make_unique<Slime>();
-    auto wolf  = std::make_unique<Wolf>();
+    CreateSlime(10, 10, map);
+    CreateSlime(15, 12, map);
+    CreateSlime(18, 8, map);
+    CreateSlime(25, 20, map);
 
-    slime->Initialize(map);
-    wolf->Initialize(map);
+    CreateWolf(3, 8, map);
+    CreateWolf(20, 10, map);
+    CreateWolf(15, 6, map);
 
-    m_enemies.push_back(std::move(slime));
-    m_enemies.push_back(std::move(wolf));
+    CreateDragon(20, 20, map);
 }
 
 void EnemyManager::Update()
@@ -76,4 +79,28 @@ void EnemyManager::RemoveEnemy(Enemy* enemy)
         });
 
     m_enemies.erase(it, m_enemies.end());
+}
+
+void EnemyManager::CreateSlime(int x, int y, Map& map)
+{
+    auto slime = std::make_unique<Slime>();
+    slime->Initialize(map, x, y);
+
+    m_enemies.push_back(std::move(slime));
+}
+
+void EnemyManager::CreateWolf(int x, int y, Map& map)
+{
+    auto wolf = std::make_unique<Wolf>();
+    wolf->Initialize(map, x, y);
+
+    m_enemies.push_back(std::move(wolf));
+}
+
+void EnemyManager::CreateDragon(int x, int y, Map& map)
+{
+    auto dragon = std::make_unique<Dragon>();
+    dragon->Initialize(map, x, y);
+
+    m_enemies.push_back(std::move(dragon));
 }

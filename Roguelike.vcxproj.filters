@@ -54,6 +54,9 @@
     <Filter Include="Game\Party">
       <UniqueIdentifier>{c63939e2-d0a7-45c1-b4d2-88fa5e661353}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game\Battle">
+      <UniqueIdentifier>{1c06c1c9-f633-4ef9-b9de-c6de77e56f3c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <!-- ファイル -->
   <ItemGroup>
@@ -147,8 +150,20 @@
     <ClCompile Include="Game\Scene\FieldScene.cpp">
       <Filter>Game\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Game\Party\PartyManager.cpp">
+    <ClCompile Include="Game\Party\Party.cpp">
       <Filter>Game\Party</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Party\Monster.cpp">
+      <Filter>Game\Party</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Enemy\Enemy.cpp">
+      <Filter>Game\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Enemy\Dragon.cpp">
+      <Filter>Game\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Battle\Battle.cpp">
+      <Filter>Game\Battle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -200,13 +215,25 @@
     <ClInclude Include="Game\Scene\FieldScene.h">
       <Filter>Game\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Game\Party\PartyManager.h">
+    <ClInclude Include="Party.h">
       <Filter>Game\Party</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Party\Monster.h">
+      <Filter>Game\Party</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Enemy\Dragon.h">
+      <Filter>Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Battle\Battle.h">
+      <Filter>Game\Battle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Resources\CSV\map.csv">
+      <Filter>Resources\CSV</Filter>
+    </None>
+    <None Include="Resources\CSV\object.csv">
       <Filter>Resources\CSV</Filter>
     </None>
   </ItemGroup>

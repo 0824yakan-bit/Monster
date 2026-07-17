@@ -58,11 +58,14 @@ void Game::Initialize()
 	m_WorldTimer = 0;
 
 	// ゲームの初期化
+	auto slime = std::make_unique<Monster>(Monster::Type::Slime);
+	m_party.AddMonster(std::move(slime));
+
 	m_map.Initialize(L"Resources/map.csv");
 	m_playerManager.Initialize(&m_map);
 	m_enemyManager.Initialize(m_map);
 	m_inputManager.Initialize();
-	m_sceneManager.Initialize(m_inputManager,m_map);
+	m_sceneManager.Initialize(m_inputManager,m_map,m_party);
 }
 
 
@@ -84,7 +87,7 @@ void Game::Update(float elapsedTime)
 
 
 	// ゲームの更新
-	m_sceneManager.Update(m_inputManager,m_playerManager,m_enemyManager,m_map);
+	m_sceneManager.Update(m_inputManager,m_playerManager,m_enemyManager,m_map,m_party);
 }
 
 
@@ -93,13 +96,12 @@ void Game::Update(float elapsedTime)
  * @brief 描画処理
  *
  * @param[in] なし
- *
  * @return なし
  */
 void Game::Render()
 {
 	// ゲームの描画
-	m_sceneManager.Render(m_playerManager,m_enemyManager,m_map);
+	m_sceneManager.Render(m_playerManager,m_enemyManager,m_map,m_party);
 
 }
 

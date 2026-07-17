@@ -26,4 +26,8 @@ public:
     Enemy* CheckHit(PlayerManager& playermanager);
 
     void RemoveEnemy(Enemy* enemy);
+
+    void CreateSlime(int x, int y, Map& map);
+    void CreateWolf(int x, int y, Map& map);
+    void CreateDragon(int x, int y, Map& map);
 };

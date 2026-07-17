@@ -12,7 +12,7 @@ SceneManager::~SceneManager()
 {
 }
 
-void SceneManager::Initialize(InputManager& inputmanager,Map&map)
+void SceneManager::Initialize(InputManager& inputmanager,Map&map,Party&party)
 {
     m_playerManager.Initialize(&map);
 
@@ -20,25 +20,25 @@ void SceneManager::Initialize(InputManager& inputmanager,Map&map)
     m_currentSceneID = SceneID::Title;
     m_nextSceneID = SceneID::None;
 
-    InitializeCurrentScene(inputmanager,map);
+    InitializeCurrentScene(inputmanager,map,party);
 }
 
-void SceneManager::Update(InputManager& inputmanager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map)
+void SceneManager::Update(InputManager& inputmanager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party)
 {
     // 現在シーン更新
-    UpdateCurrentScene(inputmanager,playerManager,enemyManager,map);
+    UpdateCurrentScene(inputmanager,playerManager,enemyManager,map,party);
 
     // シーン切り替え要求があれば切り替える
     if (m_nextSceneID != SceneID::None)
     {
-        ChangeScene(inputmanager,map);
+        ChangeScene(inputmanager,map,party);
     }
 }
 
-void SceneManager::Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map)
+void SceneManager::Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party)
 {
     DrawFormatString(10, 100, GetColor(255, 255, 255), L"%d", m_currentSceneID);
-    RenderCurrentScene(playerManager,enemyManager,map);
+    RenderCurrentScene(playerManager,enemyManager,map,party);
 }
 
 void SceneManager::Finalize()
@@ -53,7 +53,7 @@ void SceneManager::NextSceneID(SceneID requestSceneID)
     m_nextSceneID = requestSceneID;
 }
 
-void SceneManager::ChangeScene(InputManager& inputmanager,Map&map)
+void SceneManager::ChangeScene(InputManager& inputmanager,Map&map,Party&party)
 {
     // 現在シーンの終了処理
     FinalizeCurrentScene();
@@ -63,22 +63,22 @@ void SceneManager::ChangeScene(InputManager& inputmanager,Map&map)
     m_nextSceneID = SceneID::None;
 
     // 次のシーンの初期化
-    InitializeCurrentScene(inputmanager,map);
+    InitializeCurrentScene(inputmanager,map,party);
 }
 
-void SceneManager::InitializeCurrentScene(InputManager& inputmanager,Map&map)
+void SceneManager::InitializeCurrentScene(InputManager& inputmanager,Map&map,Party&party)
 {
     switch (m_currentSceneID)
     {
     case SceneID::Title :   m_titleScene .Initialize(inputmanager);  break;
     case SceneID::Field :   m_fieldScene .Initialize(inputmanager);   break;
-    case SceneID::Battle:   m_battleScene.Initialize(inputmanager,map);   break;
+    case SceneID::Battle:   m_battleScene.Initialize(inputmanager,map,party);   break;
     
     default:      assert(!"シーンIDが不正です");break;
     }
 }
 
-void SceneManager::UpdateCurrentScene(InputManager&inputmanager,PlayerManager&playerManager,EnemyManager&enemyManager,Map&map)
+void SceneManager::UpdateCurrentScene(InputManager&inputmanager,PlayerManager&playerManager,EnemyManager&enemyManager,Map&map,Party&party)
 {
     switch (m_currentSceneID)
     {
@@ -107,8 +107,8 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,PlayerManager&pl
 
     case SceneID::Battle:
 
-        m_battleScene.Update(inputmanager,enemyManager);
-
+        m_battleScene.Update(inputmanager,enemyManager,party);
+        printfDx(L"FieldRequested!!\n");
         if (m_battleScene.IsFieldRequested())
         {
             NextSceneID(SceneID::Field);
@@ -118,13 +118,13 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,PlayerManager&pl
     }
 }
 
-void SceneManager::RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map)
+void SceneManager::RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party)
 {
     switch (m_currentSceneID)
     {
     case SceneID::Title:   m_titleScene.Render();  break;
     case SceneID::Field:    m_fieldScene.Render(playerManager,enemyManager,map);   break;
-    case SceneID::Battle:   m_battleScene.Render();   break;
+    case SceneID::Battle:   m_battleScene.Render(party);   break;
 
 
     default:      assert(!"シーンIDが不正です");break;
