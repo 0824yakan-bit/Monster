@@ -16,6 +16,7 @@ public:
     };
     EnemyType type;
 
+
     const wchar_t* name;
 
     Vector2 position;
@@ -23,6 +24,7 @@ public:
 
     int hp;
     int moveTimer;
+
 public:
     void Damage(int power);
     int GetHp() const;

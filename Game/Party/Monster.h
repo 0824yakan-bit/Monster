@@ -2,11 +2,7 @@
 
 #include <vector>
 
-struct Attack
-{
-    const wchar_t* name;
-    int power;
-};
+
 
 class Monster
 {
@@ -16,6 +12,22 @@ public:
         Slime,
         Wolf,
         Dragon
+    };
+
+    enum class CharacteRistics
+    {
+        Attack,
+        Heal,
+        Defend,
+        Buff
+    };
+    CharacteRistics characteRistics;
+
+    struct Attack
+    {
+        const wchar_t* name;
+        int power;
+        CharacteRistics ristics;
     };
 
 private:
@@ -31,7 +43,7 @@ public:
 public:
     Monster(Type type);
 
-    const std::vector<Attack>& GetAttacks() const;
+    const std::vector<Attack>& GetAttacks()const;
 
     Type GetType() const;
 };

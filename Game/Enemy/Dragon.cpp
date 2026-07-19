@@ -21,8 +21,8 @@ void Dragon::Initialize(Map& map, int x, int y)
 	position.x = x * map.m_chipSize;
 	position.y = y * map.m_chipSize;
 
-	size.x = map.m_chipSize;
-	size.y = map.m_chipSize;
+	size.x = map.m_chipSize*2;
+	size.y = map.m_chipSize*2;
 
 	hp = 10;
 }
