@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <vector>
 
@@ -33,12 +33,13 @@ public:
 private:
     Type m_type;
     std::wstring m_name;
-    int m_hp;
+    int m_hitpoint;
     int m_level;
     std::vector<Attack> m_attacks;
 
 public:
     std::wstring GetName() const;
+    int GetHitPoint() const;
 
 public:
     Monster(Type type);

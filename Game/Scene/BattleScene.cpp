@@ -1,5 +1,8 @@
 ﻿#include "pch.h"
 #include "BattleScene.h"
+
+#include"Game/Scene/SceneManager.h"
+#include"Game/Player/PlayerManager.h"
 #include"Game/Enemy/Enemy.h"
 #include"Game/Enemy/EnemyManager.h"
 
@@ -13,6 +16,7 @@ BattleScene::BattleScene()
 	,m_receponsTimer{}
 	,m_joinSelect{}
 	,m_isJoinRequested{false}
+	,m_isTitleRequested{false}
 {
 }
 
@@ -22,25 +26,23 @@ BattleScene::~BattleScene()
 
 void BattleScene::Initialize(InputManager& inputmanager, Map& map,Party&party)
 {
+
 	m_battle->SetParty(&party);
 	m_battle->Initialize();
 
 	m_isJoinRequested = false;
 	m_isReplaceSelect = false;
 	m_isFieldRequested = false;
+	m_isTitleRequested = false;
 	m_battleWin = false;
 
 	m_receponsTimer = 0;
 }
 
-void BattleScene::Update(InputManager& inputmanager, EnemyManager& enemyManager, Party& party)
+void BattleScene::Update(InputManager& inputmanager, EnemyManager& enemyManager,Map&map, Party& party)
 {
 	m_receponsTimer++;
-	printfDx(
-		L"Field=%d Join=%d HP=%d\n",
-		m_isFieldRequested,
-		m_isJoinRequested,
-		m_enemy ? m_enemy->GetHp() : -1);
+	//printfDx(L"Field=%d Join=%d HP=%d\n",m_isFieldRequested,m_isJoinRequested,m_enemy ? m_enemy->GetHp() : -1);
 
 	if (m_isReplaceSelect)
 	{
@@ -72,6 +74,13 @@ void BattleScene::Update(InputManager& inputmanager, EnemyManager& enemyManager,
 		m_battle->Update();
 	}
 	
+	if (m_battle->IsFieldRequested())
+	{
+	
+			m_isFieldRequested = true;
+	
+		
+	}
 
 	if (m_enemy && m_enemy->GetHp() <= 0)
 	{
@@ -165,7 +174,6 @@ void BattleScene::Update(InputManager& inputmanager, EnemyManager& enemyManager,
 				}
 			}
 		}
-
 		
 
 
@@ -199,15 +207,12 @@ void BattleScene::Update(InputManager& inputmanager, EnemyManager& enemyManager,
 						break;
 					}
 
-					printfDx(L"[%d] %s\n", i, name);
+					//printfDx(L"[%d] %s\n", i, name);
 
 					auto& attacks = monster->GetAttacks();
 					for (int j = 0; j < attacks.size(); j++)
 					{
-						printfDx(L"    技%d : %s  威力=%d\n",
-							j,
-							attacks[j].name,
-							attacks[j].power);
+						//printfDx(L"技%d : %s  威力=%d\n",	j,	attacks[j].name,attacks[j].power);
 					}
 				}
 			}
@@ -217,7 +222,15 @@ void BattleScene::Update(InputManager& inputmanager, EnemyManager& enemyManager,
 			}
 		}
 	}
-	
+	if (m_battle->GetAnnihilation())
+	{
+		if (CheckHitKey(KEY_INPUT_RETURN))
+		{
+			m_isTitleRequested = true;
+		}
+
+		return;
+	}
 }
 void BattleScene::Render(Party&party)
 {
@@ -242,16 +255,21 @@ void BattleScene::Render(Party&party)
 
 	m_battle->Render();
 
+	if (m_battle->GetAnnihilation())
+	{
+		m_battle->RenderAnnihilation();
+	}
+
 	if (m_isJoinRequested)
 	{
 		printfDx(L"Join Window\n");
-		DrawString(40 , 580, L"仲間にしますか？",GetColor(255,255,255), TRUE);
-		DrawString(500, 580, L"はい", GetColor(255, 255, 255), TRUE);
-		DrawString(700, 580, L"いいえ", GetColor(255, 255, 255), TRUE);
+		DrawString(60 , 610, L"仲間にしますか？",GetColor(255,255,255), TRUE);
+		DrawString(520, 610, L"はい", GetColor(255, 255, 255), TRUE);
+		DrawString(720, 610, L"いいえ", GetColor(255, 255, 255), TRUE);
 		
-		int cursorX = (m_joinSelect == 0) ? 450 : 650;
+		int cursorX = (m_joinSelect == 0) ? 470 : 670;
 
-		DrawString(cursorX, 580, L"▶", GetColor(255, 255, 0), TRUE);
+		DrawString(cursorX, 610, L"▶", GetColor(255, 255, 0), TRUE);
 	}
 	if (m_isReplaceSelect)
 	{
@@ -300,8 +318,18 @@ bool BattleScene::IsJoinRequested()const
 	return m_isJoinRequested;
 }
 
+
 void BattleScene::SetEnemy(Enemy* enemy)
 {
 	m_enemy = enemy;
 	m_battle->SetEnemy(enemy);
+}
+
+bool BattleScene::IsTitleRequested()const
+{
+	return m_isTitleRequested;
+}
+void BattleScene::ResetTitleRequest()
+{
+	m_isTitleRequested = false;
 }

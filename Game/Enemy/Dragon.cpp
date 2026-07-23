@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Game/Enemy/Dragon.h"
 
 #include"Game/Enemy/EnemyManager.h"
@@ -24,6 +24,7 @@ void Dragon::Initialize(Map& map, int x, int y)
 	size.x = map.m_chipSize*2;
 	size.y = map.m_chipSize*2;
 
+	power = 10;
 	hp = 10;
 }
 

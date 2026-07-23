@@ -58,6 +58,7 @@ void Game::Initialize()
 	m_WorldTimer = 0;
 
 	// ゲームの初期化
+	m_party = Party();
 	auto slime = std::make_unique<Monster>(Monster::Type::Slime);
 	m_party.AddMonster(std::move(slime));
 
@@ -88,6 +89,12 @@ void Game::Update(float elapsedTime)
 
 	// ゲームの更新
 	m_sceneManager.Update(m_inputManager,m_playerManager,m_enemyManager,m_map,m_party);
+	if (m_sceneManager.IsTitleRequested())
+	{
+		printfDx(L"!!!!!!!!!!");
+		m_sceneManager.ResetTitleRequest();
+		Initialize();
+	}
 }
 
 

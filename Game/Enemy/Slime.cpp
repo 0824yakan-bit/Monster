@@ -24,6 +24,7 @@ void Slime::Initialize(Map& map, int x, int y)
 	size.x = map.m_chipSize;
 	size.y = map.m_chipSize;
 
+	power = 2;
 	hp = 10;
 }
 

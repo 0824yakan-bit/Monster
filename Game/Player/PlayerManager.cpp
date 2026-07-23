@@ -18,6 +18,8 @@ PlayerManager::~PlayerManager()
 
 void PlayerManager::Initialize(Map*map)
 {
+	this->map = map;
+
 	 m_position.x = 0;
 	 m_position.y = 0;
 	 m_size = map->m_chipSize;

@@ -10,8 +10,18 @@ void Enemy::Damage(int power)
     }
 }
 
+int Enemy::GetPower()const
+{
+    return power;
+}
+
 int Enemy::GetHp() const
 {
     return hp;
 }
 
+
+const wchar_t* Enemy::GetName() const
+{
+    return name;
+}

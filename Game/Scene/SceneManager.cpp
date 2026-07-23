@@ -14,9 +14,7 @@ SceneManager::~SceneManager()
 
 void SceneManager::Initialize(InputManager& inputmanager,Map&map,Party&party)
 {
-    m_playerManager.Initialize(&map);
 
-    m_enemyManager.Initialize(map);
     m_currentSceneID = SceneID::Title;
     m_nextSceneID = SceneID::None;
 
@@ -107,11 +105,16 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,PlayerManager&pl
 
     case SceneID::Battle:
 
-        m_battleScene.Update(inputmanager,enemyManager,party);
-        printfDx(L"FieldRequested!!\n");
+        m_battleScene.Update(inputmanager,enemyManager,map,party);
+        //printfDx(L"FieldRequested!!\n");
         if (m_battleScene.IsFieldRequested())
         {
             NextSceneID(SceneID::Field);
+        }
+        if (m_battleScene.IsTitleRequested())
+        {
+            NextSceneID(SceneID::Title);
+
         }
 
         break;
@@ -141,4 +144,15 @@ void SceneManager::FinalizeCurrentScene()
 
     default:      assert(!"シーンIDが不正です");break;
     }
+}
+
+
+bool SceneManager::IsTitleRequested() const
+{
+    return m_battleScene.IsTitleRequested();
+}
+
+void SceneManager::ResetTitleRequest()
+{
+    m_battleScene.ResetTitleRequest();
 }

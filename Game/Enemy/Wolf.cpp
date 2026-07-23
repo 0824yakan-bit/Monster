@@ -24,6 +24,8 @@ void Wolf::Initialize(Map& map, int x, int y)
 	size.x = map.m_chipSize;
 	size.y = map.m_chipSize;
 
+
+	power = 5;
 	hp = 10;
 }
 

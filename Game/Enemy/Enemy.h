@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include"Game/Maths/Vector2.h"
 
 class Map;
@@ -23,12 +23,16 @@ public:
     Vector2 size;
 
     int hp;
+
+    int power;
+
     int moveTimer;
 
 public:
-    void Damage(int power);
+    void Damage(int power);//パーティのpower
+    int GetPower()const;
     int GetHp() const;
-
+    const wchar_t* GetName() const;
 
 public:
      Enemy() = default;

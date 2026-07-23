@@ -16,6 +16,8 @@ EnemyManager::~EnemyManager()
 
 void EnemyManager::Initialize(Map& map)
 {
+    m_enemies.clear();
+
     CreateSlime(10, 10, map);
     CreateSlime(15, 12, map);
     CreateSlime(18, 8, map);
