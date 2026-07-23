@@ -14,20 +14,48 @@ EnemyManager::~EnemyManager()
 {
 }
 
+namespace
+{
+    const std::vector<EnemyData>enemyData =
+    {
+         {0,0,10,10},
+        {0,0,15,12},
+        {0,1,20,8},
+
+        {1,0,5,5},
+        {1,1,12,10},
+        {1,2,20,15},
+    };
+}
+
+
 void EnemyManager::Initialize(Map& map)
 {
     m_enemies.clear();
 
-    CreateSlime(10, 10, map);
-    CreateSlime(15, 12, map);
-    CreateSlime(18, 8, map);
-    CreateSlime(25, 20, map);
+    int mapNo = map.GetCurrentMap();
 
-    CreateWolf(3, 8, map);
-    CreateWolf(20, 10, map);
-    CreateWolf(15, 6, map);
+    for (auto& data : enemyData)
+    {
+        if (data.mapNo != mapNo)
+            continue;
+        switch (data.enemyType)
+        {
+        case 0:
+            CreateSlime(data.x, data.y, map);
+            break;
 
-    CreateDragon(20, 20, map);
+        case 1:
+            CreateWolf(data.x, data.y, map);
+            break;
+
+        case 2:
+            CreateDragon(data.x, data.y, map);
+            break;
+        }
+    }
+
+
 }
 
 void EnemyManager::Update()
