@@ -5,14 +5,22 @@
 
 #include "Game/Enemy/Enemy.h"
 
-
 class Map;
 class PlayerManager;
+
+struct EnemyData
+{
+    int mapNo;
+    int enemyType;
+    int x;
+    int y;
+};
 class EnemyManager
 {
-private:
+
 
 public:
+
     std::vector<std::unique_ptr<Enemy>> m_enemies;
 
 public:
