@@ -21,7 +21,7 @@ public:
 
 	MoveDir m_moveDir;
 private:
-	
+
 
 	static constexpr int MAP_WIDTH = 40;
 	static constexpr int MAP_HEIGHT = 25;
@@ -46,7 +46,7 @@ public:
 	Map();
 	~Map();
 	void Initialize(const wchar_t* fileName);
-	void Update(InputManager&inputManager,PlayerManager&playerManager);
+	void Update(InputManager& inputManager, PlayerManager& playerManager);
 	void Render();
 	void Finalize();
 
@@ -56,9 +56,11 @@ public:
 	int GetTileNo(int x, int y) const;
 	void ChangeMap(int mapNo);
 	int GetChipSize()const;
-	
+	int GetCurrentMap()const;
 
-	void DrawCurrentMap(int offsetX,int offsetY);
-	void DrawNextMap(int offsetX,int offsetY);
+
+
+	void DrawCurrentMap(int offsetX, int offsetY);
+	void DrawNextMap(int offsetX, int offsetY);
 };
 

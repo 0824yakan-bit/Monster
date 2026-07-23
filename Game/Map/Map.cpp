@@ -279,3 +279,7 @@ int Map::GetChipSize()const
 {
 	return m_chipSize;
 }
+int Map::GetCurrentMap()const
+{
+	return m_currentMap;
+}
