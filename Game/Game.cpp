@@ -8,7 +8,7 @@
  * @date   日付
  */
 
-// ヘッダファイルの読み込み ===================================================
+ // ヘッダファイルの読み込み ===================================================
 #include "Game.h"
 
 #include "Game/Screen.h"
@@ -25,9 +25,9 @@
  */
 Game::Game()
 	:m_inputManager{}
-	,m_key		 { 0 }
-	, m_oldKey	 { 0 }
-	,m_WorldTimer{ 0 }
+	, m_key{ 0 }
+	, m_oldKey{ 0 }
+	, m_WorldTimer{ 0 }
 {
 	// 乱数の初期値を設定
 	SRand(static_cast<int>(time(nullptr)));
@@ -66,7 +66,9 @@ void Game::Initialize()
 	m_playerManager.Initialize(&m_map);
 	m_enemyManager.Initialize(m_map);
 	m_inputManager.Initialize();
-	m_sceneManager.Initialize(m_inputManager,m_map,m_party);
+	m_sceneManager.Initialize(m_inputManager, m_map, m_party);
+
+	m_oldMapNo = m_map.GetCurrentMap();
 }
 
 
@@ -84,16 +86,25 @@ void Game::Update(float elapsedTime)
 
 	// キー入力の取得
 	m_oldKey = m_key;
-	m_key    = GetJoypadInputState(DX_INPUT_KEY_PAD1);
+	m_key = GetJoypadInputState(DX_INPUT_KEY_PAD1);
 
 
 	// ゲームの更新
-	m_sceneManager.Update(m_inputManager,m_playerManager,m_enemyManager,m_map,m_party);
+	m_sceneManager.Update(m_inputManager, m_playerManager, m_enemyManager, m_map, m_party);
 	if (m_sceneManager.IsTitleRequested())
 	{
 		printfDx(L"!!!!!!!!!!");
 		m_sceneManager.ResetTitleRequest();
 		Initialize();
+	}
+	// マップ変更チェック
+	if (m_oldMapNo != m_map.GetCurrentMap())
+	{
+		// 敵を作り直す
+		m_enemyManager.Initialize(m_map);
+
+		// 現在マップ更新
+		m_oldMapNo = m_map.GetCurrentMap();
 	}
 }
 
@@ -108,7 +119,7 @@ void Game::Update(float elapsedTime)
 void Game::Render()
 {
 	// ゲームの描画
-	m_sceneManager.Render(m_playerManager,m_enemyManager,m_map,m_party);
+	m_sceneManager.Render(m_playerManager, m_enemyManager, m_map, m_party);
 
 }
 

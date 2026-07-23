@@ -51,6 +51,7 @@ private:
 	// 入力関連
 	int m_key;       ///< 現在のキー情報
 	int m_oldKey;    ///< 前回のキー情報
+	int m_oldMapNo;
 public:
 	int m_WorldTimer;//ゲーム内時間（１ｆ）
 
