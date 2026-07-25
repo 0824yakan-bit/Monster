@@ -21,10 +21,10 @@ void SceneManager::Initialize(InputManager& inputmanager,Map&map,Party&party)
     InitializeCurrentScene(inputmanager,map,party);
 }
 
-void SceneManager::Update(InputManager& inputmanager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party)
+void SceneManager::Update(InputManager& inputmanager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle)
 {
     // 現在シーン更新
-    UpdateCurrentScene(inputmanager,playerManager,enemyManager,map,party);
+    UpdateCurrentScene(inputmanager,playerManager,enemyManager,map,party,battle);
 
     // シーン切り替え要求があれば切り替える
     if (m_nextSceneID != SceneID::None)
@@ -76,7 +76,7 @@ void SceneManager::InitializeCurrentScene(InputManager& inputmanager,Map&map,Par
     }
 }
 
-void SceneManager::UpdateCurrentScene(InputManager&inputmanager,PlayerManager&playerManager,EnemyManager&enemyManager,Map&map,Party&party)
+void SceneManager::UpdateCurrentScene(InputManager&inputmanager,PlayerManager&playerManager,EnemyManager&enemyManager,Map&map,Party&party,Battle&battle)
 {
     switch (m_currentSceneID)
     {
@@ -93,10 +93,11 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,PlayerManager&pl
 
     case SceneID::Field:
 
-        m_fieldScene.Update(inputmanager,playerManager,enemyManager,map);
+        m_fieldScene.Update(inputmanager,playerManager,enemyManager,map,battle);
 
         if (m_fieldScene.IsBattleRequested())
         {
+            m_battleScene.SetPlayer(&playerManager);
             m_battleScene.SetEnemy(m_fieldScene.GetHitEnemy());
             NextSceneID(SceneID::Battle);
         }

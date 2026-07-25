@@ -1,5 +1,10 @@
 #include"Game/Enemy/Enemy.h"
 
+Enemy::Enemy()
+{
+
+}
+
 void Enemy::Damage(int power)
 {
     hp -= power;

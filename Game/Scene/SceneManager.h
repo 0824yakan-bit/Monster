@@ -5,6 +5,7 @@
 #include"BattleScene.h"
 
 class Map;
+class Battle;
 class SceneManager
 {
 private:
@@ -28,7 +29,7 @@ public:
 	~SceneManager();
 
 	void Initialize(InputManager& inputmanager,Map&map,Party&party);
-	void Update(InputManager& inputmanager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
+	void Update(InputManager& inputmanager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle);
 	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
 	void Finalize();
 
@@ -36,7 +37,7 @@ public:
 	void ChangeScene(InputManager& inputmanager,Map&map,Party&party);
 
 	void InitializeCurrentScene(InputManager& inputmanager,Map&map,Party&party);
-	void UpdateCurrentScene(InputManager& inputmanager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
+	void UpdateCurrentScene(InputManager& inputmanager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle);
 	void RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
 	void FinalizeCurrentScene();
 

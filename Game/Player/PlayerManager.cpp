@@ -5,6 +5,8 @@
 PlayerManager::PlayerManager()
 	:map(nullptr)
 	,m_position{0,0}
+	,m_size{0}
+	,m_invicible{false}
 {
 
 }
@@ -19,6 +21,9 @@ PlayerManager::~PlayerManager()
 void PlayerManager::Initialize(Map*map)
 {
 	this->map = map;
+
+	m_oldposition.x = 0;
+	m_oldposition.y = 0;
 
 	 m_position.x = 0;
 	 m_position.y = 0;

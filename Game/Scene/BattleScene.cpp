@@ -17,6 +17,8 @@ BattleScene::BattleScene()
 	,m_joinSelect{}
 	,m_isJoinRequested{false}
 	,m_isTitleRequested{false}
+	,m_scenemanager{}
+	,m_player{}
 {
 }
 
@@ -76,10 +78,14 @@ void BattleScene::Update(InputManager& inputmanager, EnemyManager& enemyManager,
 	
 	if (m_battle->IsFieldRequested())
 	{
-	
-			m_isFieldRequested = true;
-	
-		
+		// 戦闘前の1マス前へ戻す
+		if (m_player)
+		{
+			m_player->m_position = m_player->m_oldposition;
+			m_player->m_invicible = true;
+		}
+
+		m_isFieldRequested = true;
 	}
 
 	if (m_enemy && m_enemy->GetHp() <= 0)
@@ -318,6 +324,12 @@ bool BattleScene::IsJoinRequested()const
 	return m_isJoinRequested;
 }
 
+
+void BattleScene::SetPlayer(PlayerManager* player)
+{
+	m_player = player;
+	m_battle->SetPlayer(player);
+}
 
 void BattleScene::SetEnemy(Enemy* enemy)
 {

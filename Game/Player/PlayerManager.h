@@ -12,9 +12,12 @@ private:
 	
 	static constexpr int M_SPEED = 32;
 public:
-	Vector2 m_position;
+	Vector2 m_oldposition;//現在から前のポジション
+	Vector2 m_position;//現在のポジション
 	Vector2 m_currentposition;
 	int m_size;
+
+	bool m_invicible;//にげる選択時のみ
 public:
 	PlayerManager();
 	~PlayerManager();

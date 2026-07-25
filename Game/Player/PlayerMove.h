@@ -4,6 +4,7 @@
 #include"Game/Map/Map.h"
 #include"Game/TileRole/TileRole.h"
 class PlayerManager;
+class Battle;
 class PlayerMove
 {
 private:

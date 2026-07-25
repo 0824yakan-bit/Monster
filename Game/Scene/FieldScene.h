@@ -4,6 +4,7 @@ class PlayerManager;
 class Enemy;
 class EnemyManager;
 class Map;
+class Battle;
 class FieldScene
 {
 private:
@@ -15,12 +16,14 @@ public:
 	~FieldScene();
 
 	void Initialize(InputManager& inputmanager);
-	void Update(InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map);
+	void Update(InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Battle&battle);
 	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map);
 	void Finalize();
 
 	bool IsBattleRequested() const;
 
 	Enemy* GetHitEnemy() const;
+
+	void ResetBattleRequest();
 };
 

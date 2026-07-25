@@ -43,6 +43,8 @@ private:
 	bool m_isFieldRequested;
 	bool m_isJoinWindow ;
 	bool m_annihilation;
+	bool m_isRun;
+	bool m_isEnemyRequested;
 
 	int m_windowWidthFront;
 	int m_windowWidth;
@@ -111,5 +113,9 @@ public:
 	bool IsFieldRequested();
 
 	bool GetAnnihilation();
+
+	bool IsEnemyRequested();
+
+	bool IsRun();
 };
 

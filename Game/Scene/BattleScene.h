@@ -22,6 +22,7 @@ private:
 	bool m_isJoinRequested;
 
 	Battle* m_battle;
+	PlayerManager* m_player;
 	Enemy* m_enemy;
 	SceneManager* m_scenemanager;
 
@@ -47,6 +48,7 @@ public:
 	bool IsTitleRequested()const;
 	void ResetTitleRequest();
 
+	void SetPlayer(PlayerManager* player);
 	void SetEnemy(Enemy* enemy);
 };
 

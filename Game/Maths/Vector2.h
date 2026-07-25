@@ -16,6 +16,9 @@ public:
     Vector2& operator-=(const Vector2& v);
     Vector2 operator*(float value) const;
 
+    bool operator!=(const Vector2& other) const;
+    bool operator==(const Vector2& other) const;
+
     // ベクトル計算
     float Length() const;
     Vector2 Normalize() const;

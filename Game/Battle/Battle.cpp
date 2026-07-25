@@ -17,6 +17,10 @@ Battle::Battle()
 	,m_attackSelect{}
 	,m_monsterSelect{}
 	,m_monsterhp{}
+	,m_isRun{}
+	,m_isFieldRequested{}
+	,m_isEnemyRequested{}
+	,m_annihilation{}
 {
 
 }
@@ -37,6 +41,7 @@ void Battle::Initialize()
 	m_Window = false;
 	m_isJoinWindow = false;
 	m_isFieldRequested = false;
+	m_isEnemyRequested = false;
 	m_windowWidthFront = 0;
 	m_windowWidth = 0;
 	m_monsterSelect = 0;     // 今選択中の仲間
@@ -479,8 +484,17 @@ void Battle::RenderScout()
 
 void Battle::UpdateRun()
 {
+	printfDx(L"戻す (%d,%d)\n",
+		m_player->m_currentposition.x,
+		m_player->m_currentposition.y);
+
+
+	m_player->m_position = m_player->m_currentposition;
+
+	m_isEnemyRequested = true;
 	m_isFieldRequested = true;
-	m_player->m_position.x -=2*m_player->m_size;
+
+	m_state = BattleState::Command;
 }
 
 void Battle::RenderRun()
@@ -599,4 +613,9 @@ bool Battle::IsFieldRequested()
 bool Battle::GetAnnihilation()
 {
 	return m_annihilation;
+}
+
+bool Battle::IsEnemyRequested()
+{
+	return m_isEnemyRequested;
 }

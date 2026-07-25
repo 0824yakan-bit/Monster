@@ -3,13 +3,20 @@
 
 #include"Game/Player/PlayerManager.h"
 #include"Game/Map/Map.h"
+#include"Game/Battle/Battle.h"
 PlayerMove::PlayerMove()
 	:m_inputManager {}
-
+	
 
 	,m_speed		{}
 	,m_movetimer	{}
 	,m_chipsize		{}
+	,m_mapX			{}
+	,m_mapY			{}
+	,type			{}
+	,nexttile		{}
+	,m_nextmapX		{}
+	,m_nextmapY		{}
 {
 
 }
@@ -34,15 +41,21 @@ void PlayerMove::Initialize(Map* map,PlayerManager& playermanager)
 
 void PlayerMove::Update(Map*map,PlayerManager*playermanager)
 {
+
 	m_mapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
 	m_mapY = static_cast<int>(playermanager->m_position.y) / m_chipsize;
 	type = map->GetTileType(m_mapX, m_mapY);
 	m_tileRole.Update(*map,playermanager->m_position);
 	m_inputManager.Update();
 	m_movetimer--;
+
+	//if (playermanager->m_currentposition != playermanager->m_position)
+	//{
+	//	playermanager->m_currentposition = playermanager->m_position;//移動前のポジションを保存
+	//}
 	if (m_movetimer < 0)
 	{
-		playermanager->m_currentposition = playermanager->m_position;//移動前のポジションを保存
+		playermanager->m_oldposition=playermanager->m_position ;
 
 			 if (m_inputManager.IsPress(KEY_INPUT_RIGHT))playermanager->m_position.x += m_speed;
 		else if (m_inputManager.IsPress(KEY_INPUT_LEFT ))playermanager->m_position.x -= m_speed;
@@ -53,7 +66,7 @@ void PlayerMove::Update(Map*map,PlayerManager*playermanager)
 			 nexttile = map->GetTileType(m_nextmapX, m_nextmapY);
 			 if (nexttile==Map::TileType::Wall)//NextがWallの場合移動できない
 			 {
-				 playermanager->m_position=playermanager->m_currentposition;
+				 playermanager->m_position=playermanager->m_oldposition;
 			 }
 		m_movetimer = 5;
 	}

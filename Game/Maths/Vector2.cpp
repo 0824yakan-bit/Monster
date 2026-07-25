@@ -14,38 +14,52 @@ Vector2::Vector2(int x, int y)
 {
 }
 
-Vector2 Vector2::operator+(const Vector2& v) const
+Vector2 Vector2::operator+(const Vector2& v) const //{x,y}にそれぞれ足し算
 {
     return Vector2(x + v.x, y + v.y);
 }
 
-Vector2& Vector2::operator+=(const Vector2& v)
+Vector2& Vector2::operator+=(const Vector2& v)//{x,y}への足し算
 {
     x += v.x;
     y += v.y;
     return *this;
 }
-Vector2 Vector2::operator-(const Vector2& v) const
+
+Vector2 Vector2::operator-(const Vector2& v) const//{x,y}にそれぞれ引き算
 {
     return Vector2(x - v.x, y - v.y);
 }
-Vector2& Vector2::operator-=(const Vector2& v)
+
+Vector2& Vector2::operator-=(const Vector2& v)//{x,y}への引き算
 {
     x -= v.x;
     y -= v.y;
     return *this;
 }
-Vector2 Vector2::operator*(float value) const
+
+Vector2 Vector2::operator*(float value) const//{x,y}とそれぞれ掛け算
 {
     return Vector2(x * value,y * value);
 }
 
-float Vector2::Length() const
+bool Vector2::operator==(const Vector2& other) const
+{
+    return x == other.x && y == other.y;
+}
+
+bool Vector2::operator!=(const Vector2& other) const
+{
+    return !(*this == other);
+}
+
+
+float Vector2::Length() const//距離
 {
     return std::sqrt(x * x + y * y);
 }
 
-Vector2 Vector2::Normalize() const
+Vector2 Vector2::Normalize() const//正規化
 {
     float len = Length();
 

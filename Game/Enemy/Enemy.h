@@ -35,7 +35,7 @@ public:
     const wchar_t* GetName() const;
 
 public:
-     Enemy() = default;
+    Enemy();
     virtual ~Enemy() = default;
 
     virtual void Initialize(Map& map,int x,int y) = 0;

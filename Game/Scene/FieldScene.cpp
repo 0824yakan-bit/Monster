@@ -2,6 +2,7 @@
 #include "Game/Scene/FieldScene.h"
 
 #include"Game/Maths/Collisionall.h"
+#include"Game/Battle/Battle.h"
 FieldScene::FieldScene()
     :m_hitEnemy{nullptr}
     ,m_isBattleRequested{false}
@@ -18,19 +19,37 @@ void FieldScene::Initialize(InputManager& inputmanager)
     m_hitEnemy = nullptr;
     m_isBattleRequested = false;
 
+
 }
 
-void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map&map)
+void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map&map,Battle&battle)
 {
-    map.Update(inputManager,playerManager);
+    printfDx(L"現在 (%d,%d)\n",
+        playerManager.m_position.x,
+        playerManager.m_position.y);
+
+
+    map.Update(inputManager, playerManager);
     playerManager.Update(&map);
+
+    if (playerManager.m_oldposition != playerManager.m_position)
+    {
+        playerManager.m_invicible = false;
+    }
+
     enemyManager.Update();
+
     Enemy* enemy = enemyManager.CheckHit(playerManager);
 
-    if (enemy)
+    if (!playerManager.m_invicible)
     {
-        m_hitEnemy = enemy;
-        m_isBattleRequested = true;
+        if (enemy)
+        {
+            playerManager.m_currentposition = playerManager.m_position;
+            m_hitEnemy = enemy;
+            m_isBattleRequested = true;
+            playerManager.m_invicible = true;
+        }
     }
 }
 
@@ -54,4 +73,9 @@ bool FieldScene::IsBattleRequested()const
 Enemy* FieldScene::GetHitEnemy() const
 {
     return m_hitEnemy;
+}
+void FieldScene::ResetBattleRequest()
+{
+    m_isBattleRequested = false;
+    m_hitEnemy = nullptr;
 }

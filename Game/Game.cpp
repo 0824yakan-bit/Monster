@@ -90,7 +90,7 @@ void Game::Update(float elapsedTime)
 
 
 	// ゲームの更新
-	m_sceneManager.Update(m_inputManager, m_playerManager, m_enemyManager, m_map, m_party);
+	m_sceneManager.Update(m_inputManager, m_playerManager, m_enemyManager, m_map, m_party,m_battle);
 	if (m_sceneManager.IsTitleRequested())
 	{
 		printfDx(L"!!!!!!!!!!");
