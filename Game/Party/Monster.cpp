@@ -12,22 +12,22 @@ Monster::Monster(Type type)
     case Type::Slime:
         m_name= L"スライム" ;
         m_hitpoint = 20;
-        m_attacks.push_back({ L"たいあたり", 1,CharacteRistics::Attack});
-        m_attacks.push_back({ L"スライム液", 5,CharacteRistics::Attack});
+        m_attacks.push_back({ L"たいあたり", 1,CharacteRistics::Normal });
+        m_attacks.push_back({ L"スライム液", 5,CharacteRistics::Normal });
         break;
 
     case Type::Wolf:
         m_name = L"ウルフ";
         m_hitpoint = 30;
-        m_attacks.push_back({ L"かみつく", 2 ,CharacteRistics::Attack });
-        m_attacks.push_back({ L"ひっかく", 5 ,CharacteRistics::Attack });
+        m_attacks.push_back({ L"かみつく", 2 ,CharacteRistics::Normal });
+        m_attacks.push_back({ L"ひっかく", 5 ,CharacteRistics::Normal });
         break;
 
     case Type::Dragon:
         m_name = L"ドラゴン";
         m_hitpoint = 50;
-        m_attacks.push_back({ L"ひのこ", 20 ,CharacteRistics::Attack });
-        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Attack });
+        m_attacks.push_back({ L"ひのこ", 20 ,CharacteRistics::Normal });
+        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Normal });
         break;
     }
 }

@@ -16,11 +16,13 @@ public:
 
     enum class CharacteRistics
     {
+        Normal,
         Fire,
         Water,
         Grass,
         Soil,
-        Wind
+        Wind,
+        Thunder
     };
     CharacteRistics characteRistics;
 
