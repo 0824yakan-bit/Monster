@@ -16,10 +16,11 @@ public:
 
     enum class CharacteRistics
     {
-        Attack,
-        Heal,
-        Defend,
-        Buff
+        Fire,
+        Water,
+        Grass,
+        Soil,
+        Wind
     };
     CharacteRistics characteRistics;
 
