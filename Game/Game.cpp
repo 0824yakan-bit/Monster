@@ -66,7 +66,7 @@ void Game::Initialize()
 	m_playerManager.Initialize(&m_map);
 	m_enemyManager.Initialize(m_map);
 	m_inputManager.Initialize();
-	m_sceneManager.Initialize(m_inputManager, m_map, m_party);
+	m_sceneManager.Initialize(m_inputManager,m_sceneManager, m_map, m_party);
 
 	m_oldMapNo = m_map.GetCurrentMap();
 }
@@ -90,7 +90,7 @@ void Game::Update(float elapsedTime)
 
 
 	// ゲームの更新
-	m_sceneManager.Update(m_inputManager, m_playerManager, m_enemyManager, m_map, m_party,m_battle);
+	m_sceneManager.Update(m_inputManager,m_sceneManager, m_playerManager, m_enemyManager, m_map, m_party,m_battle);
 	if (m_sceneManager.IsTitleRequested())
 	{
 		printfDx(L"!!!!!!!!!!");

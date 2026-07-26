@@ -3,6 +3,8 @@
 #include"Game/Party/Party.h"
 #include "Game/Enemy/Enemy.h"
 
+
+class SceneManager;
 class PlayerMove;
 class Party;
 class Enbemy;
@@ -13,6 +15,7 @@ public:
 
 private:
 	static constexpr int MAX_PARTY = 4;
+
 	PlayerManager* m_player = nullptr;
 	Party* m_party = nullptr;
 	Enemy* m_enemy = nullptr;
@@ -69,8 +72,8 @@ public:
 	Battle();
 	~Battle();
 
-	void Initialize();
-	void Update();
+	void Initialize(SceneManager*sceneManager);
+	void Update(SceneManager*sceneManager);
 	void Render();
 	void Finalize();
 
@@ -91,7 +94,7 @@ public:
 	void UpdateRun();//逃げる
 	void RenderRun();
 
-	void UpdateEnemyTurn();//敵ターン
+	void UpdateEnemyTurn(SceneManager*sceneManagar);//敵ターン
 	void RenderEnemyTurn();
 
 	void UpdateEnemyDead();

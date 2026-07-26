@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "Game/Battle/Battle.h"
+
+#include"Game/Scene/SceneManager.h"
 #include"Game/Party/Party.h"
 
 
@@ -30,7 +32,7 @@ Battle::~Battle()
 
 }
 
-void Battle::Initialize()
+void Battle::Initialize(SceneManager*sceneManager)
 {
 	m_select = 0;
 	m_displayIndex = 0;
@@ -52,13 +54,13 @@ void Battle::Initialize()
 	for (int i = 0;i < m_party->GetMonsterCount();i++)//現在のパーティのHP
 	{
 		Monster* monsterhitpoint = m_party->GetMonster(i);
-		m_monsterhp[i] = monsterhitpoint->GetHitPoint();
+		m_monsterhp[i] = monsterhitpoint->GetHitPoint() - sceneManager->m_monsterCurrentDamge[i];
 	}
 
 	m_annihilation = true;
 }
 
-void Battle::Update()
+void Battle::Update(SceneManager*sceneManager)
 {
 	m_annihilation = true;
 	for (int i = 0;i < m_party->GetMonsterCount();i++)
@@ -150,7 +152,7 @@ void Battle::Update()
 			break;
 			
 		case BattleState::EnemyTurn:
-			UpdateEnemyTurn();
+			UpdateEnemyTurn(sceneManager);
 			break;
 
 		case BattleState::EnemyDead:
@@ -504,7 +506,7 @@ void Battle::RenderRun()
 }
 
 
-void Battle::UpdateEnemyTurn()
+void Battle::UpdateEnemyTurn(SceneManager*sceneManager)
 {
 	m_displaytextTimer++;
 	if (m_displaytextTimer <= 60)
@@ -519,6 +521,7 @@ void Battle::UpdateEnemyTurn()
 		{
 			for (int i = 0;i < m_party->GetMonsterCount();i++)//全員に同じダメージを与える
 			{
+				sceneManager->m_monsterCurrentDamge[i] += m_enemy->GetPower();
 				m_monsterhp[i] -= m_enemy->GetPower();
 				if (m_monsterhp[i] - m_enemy->GetPower() < 0)
 					m_monsterhp[i] = 0;

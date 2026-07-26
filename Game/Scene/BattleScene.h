@@ -37,8 +37,8 @@ public:
 	BattleScene();
 	~BattleScene();
 
-	void Initialize(InputManager& inputmanager,Map&map,Party&party);
-	void Update(InputManager& inputmanager,EnemyManager&enemyManager,Map&map,Party&party);
+	void Initialize(InputManager& inputmanager,SceneManager&sceneManager,Map&map,Party&party);
+	void Update(InputManager& inputmanager,SceneManager&sceneManager,EnemyManager&enemyManager,Map&map,Party&party);
 	void Render(Party&party);
 	void Finalize();
 
