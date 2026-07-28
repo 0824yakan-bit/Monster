@@ -3,11 +3,11 @@
 #include"Game/Party/Party.h"
 #include "Game/Enemy/Enemy.h"
 
-
+class Map;
 class SceneManager;
 class PlayerMove;
 class Party;
-class Enbemy;
+class Enemy;
 
 class Battle
 {
@@ -90,7 +90,7 @@ public:
 	~Battle();
 
 	void Initialize(SceneManager*sceneManager);
-	void Update(SceneManager*sceneManager);
+	void Update(SceneManager*sceneManager, Map& map, PlayerManager& player);
 	void Render();
 	void Finalize();
 
@@ -99,7 +99,7 @@ public:
 	void UpdateAttackSelect();//攻撃
 	void RenderAttackSelect();
 	
-	void UpdateAttackAction();//攻撃
+	void UpdateAttackAction(Map& map, PlayerManager& player);//攻撃
 	void RenderAttackAction();
 
 	void UpdateTool();//道具
@@ -137,5 +137,7 @@ public:
 	bool IsEnemyRequested();
 
 	bool IsRun();
+
+	void UesElementalAttack(Map&map,PlayerManager&player);
 };
 

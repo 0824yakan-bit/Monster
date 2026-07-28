@@ -113,7 +113,7 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
 
     case SceneID::Battle:
 
-        m_battleScene.Update(inputmanager,sceneManager,enemyManager,map,party);
+        m_battleScene.Update(inputmanager,sceneManager,enemyManager,map,party,playerManager);
         //printfDx(L"FieldRequested!!\n");
         if (m_battleScene.IsFieldRequested())
         {

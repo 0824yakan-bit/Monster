@@ -41,7 +41,7 @@ void BattleScene::Initialize(InputManager& inputmanager,SceneManager&sceneManage
 	m_receponsTimer = 0;
 }
 
-void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, EnemyManager& enemyManager,Map&map, Party& party)
+void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, EnemyManager& enemyManager,Map&map, Party& party,PlayerManager&player)
 {
 	m_receponsTimer++;
 	//printfDx(L"Field=%d Join=%d HP=%d\n",m_isFieldRequested,m_isJoinRequested,m_enemy ? m_enemy->GetHp() : -1);
@@ -88,7 +88,7 @@ void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, E
 	}
 	if (!m_isJoinRequested && !m_isReplaceSelect && m_enemy)
 	{
-		m_battle->Update(&sceneManager);
+		m_battle->Update(&sceneManager,map,player);
 	}
 
 	if (m_battle->IsFieldRequested())

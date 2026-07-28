@@ -39,7 +39,7 @@ public:
 	~BattleScene();
 
 	void Initialize(InputManager& inputmanager,SceneManager&sceneManager,Map&map,Party&party);
-	void Update(InputManager& inputmanager,SceneManager&sceneManager,EnemyManager&enemyManager,Map&map,Party&party);
+	void Update(InputManager& inputmanager,SceneManager&sceneManager,EnemyManager&enemyManager,Map&map,Party&party,PlayerManager&player);
 	void Render(Party&party);
 	void Finalize();
 

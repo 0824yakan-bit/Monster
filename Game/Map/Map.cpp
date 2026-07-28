@@ -152,21 +152,13 @@ void Map::DrawCurrentMap(int offsetX, int offsetY)
 		{
 			int tileNo = m_workmap[m_currentMap][y][x];
 
-			DrawGraph(
-				x * m_chipSize + offsetX,
-				y * m_chipSize + offsetY,
-				m_ghChip[tileNo],
-				FALSE);
+			DrawGraph(x * m_chipSize + offsetX,	y * m_chipSize + offsetY,m_ghChip[tileNo],FALSE);
 
 			int objectNo = m_objectmap[m_currentMap][y][x];
 
 			if (objectNo >= 0)
 			{
-				DrawGraph(
-					x * m_chipSize + offsetX,
-					y * m_chipSize + offsetY,
-					m_ghChip[objectNo],
-					TRUE);
+				DrawGraph(x * m_chipSize + offsetX,y * m_chipSize + offsetY,m_ghChip[objectNo],	TRUE);
 			}
 		}
 	}
@@ -179,25 +171,18 @@ void Map::DrawNextMap(int offsetX, int offsetY)
 		{
 			int tileNo = m_workmap[m_nextmap][y][x];
 
-			DrawGraph(
-				x * m_chipSize + offsetX,
-				y * m_chipSize + offsetY,
-				m_ghChip[tileNo],
-				FALSE);
+			DrawGraph(x * m_chipSize + offsetX,	y * m_chipSize + offsetY,m_ghChip[tileNo],FALSE);
 
 			int objectNo = m_objectmap[m_nextmap][y][x];
 
 			if (objectNo >= 0)
 			{
-				DrawGraph(
-					x * m_chipSize + offsetX,
-					y * m_chipSize + offsetY,
-					m_ghChip[objectNo],
-					TRUE);
+				DrawGraph(x * m_chipSize + offsetX,y * m_chipSize + offsetY,m_ghChip[objectNo],	TRUE);
 			}
 		}
 	}
 }
+
 void Map::Finalize()
 {
 
@@ -282,4 +267,24 @@ int Map::GetChipSize()const
 int Map::GetCurrentMap()const
 {
 	return m_currentMap;
+}
+
+void Map::NormalBreak(PlayerManager& player)
+{
+	Vector2 position = player.GetPosition();
+
+	int tileX = static_cast<int>(position.x) / m_chipSize;
+	int tileY = static_cast<int>(position.y) / m_chipSize;
+
+	int rightX = tileX + 1;
+
+	if (rightX >= 0 && rightX < MAP_WIDTH &&
+		tileY >= 0 && tileY < MAP_HEIGHT)
+	{
+		// 見た目
+		m_objectmap[m_currentMap][tileY][rightX] = 41;
+
+		// 当たり判定（追加）
+		m_basemap[m_currentMap][tileY][rightX] = TileType::Wall;
+	}
 }

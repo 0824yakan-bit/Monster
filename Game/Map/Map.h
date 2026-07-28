@@ -62,5 +62,8 @@ public:
 
 	void DrawCurrentMap(int offsetX, int offsetY);
 	void DrawNextMap(int offsetX, int offsetY);
+
+
+	void NormalBreak(PlayerManager&player);
 };
 

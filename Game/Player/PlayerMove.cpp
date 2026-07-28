@@ -49,10 +49,7 @@ void PlayerMove::Update(Map*map,PlayerManager*playermanager)
 	m_inputManager.Update();
 	m_movetimer--;
 
-	//if (playermanager->m_currentposition != playermanager->m_position)
-	//{
-	//	playermanager->m_currentposition = playermanager->m_position;//移動前のポジションを保存
-	//}
+
 	if (m_movetimer < 0)
 	{
 		playermanager->m_oldposition=playermanager->m_position ;

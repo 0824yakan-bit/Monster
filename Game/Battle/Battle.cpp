@@ -64,7 +64,7 @@ void Battle::Initialize(SceneManager*sceneManager)
 	m_annihilation = true;
 }
 
-void Battle::Update(SceneManager*sceneManager)
+void Battle::Update(SceneManager*sceneManager, Map& map, PlayerManager& player)
 {
 	m_annihilation = true;
 	for (int i = 0;i < m_party->GetMonsterCount();i++)
@@ -163,7 +163,7 @@ void Battle::Update(SceneManager*sceneManager)
 		break;
 
 	case BattleState::AttackAction:
-		UpdateAttackAction();
+		UpdateAttackAction(map,player);
 		break;
 
 	case BattleState::Tool:
@@ -431,7 +431,7 @@ void Battle::RenderAttackSelect()
 
 }
 
-void Battle::UpdateAttackAction()
+void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 {
 	m_displaytextTimer++;
 
@@ -498,7 +498,7 @@ void Battle::UpdateAttackAction()
 		}
 		break;
 		}
-
+		UesElementalAttack(map,player);
 		m_enemy->Damage(attacks[index].power * magnification);
 
 
@@ -749,3 +749,13 @@ bool Battle::IsEnemyRequested()
 {
 	return m_isEnemyRequested;
 }
+
+void Battle::UesElementalAttack(Map&map,PlayerManager&player)
+{
+	//属性の組み合わせすべて
+	if (state & USED_NORMAL)
+	{
+		map.NormalBreak(player);
+	}
+}
+
