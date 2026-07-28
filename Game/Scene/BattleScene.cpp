@@ -71,11 +71,26 @@ void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, E
 		return;
 	}
 
-	if (!m_isJoinRequested &&!m_isReplaceSelect &&m_enemy &&m_enemy->GetHp() > 0)
+
+	
+
+	if (m_battle->IsEnemyRequested() && m_enemy && m_enemy->GetHp() <= 0)
+	{
+		if (!m_isJoinRequested && !m_isReplaceSelect)
+		{
+			m_isJoinRequested = true;
+			m_isReplaceSelect = false;
+
+			m_joinSelect = 0;
+			m_receponsTimer = 0;
+			return;
+		}
+	}
+	if (!m_isJoinRequested && !m_isReplaceSelect && m_enemy)
 	{
 		m_battle->Update(&sceneManager);
 	}
-	
+
 	if (m_battle->IsFieldRequested())
 	{
 		// 戦闘前の1マス前へ戻す
@@ -87,18 +102,6 @@ void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, E
 
 		m_isFieldRequested = true;
 	}
-
-	if (m_enemy && m_enemy->GetHp() <= 0)
-	{
-		if (!m_isJoinRequested && !m_isReplaceSelect)
-		{
-			m_isJoinRequested = true;
-			m_isReplaceSelect = false;
-
-			m_joinSelect = 0;      // 「はい」を選択状態にする
-			m_receponsTimer=0;
-			return;
-		}
 		if (m_isJoinRequested)
 		{
 			m_battle->SetJoinWindow(true);
@@ -226,7 +229,7 @@ void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, E
 			{
 				printfDx(L"仲間はいません\n");
 			}
-		}
+		
 	}
 	if (m_battle->GetAnnihilation())
 	{
@@ -268,7 +271,9 @@ void BattleScene::Render(Party&party)
 
 	if (m_isJoinRequested)
 	{
-		printfDx(L"Join Window\n");
+		m_enemyName = m_enemy->GetName();
+		DrawBox(40, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
+		DrawFormatString(60,550, GetColor(255, 255, 255), L"%lsを",m_enemyName);
 		DrawString(60 , 610, L"仲間にしますか？",GetColor(255,255,255), TRUE);
 		DrawString(520, 610, L"はい", GetColor(255, 255, 255), TRUE);
 		DrawString(720, 610, L"いいえ", GetColor(255, 255, 255), TRUE);

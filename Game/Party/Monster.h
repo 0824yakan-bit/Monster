@@ -16,13 +16,13 @@ public:
 
     enum class CharacteRistics
     {
-        Normal,
-        Fire,
-        Water,
-        Grass,
-        Soil,
-        Wind,
-        Thunder
+        Normal,//無属性
+        Fire,  //火属性
+        Water, //水属性
+        Grass, //草属性
+        Soil,  //土属性
+        Wind,  //風属性
+        Thunder//雷属性
     };
     CharacteRistics characteRistics;
 

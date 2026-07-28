@@ -35,11 +35,27 @@ private:
 
 	BattleState m_state;
 	
+	enum AttackActive//属性組み合わせ・バトル終了時まで使った属性は保存
+	{
+		USED_NORMAL = 1 << 0,//通常　攻撃
+		USED_FIRE   = 1 << 1,//　火　属性
+		USED_WATER  = 1 << 2,//　水　属性
+		USED_GRASS  = 1 << 3,//　草　属性
+		USED_SOIL   = 1 << 4,//　土　属性
+		USED_THUNDER= 1 << 5,//　雷　属性
+		USED_WIND   = 1 << 6,//　風　属性
+	};
+	unsigned int state = 0;
+
 	int m_monsterhp[MAX_PARTY];//パーティの現在のhp・4体まで
 	int m_displayIndex;//現在の味方行動表示
 	int m_select;
 	int m_receponsTimer;
 	int m_displaytextTimer;
+	std::wstring m_deadEnemyName;
+	// やられ演出用
+	bool m_enemyDeadMotion;
+	int  m_enemyDeadOffsetY;
 
 	bool m_IsActive;
 	bool m_Window;
@@ -48,6 +64,7 @@ private:
 	bool m_annihilation;
 	bool m_isRun;
 	bool m_isEnemyRequested;
+	
 
 	int m_windowWidthFront;
 	int m_windowWidth;

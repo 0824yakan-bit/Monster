@@ -24,6 +24,7 @@ private:
 	Battle* m_battle;
 	PlayerManager* m_player;
 	Enemy* m_enemy;
+	const wchar_t* m_enemyName;
 	SceneManager* m_scenemanager;
 
 	bool m_isReplaceSelect;

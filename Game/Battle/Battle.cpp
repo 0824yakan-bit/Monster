@@ -39,6 +39,8 @@ void Battle::Initialize(SceneManager*sceneManager)
 	m_state = BattleState::Command;
 	m_receponsTimer = 10;
 	m_displaytextTimer = 0;
+	m_enemyDeadMotion = false;
+	m_enemyDeadOffsetY = 0;
 	m_IsActive = true;
 	m_Window = false;
 	m_isJoinWindow = false;
@@ -50,6 +52,8 @@ void Battle::Initialize(SceneManager*sceneManager)
 	m_attackSelect = 0;      // 今選択中の技
 
 	m_selectedAttack.resize(m_party->GetMonsterCount(),-1);
+
+	state = 0;//戦闘開始時属性攻撃の状態リセット(１で使用）
 
 	for (int i = 0;i < m_party->GetMonsterCount();i++)//現在のパーティのHP
 	{
@@ -93,11 +97,12 @@ void Battle::Update(SceneManager*sceneManager)
 				m_select = COMMAND_NUM - 1;
 			}
 		}
-		if (!m_Window&&CheckHitKey(KEY_INPUT_RETURN))
+		if (!m_Window && CheckHitKey(KEY_INPUT_RETURN))
 		{
 			m_receponsTimer = 0;
 			m_IsActive = false;
 			m_Window = true;
+
 
 			switch (m_select)//指揮・もちもの・さそう・にげだすの選択　キーカーソルの位置
 			{
@@ -126,44 +131,8 @@ void Battle::Update(SceneManager*sceneManager)
 				break;
 			}
 		}
-		switch (m_state)//現在の状態
-		{
-		case BattleState::Command:
-			break;
-
-		case BattleState::AttackSelect:
-			UpdateAttackSelect();
-			break;
-
-		case BattleState::AttackAction:
-			UpdateAttackAction();
-			break;
-
-		case BattleState::Tool:
-			UpdateTool();
-			break;
-
-		case BattleState::Scout:
-			UpdateScout();
-			break;
-
-		case BattleState::Run:
-			UpdateRun();
-			break;
-			
-		case BattleState::EnemyTurn:
-			UpdateEnemyTurn(sceneManager);
-			break;
-
-		case BattleState::EnemyDead:
-			UpdateEnemyDead();
-			break;
-
-		case BattleState::Annihilation:
-			UpdateAnnihilation();
-			break;
-		}
-		if (!m_IsActive && CheckHitKey(KEY_INPUT_BACK)&&m_monsterSelect==0)//詳細から戻る
+		
+		if (!m_IsActive && CheckHitKey(KEY_INPUT_BACK) && m_monsterSelect == 0)//詳細から戻る
 		{
 			m_state = BattleState::Command;
 			m_IsActive = true;
@@ -183,10 +152,44 @@ void Battle::Update(SceneManager*sceneManager)
 			if (m_windowWidth > 920)
 				m_windowWidth = 920;
 		}
-	
-
 	}
+	switch (m_state)//現在の状態
+	{
+	case BattleState::Command:
+		break;
 
+	case BattleState::AttackSelect:
+		UpdateAttackSelect();
+		break;
+
+	case BattleState::AttackAction:
+		UpdateAttackAction();
+		break;
+
+	case BattleState::Tool:
+		UpdateTool();
+		break;
+
+	case BattleState::Scout:
+		UpdateScout();
+		break;
+
+	case BattleState::Run:
+		UpdateRun();
+		break;
+
+	case BattleState::EnemyTurn:
+		UpdateEnemyTurn(sceneManager);
+		break;
+
+	case BattleState::EnemyDead:
+		UpdateEnemyDead();
+		break;
+
+	case BattleState::Annihilation:
+		UpdateAnnihilation();
+		break;
+	}
 }
 
 void Battle::Render()
@@ -249,12 +252,39 @@ void Battle::Render()
 	//敵描画
 	if (m_enemy)
 	{
-		m_enemy->RenderBattle();
+		if (m_enemyDeadMotion)
+		{
+			// やられ中は位置を下へずらす
+			SetDrawArea(0, m_enemyDeadOffsetY, 1280, 720 + m_enemyDeadOffsetY);
+
+			// 点滅させる（偶数フレームだけ描画）
+			if ((m_displaytextTimer / 5) % 2 == 0)
+			{
+				m_enemy->RenderBattle();
+			}
+
+			SetDrawArea(0, 0, 1280, 720);
+		}
+		else
+		{
+			m_enemy->RenderBattle();
+		}
 	}
+
 	//仮ｈｐ
 	DrawFormatString(500,120,GetColor(0, 255, 255),L"HP : %d",m_enemy->GetHp());
 
+	DrawFormatString(
+		20, 300,GetColor(0, 0, 0),	L"N:%d F:%d Wa:%d G:%d S:%d T:%d Wi:%d",
 
+		(state & USED_NORMAL) ? 1 : 0,
+		(state & USED_FIRE)   ? 1 : 0,
+		(state & USED_WATER)  ? 1 : 0,
+		(state & USED_GRASS)  ? 1 : 0,
+		(state & USED_SOIL)   ? 1 : 0,
+		(state & USED_THUNDER)? 1 : 0,
+		(state & USED_WIND)   ? 1 : 0
+	);
 }
 
 void Battle::Finalize()
@@ -412,20 +442,89 @@ void Battle::UpdateAttackAction()
 
 		int index = m_selectedAttack[m_displayIndex];
 
-		m_enemy->Damage(attacks[index].power);
+		Monster::CharacteRistics m_characteRistics = attacks[index].ristics;
 
-		if (m_enemy->GetHp() <= 0)
+		float magnification = 1.0f;
+		switch (m_characteRistics)
 		{
-			m_displayMessage = std::wstring(m_enemy->GetName()) + L"を倒した!";
+		case Monster::CharacteRistics::Normal:
+		{
+			//通常攻撃ON
+			state |= USED_NORMAL;
+		}
+		break;
+		case Monster::CharacteRistics::Fire:
+		{
+			//火属性攻撃ON
+			state |= USED_FIRE;
+			//威力 １.５倍
+			magnification = 1.5f;
 
-			// 倒した演出へ
-			m_state = BattleState::EnemyDead;
+		}
+		break;
+		case Monster::CharacteRistics::Water:
+		{
+			//水属性攻撃ON
+			state |= USED_WATER;
 
-			return;
+		}
+		break;
+		case Monster::CharacteRistics::Grass:
+		{
+			//草属性攻撃ON
+			state |= USED_GRASS;
+
+		}
+		break;
+		case Monster::CharacteRistics::Soil:
+		{
+			//土属性攻撃ON
+			state |= USED_SOIL;
+
+		}
+		break;
+		case Monster::CharacteRistics::Thunder:
+		{
+			//雷属性攻撃ON
+			state |= USED_THUNDER;
+
+		}
+		break;
+		case Monster::CharacteRistics::Wind:
+		{
+			//風属性攻撃ON
+			state |= USED_WIND;
+
+		}
+		break;
 		}
 
-		m_displayMessage =monster->GetName()+ L"の"	+ attacks[index].name+ L"！";
+		m_enemy->Damage(attacks[index].power * magnification);
+
+
+
+		m_displayMessage = monster->GetName() + L"の" + attacks[index].name + L"！";
 	}
+	if (m_displaytextTimer < 60)
+	{
+		return;
+	}
+
+	if (m_enemy->GetHp() <= 0)
+	{
+		// 倒した敵の名前だけ保存
+		m_deadEnemyName = m_enemy->GetName();
+
+		m_enemyDeadMotion = true;
+		m_enemyDeadOffsetY = 0;
+
+		// EnemyDeadへ移動
+		m_displaytextTimer = 0;
+		m_state = BattleState::EnemyDead;
+
+		return;
+	}
+
 
 	if (m_displaytextTimer >= 60)
 	{
@@ -453,7 +552,8 @@ void Battle::RenderAttackAction()
 {
 	if (!m_displayMessage.empty())
 	{
-		DrawString(	50,	550,	m_displayMessage.c_str(),GetColor(0, 0, 0));
+		DrawBox(40, 530, 1240, 690,GetColor(0, 0, 0), TRUE);
+		DrawString(	50,	550,m_displayMessage.c_str(),GetColor(255,255,255));
 	}
 }
 
@@ -526,12 +626,11 @@ void Battle::UpdateEnemyTurn(SceneManager*sceneManager)
 				if (m_monsterhp[i] - m_enemy->GetPower() < 0)
 					m_monsterhp[i] = 0;
 			}
+			EndTurn();
 		}
 
 	}
 	
-	if(CheckHitKey(KEY_INPUT_0))
-	EndTurn();
 }
 
 
@@ -542,9 +641,37 @@ void Battle::RenderEnemyTurn()
 	DrawString(20, 500, L"EnemyTURN", GetColor(32, 132, 43), TRUE);
 }
 
+
 void Battle::UpdateEnemyDead()
 {
+	m_displaytextTimer++;
 
+	// 0〜29フレーム：やられモーション
+	if (m_displaytextTimer < 30)
+	{
+		m_displayMessage = L"";
+		m_enemyDeadOffsetY += 3; // 少しずつ下へ落とす
+		return;
+	}
+
+	// 30フレーム目で倒したメッセージに切り替え
+	if (m_displaytextTimer == 30)
+	{
+		m_displayMessage = m_deadEnemyName + L"を倒した!";
+	}
+
+	// さらに60フレーム表示したら終了
+	if (m_displaytextTimer >= 90)
+	{
+		m_enemyDeadMotion = false;
+		m_enemyDeadOffsetY = 0;
+
+		m_displaytextTimer = 0;
+
+		m_isEnemyRequested = true;
+
+		m_state = BattleState::Command;
+	}
 }
 void Battle::RenderEnemyDead()
 {

@@ -13,7 +13,7 @@ Monster::Monster(Type type)
         m_name= L"スライム" ;
         m_hitpoint = 20;
         m_attacks.push_back({ L"たいあたり", 1,CharacteRistics::Normal });
-        m_attacks.push_back({ L"スライム液", 5,CharacteRistics::Normal });
+        m_attacks.push_back({ L"スライム液", 5,CharacteRistics::Water });
         break;
 
     case Type::Wolf:
@@ -26,8 +26,8 @@ Monster::Monster(Type type)
     case Type::Dragon:
         m_name = L"ドラゴン";
         m_hitpoint = 50;
-        m_attacks.push_back({ L"ひのこ", 20 ,CharacteRistics::Normal });
-        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Normal });
+        m_attacks.push_back({ L"ひのこ",2 ,CharacteRistics::Fire });
+        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
         break;
     }
 }
