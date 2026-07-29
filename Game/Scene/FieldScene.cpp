@@ -13,9 +13,10 @@ FieldScene::~FieldScene()
 {
 }
 
-void FieldScene::Initialize(InputManager& inputmanager)
+void FieldScene::Initialize(InputManager& inputmanager, Map& map)
 {
-    
+    map.ChangeStage(0); // 0～9//階層変更関数
+
     m_hitEnemy = nullptr;
     m_isBattleRequested = false;
 
@@ -24,9 +25,8 @@ void FieldScene::Initialize(InputManager& inputmanager)
 
 void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map&map,Battle&battle)
 {
-    printfDx(L"現在 (%d,%d)\n",
-        playerManager.m_position.x,
-        playerManager.m_position.y);
+   // printfDx(L"現在 (%d,%d)\n", playerManager.m_position.x,playerManager.m_position.y);
+
 
 
     map.Update(inputManager, playerManager);

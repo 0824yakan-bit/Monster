@@ -25,9 +25,10 @@ void PlayerManager::Initialize(Map*map)
 	m_oldposition.x = 0;
 	m_oldposition.y = 0;
 
-	 m_position.x = 0;
-	 m_position.y = 0;
 	 m_size = map->m_chipSize;
+
+	 m_position.x = 12*m_size;
+	 m_position.y = 10*m_size;
 	playermove.Initialize(map,*this);
 }
 

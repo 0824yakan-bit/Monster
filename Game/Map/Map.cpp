@@ -47,27 +47,31 @@ void Map::Initialize(const wchar_t* fileName)
 }
 void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 {
-
-	//右端から次のマップへ移動
-	if (!m_isTransition && playerManager.m_position.x >= Screen::RIGHT)
+	int startMap = GetStageStartMap();
+	int endMap = GetStageEndMap();
+	// 右端
+	if (!m_isTransition &&
+		playerManager.m_position.x + m_chipSize >= Screen::RIGHT)
 	{
-		//移動方向を保存
 		m_moveDir = MoveDir::Right;
 
-		//次のマップ番号
-		m_nextmap = (m_currentMap + 1) % MAP_NUM;
+		if (m_currentMap >= endMap)
+			m_nextmap = startMap;
+		else
+			m_nextmap = m_currentMap + 2;
 
 		m_transition = 0;
 		m_isTransition = true;
 	}
 	//左端から
-	if (!m_isTransition && playerManager.m_position.x < Screen::LEFT)
+	if (!m_isTransition && playerManager.m_position.x <= Screen::LEFT)
 	{
-		//移動方向を保存
 		m_moveDir = MoveDir::Left;
 
-		//前のマップ番号
-		m_nextmap = (m_currentMap - 1 + MAP_NUM) % MAP_NUM;
+		if (m_currentMap <= startMap)
+			m_nextmap = endMap;
+		else
+			m_nextmap = m_currentMap - 2;
 
 		m_transition = 0;
 		m_isTransition = true;
@@ -77,17 +81,25 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 	{
 		m_moveDir = MoveDir::Up;
 
-		m_nextmap = (m_currentMap -1 + MAP_NUM) % MAP_NUM;
-		
+		if (m_currentMap <= startMap)
+			m_nextmap = endMap;
+		else
+			m_nextmap = m_currentMap - 1;
+
 		m_transition = 0;
 		m_isTransition = true;
 	}
-	//下から
-	if (!m_isTransition && playerManager.m_position.y >= Screen::BOTTOM)
+	// 下端
+	if (!m_isTransition &&
+		playerManager.m_position.y + m_chipSize >= Screen::BOTTOM)
 	{
 		m_moveDir = MoveDir::Down;
 
-		m_nextmap = (m_currentMap + 1) % MAP_NUM;
+		if (m_currentMap >= endMap)
+			m_nextmap = startMap;
+		else
+			m_nextmap = m_currentMap + 1;
+
 		m_transition = 0;
 		m_isTransition = true;
 	}
@@ -105,13 +117,13 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 			m_isTransition = false;
 
 			if (m_moveDir == MoveDir::Right)
-				playerManager.m_position.x = 0;
+				playerManager.m_position.x = 0+m_chipSize;
 			else if (m_moveDir == MoveDir::Left)
-				playerManager.m_position.x = Screen::RIGHT - m_chipSize;
+				playerManager.m_position.x = Screen::RIGHT - m_chipSize*2;
 			else if (m_moveDir == MoveDir::Up)
-				playerManager.m_position.y = Screen::BOTTOM - m_chipSize;
+				playerManager.m_position.y = Screen::BOTTOM - m_chipSize-16;
 			else if (m_moveDir == MoveDir::Down)
-				playerManager.m_position.y = 0;
+				playerManager.m_position.y = 0+m_chipSize;
 			m_moveDir = MoveDir::None;
 		}
 	}
@@ -269,22 +281,90 @@ int Map::GetCurrentMap()const
 	return m_currentMap;
 }
 
-void Map::NormalBreak(PlayerManager& player)
+int Map::GetStageStartMap() const
 {
-	Vector2 position = player.GetPosition();
-
-	int tileX = static_cast<int>(position.x) / m_chipSize;
-	int tileY = static_cast<int>(position.y) / m_chipSize;
-
-	int rightX = tileX + 1;
-
-	if (rightX >= 0 && rightX < MAP_WIDTH &&
-		tileY >= 0 && tileY < MAP_HEIGHT)
-	{
-		// 見た目
-		m_objectmap[m_currentMap][tileY][rightX] = 41;
-
-		// 当たり判定（追加）
-		m_basemap[m_currentMap][tileY][rightX] = TileType::Wall;
-	}
+	return m_stageNo * MAPS_PER_STAGE;
 }
+
+int Map::GetStageEndMap() const
+{
+	return GetStageStartMap() + MAPS_PER_STAGE - 1;
+}
+
+void Map::ChangeStage(int stageNo)
+{
+	m_stageNo = stageNo;
+	m_currentMap = GetStageStartMap();
+}
+
+
+
+		void Map::NormalBreak(PlayerManager& player)
+		{
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			int rightX = tileX + 1;
+
+			if (rightX >= 0 && rightX < MAP_WIDTH &&tileY >= 0 && tileY < MAP_HEIGHT)
+			{
+				// 見た目
+				m_objectmap[m_currentMap][tileY][rightX] = 1;
+
+				// 当たり判定（追加）
+				m_basemap[m_currentMap][tileY][rightX] = TileType::Wall;
+			}
+		}
+
+		void Map::FireBreak(PlayerManager& player)
+		{
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			int rightX = tileX ;
+
+			if (rightX >= 0 && rightX < MAP_WIDTH &&tileY >= 0 && tileY < MAP_HEIGHT)
+			{
+				for (int i = -3;i < 6;i++)
+				{
+					for (int j = -5;j < 10;j++)
+					{
+						// 見た目
+						m_objectmap[m_currentMap][tileY+j][rightX+i] = 1;
+
+						// 当たり判定（追加）
+						m_basemap[m_currentMap][tileY+j][rightX+i] = TileType::Floor;
+					}
+				}
+
+			}
+		}
+
+		void Map::WaterBreak(PlayerManager& player)
+		{
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			int rightX = tileX + 5;
+
+			if (rightX >= 0 && rightX < MAP_WIDTH && tileY >= 0 && tileY < MAP_HEIGHT)
+			{
+				// 見た目
+				m_objectmap[m_currentMap][tileY][rightX] = 1;
+
+				// 当たり判定（追加）
+				m_basemap[m_currentMap][tileY][rightX] = TileType::Wall;
+			}
+		}
+
+
+
+
+
+

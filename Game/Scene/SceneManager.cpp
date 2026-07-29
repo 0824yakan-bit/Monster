@@ -76,7 +76,7 @@ void SceneManager::InitializeCurrentScene(InputManager& inputmanager,SceneManage
     switch (m_currentSceneID)
     {
     case SceneID::Title :   m_titleScene .Initialize(inputmanager);  break;
-    case SceneID::Field :   m_fieldScene .Initialize(inputmanager);   break;
+    case SceneID::Field :   m_fieldScene .Initialize(inputmanager,map);   break;
     case SceneID::Battle:   m_battleScene.Initialize(inputmanager,sceneManager,map,party);   break;
     
     default:      assert(!"シーンIDが不正です");break;

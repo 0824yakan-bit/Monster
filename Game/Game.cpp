@@ -93,7 +93,6 @@ void Game::Update(float elapsedTime)
 	m_sceneManager.Update(m_inputManager,m_sceneManager, m_playerManager, m_enemyManager, m_map, m_party,m_battle);
 	if (m_sceneManager.IsTitleRequested())
 	{
-		printfDx(L"!!!!!!!!!!");
 		m_sceneManager.ResetTitleRequest();
 		Initialize();
 	}

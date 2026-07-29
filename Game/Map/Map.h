@@ -21,8 +21,6 @@ public:
 
 	MoveDir m_moveDir;
 private:
-
-
 	static constexpr int MAP_WIDTH = 40;
 	static constexpr int MAP_HEIGHT = 25;
 	static constexpr int GH_MAX = 320;
@@ -32,6 +30,14 @@ private:
 	bool m_isTransition;
 	int m_nextmap;
 	int m_transition;
+
+private:
+	int m_stageNo = 0;   // 0=ステージ1, 1=ステージ2 ...
+	static constexpr int MAPS_PER_STAGE = 10;
+
+	int GetStageStartMap() const;
+	int GetStageEndMap() const;
+
 public:
 	static constexpr int MAP_NUM = 40;
 	TileType m_basemap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//当たり判定用のマップデータ
@@ -63,7 +69,11 @@ public:
 	void DrawCurrentMap(int offsetX, int offsetY);
 	void DrawNextMap(int offsetX, int offsetY);
 
+	void ChangeStage(int stageNo);//階層変更関数
 
-	void NormalBreak(PlayerManager&player);
+	//地形破壊
+	void NormalBreak(PlayerManager&player);//通常攻撃
+	void FireBreak(PlayerManager& player);//火属性攻撃
+	void WaterBreak(PlayerManager& player);//水属性攻撃
 };
 

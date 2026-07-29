@@ -6,23 +6,23 @@
 
 
 Battle::Battle()
-	:m_receponsTimer{}
-	,m_displaytextTimer{}
-	,m_Window{}
-	,m_windowWidth{}
-	,m_windowWidthFront{}
-	,m_IsActive{}
-	,m_isJoinWindow{}
-	,m_select{}
-	,m_state{}
-	,m_displayIndex{}
-	,m_attackSelect{}
-	,m_monsterSelect{}
-	,m_monsterhp{}
-	,m_isRun{}
-	,m_isFieldRequested{}
-	,m_isEnemyRequested{}
-	,m_annihilation{}
+	:m_receponsTimer	{}
+	,m_displaytextTimer	{}
+	,m_Window			{}
+	,m_windowWidth		{}
+	,m_windowWidthFront	{}
+	,m_IsActive			{}
+	,m_isJoinWindow		{}
+	,m_select			{}
+	,m_state			{}
+	,m_displayIndex		{}
+	,m_attackSelect		{}
+	,m_monsterSelect	{}
+	,m_monsterhp		{}
+	,m_isRun			{}
+	,m_isFieldRequested	{}
+	,m_isEnemyRequested	{}
+	,m_annihilation		{}
 {
 
 }
@@ -586,9 +586,7 @@ void Battle::RenderScout()
 
 void Battle::UpdateRun()
 {
-	printfDx(L"戻す (%d,%d)\n",
-		m_player->m_currentposition.x,
-		m_player->m_currentposition.y);
+	//printfDx(L"戻す (%d,%d)\n",	m_player->m_currentposition.x,m_player->m_currentposition.y);
 
 
 	m_player->m_position = m_player->m_currentposition;
@@ -756,6 +754,14 @@ void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 	if (state & USED_NORMAL)
 	{
 		map.NormalBreak(player);
+	}
+	if (state & USED_FIRE)
+	{
+		map.FireBreak(player);
+	}
+	if (state & USED_WATER)
+	{
+		map.WaterBreak(player);
 	}
 }
 
