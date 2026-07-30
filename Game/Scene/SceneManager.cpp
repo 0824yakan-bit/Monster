@@ -99,7 +99,7 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
         break;
 
     case SceneID::Field:
-
+   
         m_fieldScene.Update(inputmanager,playerManager,enemyManager,map,battle);
 
         if (m_fieldScene.IsBattleRequested())
@@ -117,6 +117,10 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
         //printfDx(L"FieldRequested!!\n");
         if (m_battleScene.IsFieldRequested())
         {
+            m_fieldScene.SetAttackEffects(m_battleScene.GetUsedAttackOrder());
+
+            m_battleScene.ClearUsedAttackOrder();
+
             NextSceneID(SceneID::Field);
         }
         if (m_battleScene.IsTitleRequested())

@@ -12,6 +12,13 @@ class Enemy;
 class Battle
 {
 public:
+	struct UsedAttackInfo
+	{
+		Monster::CharacteRistics element; // 属性
+		std::wstring attackName;          // 技名
+	};
+
+	std::vector<UsedAttackInfo> m_usedAttackOrder;
 
 private:
 	static constexpr int MAX_PARTY = 4;
@@ -45,7 +52,10 @@ private:
 		USED_THUNDER= 1 << 5,//　雷　属性
 		USED_WIND   = 1 << 6,//　風　属性
 	};
-	unsigned int state = 0;
+	unsigned int state = 0;//符号なし（プラスのみ）
+
+
+
 
 	int m_monsterhp[MAX_PARTY];//パーティの現在のhp・4体まで
 	int m_displayIndex;//現在の味方行動表示
@@ -139,5 +149,9 @@ public:
 	bool IsRun();
 
 	void UesElementalAttack(Map&map,PlayerManager&player);
+
+	const std::vector<UsedAttackInfo>& GetUsedAttackOrder() const;
+
+	void ClearUsedAttackOrder();
 };
 

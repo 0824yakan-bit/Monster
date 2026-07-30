@@ -2,6 +2,7 @@
 #include "BattleScene.h"
 
 #include"Game/Scene/SceneManager.h"
+#include"Game/Scene/FieldScene.h"
 #include"Game/Player/PlayerManager.h"
 #include"Game/Enemy/Enemy.h"
 #include"Game/Enemy/EnemyManager.h"
@@ -349,4 +350,14 @@ bool BattleScene::IsTitleRequested()const
 void BattleScene::ResetTitleRequest()
 {
 	m_isTitleRequested = false;
+}
+
+const std::vector<Battle::UsedAttackInfo>&BattleScene::GetUsedAttackOrder() const
+{
+	return m_battle->GetUsedAttackOrder();
+}
+
+void BattleScene::ClearUsedAttackOrder()
+{
+	m_battle->ClearUsedAttackOrder();
 }

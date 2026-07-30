@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Game/Battle/Battle.h"
 class InputManager;
+class FieldScene;
 class SceneManager;
 class PlayerManager;
 class Enemy;
@@ -51,6 +52,9 @@ public:
 
 	void SetPlayer(PlayerManager* player);
 	void SetEnemy(Enemy* enemy);
+
+	const std::vector<Battle::UsedAttackInfo>& GetUsedAttackOrder() const;
+	void ClearUsedAttackOrder();
 };
 
 

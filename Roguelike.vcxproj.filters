@@ -212,9 +212,6 @@
     <ClInclude Include="Game\Scene\FieldScene.h">
       <Filter>Game\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Party.h">
-      <Filter>Game\Party</Filter>
-    </ClInclude>
     <ClInclude Include="Game\Party\Monster.h">
       <Filter>Game\Party</Filter>
     </ClInclude>
@@ -229,6 +226,9 @@
     </ClInclude>
     <ClInclude Include="Game\Enemy\Wolf.h">
       <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Party\Party.h">
+      <Filter>Game\Party</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

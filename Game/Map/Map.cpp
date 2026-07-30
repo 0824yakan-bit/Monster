@@ -240,7 +240,7 @@ void Map::LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][
 				}
 				mapData[map][y][x] = tile;
 
-				if (tile >= 0 && tile <= 32)
+				if (tile >= 0 && tile < 32)
 					m_basemap[map][y][x] = TileType::Floor;
 				else if (tile <= 80)
 					m_basemap[map][y][x] = TileType::Wall;
@@ -310,11 +310,14 @@ void Map::ChangeStage(int stageNo)
 
 			if (rightX >= 0 && rightX < MAP_WIDTH &&tileY >= 0 && tileY < MAP_HEIGHT)
 			{
-				// 見た目
-				m_objectmap[m_currentMap][tileY][rightX] = 1;
+				if (m_objectmap[m_currentMap][tileY][rightX] == 40)
+				{
+					// 見た目
+					m_objectmap[m_currentMap][tileY][rightX] = 1;
 
-				// 当たり判定（追加）
-				m_basemap[m_currentMap][tileY][rightX] = TileType::Wall;
+					// 当たり判定（追加）
+					m_basemap[m_currentMap][tileY][rightX] = TileType::Floor;
+				}
 			}
 		}
 
@@ -333,11 +336,14 @@ void Map::ChangeStage(int stageNo)
 				{
 					for (int j = -5;j < 10;j++)
 					{
-						// 見た目
-						m_objectmap[m_currentMap][tileY+j][rightX+i] = 1;
+						if (m_objectmap[m_currentMap][tileY+j][rightX+i] == 40)
+						{
+							// 見た目
+							m_objectmap[m_currentMap][tileY + j][rightX + i] = 1;
 
-						// 当たり判定（追加）
-						m_basemap[m_currentMap][tileY+j][rightX+i] = TileType::Floor;
+							// 当たり判定（追加）
+							m_basemap[m_currentMap][tileY + j][rightX + i] = TileType::Floor;
+						}
 					}
 				}
 
@@ -355,11 +361,58 @@ void Map::ChangeStage(int stageNo)
 
 			if (rightX >= 0 && rightX < MAP_WIDTH && tileY >= 0 && tileY < MAP_HEIGHT)
 			{
-				// 見た目
-				m_objectmap[m_currentMap][tileY][rightX] = 1;
+				if (m_objectmap[m_currentMap][tileY][rightX] == 40)
+				{
+					// 見た目
+					m_objectmap[m_currentMap][tileY][rightX] = 1;
 
-				// 当たり判定（追加）
-				m_basemap[m_currentMap][tileY][rightX] = TileType::Wall;
+					// 当たり判定（追加）
+					m_basemap[m_currentMap][tileY][rightX] = TileType::Floor;
+				}
+			}
+		}
+
+		void Map::GrassBreak(PlayerManager& player)
+		{
+		}
+
+		void Map::SoilBreak(PlayerManager& player)
+		{
+		}
+
+		void Map::WindBreak(PlayerManager& player)
+		{
+		}
+
+		void Map::ThunderBreak(PlayerManager& player)
+		{
+		}
+
+		void Map::SteamExplosionBreak(PlayerManager& player)
+		{
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			int rightX = tileX;
+
+			if (rightX >= 0 && rightX < MAP_WIDTH && tileY >= 0 && tileY < MAP_HEIGHT)
+			{
+				for (int i = -10;i < 10;i++)
+				{
+					for (int j = -10;j < 10;j++)
+					{
+
+						// 見た目
+						m_objectmap[m_currentMap][tileY + j][rightX + i] = 3;
+
+						// 当たり判定（追加）
+						m_basemap[m_currentMap][tileY + j][rightX + i] = TileType::Floor;
+
+					}
+				}
+
 			}
 		}
 

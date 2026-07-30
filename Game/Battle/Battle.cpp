@@ -34,6 +34,8 @@ Battle::~Battle()
 
 void Battle::Initialize(SceneManager*sceneManager)
 {
+	m_usedAttackOrder.clear();
+
 	m_select = 0;
 	m_displayIndex = 0;
 	m_state = BattleState::Command;
@@ -324,9 +326,25 @@ void Battle::UpdateAttackSelect()
 		m_state = BattleState::AttackAction;
 		return;
 	}
-	else
-	{ 
-	auto& attacks = m_party->GetMonster(m_monsterSelect)->GetAttacks();
+
+	// HP0 の仲間を自動で飛ばす
+	while (m_monsterSelect < m_party->GetMonsterCount() &&m_monsterhp[m_monsterSelect] <= 0)
+	{
+		m_monsterSelect++;
+	}
+
+	// 全員選択済み（または全員戦闘不能）なら行動へ
+	if (m_monsterSelect >= m_party->GetMonsterCount())
+	{
+		m_displayIndex = 0;
+		m_displaytextTimer = 0;
+
+		m_state = BattleState::AttackAction;
+		return;
+	}
+
+	// 生きている仲間だけここに来る
+	auto& attacks = m_party->GetMonster(m_monsterSelect)->GetAttacks();	
 		if (m_receponsTimer > 25)
 		{
 			if (CheckHitKey(KEY_INPUT_DOWN))
@@ -372,20 +390,28 @@ void Battle::UpdateAttackSelect()
 			if (CheckHitKey(KEY_INPUT_BACK) && m_monsterSelect >= 1)
 			{
 				m_receponsTimer = 0;
-				//printfDx(L"%ls の取り消し", attacks[m_attackSelect].name);
 
-				//前のモンスターの技に戻る
-				m_monsterSelect--;
+				do
+				{
+					m_monsterSelect--;
+				} while (m_monsterSelect >= 0 &&
+					m_monsterhp[m_monsterSelect] <= 0);
 
-				m_selectedAttack[m_monsterSelect] = -1;
-				// 技選択カーソルを先頭に戻す
+				if (m_monsterSelect >= 0)
+				{
+					m_selectedAttack[m_monsterSelect] = -1;
+				}
+				else
+				{
+					m_monsterSelect = 0;
+				}
+
 				m_attackSelect = 0;
 			}
-
 		}
 
 	}
-}
+
 
 void Battle::RenderAttackSelect()
 {
@@ -433,6 +459,31 @@ void Battle::RenderAttackSelect()
 
 void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 {
+	// HP0 または未選択の仲間を飛ばす
+	while (m_displayIndex < m_party->GetMonsterCount() &&
+		(m_monsterhp[m_displayIndex] <= 0 ||
+			m_selectedAttack[m_displayIndex] < 0))
+	{
+		m_displayIndex++;
+	}
+
+	// 全員処理済みなら敵ターンへ
+	if (m_displayIndex >= m_party->GetMonsterCount())
+	{
+		m_displayMessage.clear();
+
+		m_displayIndex = 0;
+		m_monsterSelect = 0;
+
+		std::fill(m_selectedAttack.begin(),
+			m_selectedAttack.end(),
+			-1);
+
+		m_state = BattleState::EnemyTurn;
+		m_displaytextTimer = 0;
+		return;
+	}
+
 	m_displaytextTimer++;
 
 	if (m_displaytextTimer == 1)
@@ -442,7 +493,22 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 
 		int index = m_selectedAttack[m_displayIndex];
 
+		// 念のため範囲チェック
+		if (index < 0 || index >= (int)attacks.size())
+		{
+			m_displayIndex++;
+			m_displaytextTimer = 0;
+			return;
+		}
+
 		Monster::CharacteRistics m_characteRistics = attacks[index].ristics;
+
+		// 発動順を保存
+		UsedAttackInfo info;
+		info.element = m_characteRistics;
+		info.attackName = attacks[index].name;
+
+		m_usedAttackOrder.push_back(info);
 
 		float magnification = 1.0f;
 		switch (m_characteRistics)
@@ -750,7 +816,7 @@ bool Battle::IsEnemyRequested()
 
 void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 {
-	//属性の組み合わせすべて
+	//属性単体
 	if (state & USED_NORMAL)
 	{
 		map.NormalBreak(player);
@@ -763,5 +829,74 @@ void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 	{
 		map.WaterBreak(player);
 	}
+	if (state & USED_GRASS)
+	{
+		map.GrassBreak(player);
+	}
+	if (state & USED_SOIL)
+	{
+		map.SoilBreak(player);
+	}
+	if (state & USED_WIND)
+	{
+		map.WindBreak(player);
+	}
+	if (state & USED_THUNDER)
+	{
+		map.ThunderBreak(player);
+	}
+
+	//複合属性
+	
+	//火＋○○
+	if (state & USED_FIRE&& state & USED_WATER)//火＋水
+	{
+		map.SteamExplosionBreak(player);
+	}
+
+
+	//水＋○○
+	if (state & USED_WATER)
+	{
+		map.WaterBreak(player);
+	}
+
+
+	//草＋○○
+	if (state & USED_GRASS)
+	{
+		map.GrassBreak(player);
+	}
+
+
+	//土＋○○
+	if (state & USED_SOIL)
+	{
+		map.SoilBreak(player);
+	}
+
+
+	//風＋○○
+	if (state & USED_WIND)
+	{
+		map.WindBreak(player);
+	}
+
+
+	//雷＋○○
+	if (state & USED_THUNDER)
+	{
+		map.ThunderBreak(player);
+	}
+	
 }
 
+const std::vector<Battle::UsedAttackInfo>& Battle::GetUsedAttackOrder() const
+{
+	return m_usedAttackOrder;
+}
+
+void Battle::ClearUsedAttackOrder()
+{
+	m_usedAttackOrder.clear();
+}

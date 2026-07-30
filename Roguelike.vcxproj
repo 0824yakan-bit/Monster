@@ -172,6 +172,7 @@
     <ClInclude Include="Game\Maths\Collisionall.h" />
     <ClInclude Include="Game\Maths\Vector2.h" />
     <ClInclude Include="Game\Party\Monster.h" />
+    <ClInclude Include="Game\Party\Party.h" />
     <ClInclude Include="Game\Player\PlayerManager.h" />
     <ClInclude Include="Game\Player\PlayerMove.h" />
     <ClInclude Include="Game\Scene\BattleScene.h" />
@@ -180,7 +181,6 @@
     <ClInclude Include="Game\Scene\SceneManager.h" />
     <ClInclude Include="Game\Scene\TitleScene.h" />
     <ClInclude Include="Game\TileRole\TileRole.h" />
-    <ClInclude Include="Party.h" />
     <ClInclude Include="pch.h" />
     <!-- メイン -->
     <ClCompile Include="WinMain.cpp" />

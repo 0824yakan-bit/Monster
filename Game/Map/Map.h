@@ -35,8 +35,7 @@ private:
 	int m_stageNo = 0;   // 0=ステージ1, 1=ステージ2 ...
 	static constexpr int MAPS_PER_STAGE = 10;
 
-	int GetStageStartMap() const;
-	int GetStageEndMap() const;
+	
 
 public:
 	static constexpr int MAP_NUM = 40;
@@ -64,7 +63,9 @@ public:
 	int GetChipSize()const;
 	int GetCurrentMap()const;
 
+	int GetStageStartMap() const;//階層の中の１エリア目
 
+	int GetStageEndMap() const;//階層の中の１０エリア目
 
 	void DrawCurrentMap(int offsetX, int offsetY);
 	void DrawNextMap(int offsetX, int offsetY);
@@ -72,8 +73,18 @@ public:
 	void ChangeStage(int stageNo);//階層変更関数
 
 	//地形破壊
-	void NormalBreak(PlayerManager&player);//通常攻撃
-	void FireBreak(PlayerManager& player);//火属性攻撃
-	void WaterBreak(PlayerManager& player);//水属性攻撃
+
+	//属性単体
+	void NormalBreak (PlayerManager& player);//無属性
+	void FireBreak   (PlayerManager& player);//火属性
+	void WaterBreak  (PlayerManager& player);//水属性
+	void GrassBreak  (PlayerManager& player);//草属性
+	void SoilBreak   (PlayerManager& player);//土属性
+	void WindBreak   (PlayerManager& player);//風属性
+	void ThunderBreak(PlayerManager& player);//雷属性
+
+	//複合属性
+	void SteamExplosionBreak(PlayerManager& player);//火＋水
+
 };
 

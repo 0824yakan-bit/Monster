@@ -15,8 +15,11 @@ FieldScene::~FieldScene()
 
 void FieldScene::Initialize(InputManager& inputmanager, Map& map)
 {
-    map.ChangeStage(0); // 0～9//階層変更関数
 
+    if (map.GetCurrentMap() == 0 && map.GetStageStartMap() == 0)
+    {
+        map.ChangeStage(0);
+    }
     m_hitEnemy = nullptr;
     m_isBattleRequested = false;
 
@@ -51,6 +54,21 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
             playerManager.m_invicible = true;
         }
     }
+    if (m_playEffect)
+    {
+        m_effectTimer++;
+
+        if (m_effectTimer >= 30)
+        {
+            m_effectTimer = 0;
+            m_effectIndex++;
+
+            if (m_effectIndex >= (int)m_attackEffects.size())
+            {
+                m_playEffect = false;
+            }
+        }
+    }
 }
 
 void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map)
@@ -58,6 +76,38 @@ void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager
     map.Render();
     playerManager.Render(&map);
     enemyManager.Render();
+    if (m_playEffect && m_effectIndex < m_attackEffects.size())
+    {
+        const auto& info = m_attackEffects[m_effectIndex];
+
+        switch (info.element)//属性攻撃ごとのエフェクト描画
+        {
+        case Monster::CharacteRistics::Fire:
+            DrawBox(0, 0, 1280, 720, GetColor(255, 80, 0), TRUE);
+            break;
+
+        case Monster::CharacteRistics::Water:
+            DrawBox(0, 0, 1280, 720, GetColor(0, 120, 255), TRUE);
+            break;
+
+        case Monster::CharacteRistics::Grass:
+            DrawBox(0, 0, 1280, 720, GetColor(0, 200, 0), TRUE);
+            break;
+
+        case Monster::CharacteRistics::Thunder:
+            DrawBox(0, 0, 1280, 720, GetColor(255, 255, 0), TRUE);
+            break;
+
+        case Monster::CharacteRistics::Wind:
+            DrawBox(0, 0, 1280, 720, GetColor(180, 180, 180), TRUE);
+            break;
+
+        default:
+            break;
+        }
+
+        DrawString(20, 20, info.attackName.c_str(), GetColor(255, 255, 255));
+    }
 }
 
 void FieldScene::Finalize()
@@ -78,4 +128,12 @@ void FieldScene::ResetBattleRequest()
 {
     m_isBattleRequested = false;
     m_hitEnemy = nullptr;
+}
+
+void FieldScene::SetAttackEffects( const std::vector<Battle::UsedAttackInfo>& effects)
+{
+    m_attackEffects = effects;
+    m_effectIndex = 0;
+    m_effectTimer = 0;
+    m_playEffect = !effects.empty();
 }
