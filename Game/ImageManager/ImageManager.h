@@ -17,6 +17,8 @@ public:
 	int GetTexture(const std::wstring& name);
 	void DrawSlime(Vector2 position, Vector2 size);
 	void DrawWolf(Vector2 position, Vector2 size);
-	void DrawDragon(Vector2 position,Vector2 size);
+	void DrawDragon(Vector2 position, Vector2 size);
+	void DrawN(Vector2 position, Vector2 size);
+	void DrawM(Vector2 position,Vector2 size);
 };
 

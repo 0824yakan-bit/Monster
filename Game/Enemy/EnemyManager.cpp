@@ -41,14 +41,6 @@ namespace
 void EnemyManager::Initialize(Map& map)
 {
 
-    static bool loaded = false;
-
-    if (!loaded)
-    {
-        m_imageManager.LoadTextures();
-        loaded = true;
-    }
-
     m_enemies.clear();
 
     int mapNo = map.GetCurrentMap();
@@ -72,9 +64,10 @@ void EnemyManager::Initialize(Map& map)
             break;
         case 3:
             CreateGolem(data.x, data.y, map);
-
+            break;
         case 4:
             CreateFairy(data.x, data.y, map);
+            break;
         }
     }
 
@@ -103,6 +96,11 @@ void EnemyManager::Finalize()
     {
         enemy->Finalize();
     }
+}
+
+void EnemyManager::SetImage(ImageManager* image)
+{
+    m_image = image;
 }
 
 Enemy* EnemyManager::CheckHit(PlayerManager& playermanager)
@@ -138,7 +136,7 @@ void EnemyManager::CreateSlime(int x, int y, Map& map)
 {
     auto slime = std::make_unique<Slime>();
 
-    slime->SetImage(&m_imageManager);
+    slime->SetImage(m_image);
 
     slime->Initialize(map, x, y);
 
@@ -149,7 +147,7 @@ void EnemyManager::CreateWolf(int x, int y, Map& map)
 {
     auto wolf = std::make_unique<Wolf>();
 
-    wolf->SetImage(&m_imageManager);
+    wolf->SetImage(m_image);
 
     wolf->Initialize(map, x, y);
 
@@ -160,7 +158,7 @@ void EnemyManager::CreateDragon(int x, int y, Map& map)
 {
     auto dragon = std::make_unique<Dragon>();
 
-    dragon->SetImage(&m_imageManager);
+    dragon->SetImage(m_image);
 
     dragon->Initialize(map, x, y);
 

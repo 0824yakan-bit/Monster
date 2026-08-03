@@ -15,6 +15,7 @@
 
 
 // ヘッダファイルの読み込み ===================================================
+#include"Game/ImageManager/ImageManager.h"
 #include"Game/Map/Map.h"
 #include"Game/Player/PlayerManager.h"
 #include"Game/Enemy/EnemyManager.h"
@@ -38,6 +39,8 @@ public:
 	// システム関連
 	static constexpr const wchar_t* TITLE = L"Sample Game";   ///< ゲームタイトル
 	//
+	ImageManager m_imageManager;
+
 	PlayerManager m_playerManager;
 	EnemyManager m_enemyManager;
 	Map m_map;

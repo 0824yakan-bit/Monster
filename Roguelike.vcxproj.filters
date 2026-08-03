@@ -274,5 +274,11 @@
     <Image Include="Resources\Textures\dragon.png">
       <Filter>Resources\Textures</Filter>
     </Image>
+    <Image Include="Resources\Textures\N.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\M.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

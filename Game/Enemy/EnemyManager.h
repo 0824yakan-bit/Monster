@@ -20,7 +20,7 @@ struct EnemyData
 class EnemyManager
 {
 private:
-    ImageManager m_imageManager;
+    ImageManager* m_image=nullptr;
 
 public:
 
@@ -34,6 +34,8 @@ public:
     void Update();
     void Render();
     void Finalize();
+
+    void SetImage(ImageManager* image);
 
     Enemy* CheckHit(PlayerManager& playermanager);
 

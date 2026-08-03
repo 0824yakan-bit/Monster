@@ -54,10 +54,10 @@ void PlayerMove::Update(Map*map,PlayerManager*playermanager)
 	{
 		playermanager->m_oldposition=playermanager->m_position ;
 
-			 if (m_inputManager.IsPress(KEY_INPUT_RIGHT))playermanager->m_position.x += m_speed;
-		else if (m_inputManager.IsPress(KEY_INPUT_LEFT ))playermanager->m_position.x -= m_speed;
-		else if (m_inputManager.IsPress(KEY_INPUT_UP   ))playermanager->m_position.y -= m_speed;
-		else if (m_inputManager.IsPress(KEY_INPUT_DOWN ))playermanager->m_position.y += m_speed;
+			 if (m_inputManager.IsPress(KEY_INPUT_RIGHT)/*|| m_inputManager.IsPress(PAD_INPUT_RIGHT)*/)playermanager->m_position.x += m_speed;
+		else if (m_inputManager.IsPress(KEY_INPUT_LEFT )/*|| m_inputManager.IsPress(PAD_INPUT_LEFT )*/)playermanager->m_position.x -= m_speed;
+		else if (m_inputManager.IsPress(KEY_INPUT_UP   )/*|| m_inputManager.IsPress(PAD_INPUT_UP   )*/)playermanager->m_position.y -= m_speed;
+		else if (m_inputManager.IsPress(KEY_INPUT_DOWN )/*|| m_inputManager.IsPress(PAD_INPUT_DOWN )*/)playermanager->m_position.y += m_speed;
 			 m_nextmapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
 			 m_nextmapY = static_cast<int>(playermanager->m_position.y) / m_chipsize;
 			 nexttile = map->GetTileType(m_nextmapX, m_nextmapY);

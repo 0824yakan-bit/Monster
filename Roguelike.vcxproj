@@ -203,6 +203,8 @@
     <!-- 埋め込みリソース -->
     <ClInclude Include="EmbeddedResources\Resource.h" />
     <Image Include="Resources\Textures\dragon.png" />
+    <Image Include="Resources\Textures\M.png" />
+    <Image Include="Resources\Textures\N.png" />
     <Image Include="Resources\Textures\wolf.png" />
     <Image Include="Resources\Textures\slime.png" />
     <ResourceCompile Include="EmbeddedResources\Resource.rc" />

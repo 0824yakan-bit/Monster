@@ -62,11 +62,14 @@ void Game::Initialize()
 	auto slime = std::make_unique<Monster>(Monster::Type::Slime);
 	m_party.AddMonster(std::move(slime));
 
+	m_imageManager.LoadTextures();
+	m_enemyManager.SetImage(&m_imageManager);
+
 	m_map.Initialize(L"Resources/map.csv");
 	m_playerManager.Initialize(&m_map);
 	m_enemyManager.Initialize(m_map);
 	m_inputManager.Initialize();
-	m_sceneManager.Initialize(m_inputManager,m_sceneManager, m_map, m_party);
+	m_sceneManager.Initialize(m_inputManager,m_sceneManager, m_map, m_party,m_imageManager);
 
 	m_oldMapNo = m_map.GetCurrentMap();
 }
