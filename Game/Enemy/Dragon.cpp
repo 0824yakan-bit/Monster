@@ -21,8 +21,15 @@ void Dragon::Initialize(Map& map, int x, int y)
 	position.x = x * map.m_chipSize;
 	position.y = y * map.m_chipSize;
 
-	size.x = map.m_chipSize*2;
-	size.y = map.m_chipSize*2;
+	size.x = map.m_chipSize*5;
+	size.y = map.m_chipSize*5;
+
+
+	renderPosition.x = 500.0f;
+	renderPosition.y = 100.0f;
+
+	renderSize.x = 200.0f;
+	renderSize.y = 200.0f;
 
 	power = 10;
 	hp = 10;
@@ -42,7 +49,8 @@ void Dragon::Update()
 
 void Dragon::Render()
 {
-	DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
+	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
+	m_image->DrawDragon(position, size);
 }
 
 void Dragon::Finalize()
@@ -57,5 +65,6 @@ void Dragon::OnHit(PlayerManager& playermanager)
 
 void Dragon::RenderBattle()
 {
-	DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
+	//DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
+	m_image->DrawDragon(renderPosition, renderSize);
 }

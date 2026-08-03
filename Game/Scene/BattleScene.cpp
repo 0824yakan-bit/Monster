@@ -143,6 +143,14 @@ void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, E
 						case Enemy::EnemyType::Dragon:
 							monster = std::make_unique<Monster>(Monster::Type::Dragon);
 							break;
+
+						case Enemy::EnemyType::Golem:
+							monster = std::make_unique<Monster>(Monster::Type::Golem);
+							break;
+
+						case Enemy::EnemyType::Fairy:
+							monster = std::make_unique<Monster>(Monster::Type::Fairy);
+							break;
 						}
 
 						

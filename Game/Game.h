@@ -37,7 +37,7 @@ class Game
 public:
 	// システム関連
 	static constexpr const wchar_t* TITLE = L"Sample Game";   ///< ゲームタイトル
-	//後にほかのマネージャに移す
+	//
 	PlayerManager m_playerManager;
 	EnemyManager m_enemyManager;
 	Map m_map;

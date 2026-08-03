@@ -24,6 +24,12 @@ void Slime::Initialize(Map& map, int x, int y)
 	size.x = map.m_chipSize;
 	size.y = map.m_chipSize;
 
+	renderPosition.x = 500.0f;
+	renderPosition.y = 100.0f;
+
+	renderSize.x = 200.0f;
+	renderSize.y = 200.0f;
+
 	power = 2;
 	hp = 10;
 }
@@ -42,7 +48,8 @@ void Slime::Update()
 
 void Slime::Render()
 {
-    DrawBox(position.x,position.y,position.x + size.x,position.y + size.y,GetColor(0, 0, 0),TRUE);
+   // DrawBox(position.x,position.y,position.x + size.x,position.y + size.y,GetColor(0, 0, 0),TRUE);
+	m_image->DrawSlime(position, size);
 }
 
 void Slime::Finalize()
@@ -57,5 +64,5 @@ void Slime::OnHit(PlayerManager&playermanager)
 
 void Slime::RenderBattle()
 {
-	DrawBox(500, 150, 650, 300,GetColor(0, 255, 0), TRUE);
+	m_image->DrawSlime(renderPosition, renderSize);
 }

@@ -143,8 +143,11 @@
     <ClCompile Include="Game\Enemy\Dragon.cpp" />
     <ClCompile Include="Game\Enemy\Enemy.cpp" />
     <ClCompile Include="Game\Enemy\EnemyManager.cpp" />
+    <ClCompile Include="Game\Enemy\Fairy.cpp" />
+    <ClCompile Include="Game\Enemy\Golem.cpp" />
     <ClCompile Include="Game\Enemy\Slime.cpp" />
     <ClCompile Include="Game\Enemy\Wolf.cpp" />
+    <ClCompile Include="Game\ImageManager\ImageManager.cpp" />
     <ClCompile Include="Game\Inputmanager\InputManager.cpp" />
     <ClCompile Include="Game\Map\Map.cpp" />
     <ClCompile Include="Game\Maths\Collisionall.cpp" />
@@ -165,8 +168,11 @@
     <ClInclude Include="Game\Enemy\Dragon.h" />
     <ClInclude Include="Game\Enemy\Enemy.h" />
     <ClInclude Include="Game\Enemy\EnemyManager.h" />
+    <ClInclude Include="Game\Enemy\Fairy.h" />
+    <ClInclude Include="Game\Enemy\Golem.h" />
     <ClInclude Include="Game\Enemy\Slime.h" />
     <ClInclude Include="Game\Enemy\Wolf.h" />
+    <ClInclude Include="Game\ImageManager\ImageManager.h" />
     <ClInclude Include="Game\Inputmanager\InputManager.h" />
     <ClInclude Include="Game\Map\Map.h" />
     <ClInclude Include="Game\Maths\Collisionall.h" />
@@ -196,6 +202,9 @@
     <ClInclude Include="Library\MemoryLeakDetector.h" />
     <!-- 埋め込みリソース -->
     <ClInclude Include="EmbeddedResources\Resource.h" />
+    <Image Include="Resources\Textures\dragon.png" />
+    <Image Include="Resources\Textures\wolf.png" />
+    <Image Include="Resources\Textures\slime.png" />
     <ResourceCompile Include="EmbeddedResources\Resource.rc" />
     <Image Include="EmbeddedResources\Icon\Game.ico" />
     <!-- リソースファイル -->

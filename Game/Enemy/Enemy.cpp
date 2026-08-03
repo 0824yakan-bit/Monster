@@ -1,6 +1,7 @@
 #include"Game/Enemy/Enemy.h"
 
 Enemy::Enemy()
+    :m_image()
 {
 
 }
@@ -29,4 +30,9 @@ int Enemy::GetHp() const
 const wchar_t* Enemy::GetName() const
 {
     return name;
+}
+
+void Enemy::SetImage(ImageManager* image)
+{
+    m_image = image;
 }

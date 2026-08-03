@@ -6,6 +6,8 @@
 #include "Game/Enemy/Slime.h"
 #include "Game/Enemy/Wolf.h"
 #include"Game/Enemy/Dragon.h"
+#include"Game/Enemy/Golem.h"
+#include"Game/Enemy/Fairy.h"
 EnemyManager::EnemyManager()
 {
 }
@@ -27,13 +29,26 @@ namespace
         {1,2,20,15},
 
         //map2
-        {2,0,15,20}
+        {2,0,15,20},
+        {2,3,10,10},
+
+        //map3
+        {3,1,1,10}
     };
 }
 
 
 void EnemyManager::Initialize(Map& map)
 {
+
+    static bool loaded = false;
+
+    if (!loaded)
+    {
+        m_imageManager.LoadTextures();
+        loaded = true;
+    }
+
     m_enemies.clear();
 
     int mapNo = map.GetCurrentMap();
@@ -55,6 +70,11 @@ void EnemyManager::Initialize(Map& map)
         case 2:
             CreateDragon(data.x, data.y, map);
             break;
+        case 3:
+            CreateGolem(data.x, data.y, map);
+
+        case 4:
+            CreateFairy(data.x, data.y, map);
         }
     }
 
@@ -117,6 +137,9 @@ void EnemyManager::RemoveEnemy(Enemy* enemy)
 void EnemyManager::CreateSlime(int x, int y, Map& map)
 {
     auto slime = std::make_unique<Slime>();
+
+    slime->SetImage(&m_imageManager);
+
     slime->Initialize(map, x, y);
 
     m_enemies.push_back(std::move(slime));
@@ -125,6 +148,9 @@ void EnemyManager::CreateSlime(int x, int y, Map& map)
 void EnemyManager::CreateWolf(int x, int y, Map& map)
 {
     auto wolf = std::make_unique<Wolf>();
+
+    wolf->SetImage(&m_imageManager);
+
     wolf->Initialize(map, x, y);
 
     m_enemies.push_back(std::move(wolf));
@@ -133,7 +159,26 @@ void EnemyManager::CreateWolf(int x, int y, Map& map)
 void EnemyManager::CreateDragon(int x, int y, Map& map)
 {
     auto dragon = std::make_unique<Dragon>();
+
+    dragon->SetImage(&m_imageManager);
+
     dragon->Initialize(map, x, y);
 
     m_enemies.push_back(std::move(dragon));
+}
+
+void EnemyManager::CreateGolem(int x, int y, Map& map)
+{
+    auto golem = std::make_unique<Golem>();
+    golem->Initialize(map, x, y);
+
+    m_enemies.push_back(std::move(golem));
+}
+
+void EnemyManager::CreateFairy(int x, int y, Map& map)
+{
+    auto fairy = std::make_unique<Fairy>();
+    fairy->Initialize(map, x, y);
+
+    m_enemies.push_back(std::move(fairy));
 }

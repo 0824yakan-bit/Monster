@@ -856,23 +856,29 @@ void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 
 
 	//水＋○○
-	if (state & USED_WATER)
+	if (state & USED_WATER && state & USED_SOIL)//水＋土
 	{
-		map.WaterBreak(player);
+		map.FloorBreak(player);//次のマップに移動ｏｒ地下マップに移動
+	}
+
+	if( state & USED_WATER && state & USED_WIND)//水＋風
+	{
+		map.WaterFlowsBreak(player);//上から順に水を流す
 	}
 
 
+
 	//草＋○○
-	if (state & USED_GRASS)
+	if (state & USED_GRASS && state & USED_WATER)//水＋草
 	{
-		map.GrassBreak(player);
+		map.GrowGrassBreak(player);//周りに草を生やす＋回復してもいいかも
 	}
 
 
 	//土＋○○
-	if (state & USED_SOIL)
+	if (state & USED_SOIL&&state&USED_FIRE)//土＋火
 	{
-		map.SoilBreak(player);
+		map.VolcazationBreak(player);//火山化
 	}
 
 
