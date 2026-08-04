@@ -27,19 +27,35 @@ private:
 	Vector2 Nposition;
 	Vector2 size ;
 
+////メニュー一覧
 	bool m_isMapActive;//その階層のマップ一覧ｏｒ全階層マップ
 	bool m_isMenuActive;//メニュー表示
 	int m_menuListSelect;//選択中のメニュー
 	enum class MenuList
 	{
-		None,//何もなし
+		Empty,//何もなし
 		CooperativeMove,//連携技使用
 		PartyCheck,//現在のパーティ確認
 		ToolCheck,//所持中のもちもの
+		OperationInstructions,//操作説明
 
 	};
 	MenuList m_menuList;
-
+////技一覧
+	bool m_isCooperatDetailActive;//詳細表示
+	int m_CooperatDetailSelect;//選択中
+	enum class CooperatList//技一覧
+	{
+		Empty,
+		None,
+		Fire,
+		Water,
+		Grass,
+		Soil,
+		Wind,
+		Thunder,
+	};
+	CooperatList m_cooperatList;
 
 public:
 	FieldScene();
@@ -54,12 +70,12 @@ public:
 	void UpdateCooperativeMove();
 	void UpdatePartyCheck();
 	void UpdateToolCheck();
+	void UpdateOperationInstructions();
 
-	void RenderNone();
 	void RenderCooperativeMove();
 	void RenderPartyCheck();
 	void RenderToolCheck();
-
+	void RenderOperationInstructions();
 
 	void SetImage(ImageManager* image);
 

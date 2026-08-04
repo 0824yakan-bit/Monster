@@ -303,8 +303,21 @@ void Map::ChangeStage(int stageNo)
 	m_currentMap = GetStageStartMap();
 }
 
+/**
+ * @brief 指定範囲のオブジェクトとタイルを置き換える
+ * @param centerX 範囲の中心X座標
+ * @param centerY 範囲の中心Y座標
+ * @param left    中心から左方向の範囲
+ * @param right   中心から右方向の範囲
+ * @param top     中心から上方向の範囲
+ * @param bottom  中心から下方向の範囲
+ * @param targetObject 置換対象のオブジェクトID（負値で全対象）
+ * @param replaceObject 置換後のオブジェクトID
+ * @param replaceType   置換後のタイル種別
+ */
 void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType)
 {
+
 	for (int y = top; y <= bottom; ++y)
 	{
 		for (int x = left; x <= right; ++x)
@@ -313,14 +326,12 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 			int ty = centerY + y;
 
 			// 範囲外防止
-			if (tx < 0 || tx >= MAP_WIDTH ||
-				ty < 0 || ty >= MAP_HEIGHT)
+			if (tx < 0 || tx >= MAP_WIDTH ||ty < 0 || ty >= MAP_HEIGHT)
 			{
 				continue;
 			}
 
-			if (targetObject < 0 ||
-				m_objectmap[m_currentMap][ty][tx] == targetObject)
+			if (targetObject < 0 ||m_objectmap[m_currentMap][ty][tx] == targetObject)
 			{
 				m_objectmap[m_currentMap][ty][tx] = replaceObject;
 				m_basemap[m_currentMap][ty][tx] = replaceType;
@@ -331,56 +342,78 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 
 		void Map::NormalBreak(PlayerManager& player)
 		{
+			printfDx(L"NormalBleak called");
 			Vector2 position = player.GetPosition();
 
 			int tileX = static_cast<int>(position.x) / m_chipSize;
 			int tileY = static_cast<int>(position.y) / m_chipSize;
 
-			int rightX = tileX + 1;
-
-			if (rightX >= 0 && rightX < MAP_WIDTH &&tileY >= 0 && tileY < MAP_HEIGHT)
-			{
-				if (m_objectmap[m_currentMap][tileY][rightX] == 40)
-				{
-					// 見た目
-					m_objectmap[m_currentMap][tileY][rightX] = 1;
-
-					// 当たり判定（追加）
-					m_basemap[m_currentMap][tileY][rightX] = TileType::Floor;
-				}
-			}
+			BreakArea(tileX, tileY, 0, 1, 0, 0, 40, 1, TileType::Floor);//右１マスを削る
 		}
 
 		void Map::FireBreak(PlayerManager& player)
 		{
+			printfDx(L"FireBreak called\n");
+
 			Vector2 position = player.GetPosition();
 
-			BreakArea(position.x, position.y, -3, 5, -5, 9,40, 1, TileType::Floor);
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX, tileY, -5, 5, -5, 5,57, 1, TileType::Floor);//枯れ木（５７）を燃やす
 		}
 
 		void Map::WaterBreak(PlayerManager& player)
 		{
+			printfDx(L"WaterBreak called");
 			Vector2 position = player.GetPosition();
 
-			BreakArea(position.x + 5, position.y, 0, 0, 0, 0,40, 1, TileType::Floor);
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX,tileY, 0, 0, 0, 0,40, 1, TileType::Floor);
 		}
 
 		void Map::GrassBreak(PlayerManager& player)
 		{
+			printfDx(L"GrassBreak called");
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX, tileY, -5, 5, -5, 5, 3, 92, TileType::Floor);//土（３）を草（９２）に変える
 		}
 
 		void Map::SoilBreak(PlayerManager& player)
 		{
+			printfDx(L"SoilBreak called");
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX, tileY, -2, 2, -2, 2, 33, 3, TileType::Floor);//水（３３）を土（３）に変える
+
 		}
 
 		void Map::WindBreak(PlayerManager& player)
 		{
+			printfDx(L"WindBreak called");
+
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX, tileY, 0, 3, 0, 0, 40, 57, TileType::Wall);//右３マス分枯れ木に変える
 		}
 
 		void Map::ThunderBreak(PlayerManager& player)
 		{
 		}
 
+////連携技
 		void Map::SteamExplosionBreak(PlayerManager& player)
 		{
 			Vector2 position = player.GetPosition();
