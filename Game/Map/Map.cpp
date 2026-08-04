@@ -406,7 +406,8 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 			int tileX = static_cast<int>(position.x) / m_chipSize;
 			int tileY = static_cast<int>(position.y) / m_chipSize;
 
-			BreakArea(tileX, tileY, 0, 3, 0, 0, 40, 57, TileType::Wall);//右３マス分枯れ木に変える
+			BreakArea(tileX, tileY, 3, 3, 0, 0, 40, 57, TileType::Wall);//左右３マス分枯れ木に変える
+			BreakArea(tileX, tileY, 3, 3, 0, 0, 41, 57, TileType::Wall);//左右３マス分枯れ木に変える
 		}
 
 		void Map::ThunderBreak(PlayerManager& player)
@@ -416,8 +417,13 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 ////連携技
 		void Map::SteamExplosionBreak(PlayerManager& player)
 		{
+			printfDx(L"SteamExplosionBreak called");
 			Vector2 position = player.GetPosition();
-			BreakArea(position.x, position.y, -10, 9, -10, 9,-1, 3, TileType::Floor);
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX,tileY, -10, 10, -10, 10,-1, 3, TileType::Floor);
 		}
 
 		void Map::FloorBreak(PlayerManager& player)

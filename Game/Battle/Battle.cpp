@@ -60,9 +60,12 @@ void Battle::Initialize(SceneManager*sceneManager)
 	for (int i = 0;i < m_party->GetMonsterCount();i++)//現在のパーティのHP
 	{
 		Monster* monsterhitpoint = m_party->GetMonster(i);
-		m_monsterhp[i] = monsterhitpoint->GetHitPoint() - sceneManager->m_monsterCurrentDamge[i];
+		m_monsterhp[i] = m_party->GetMonster(i)->GetCurrentHitPoint();
 	}
-
+	for (int i = 0; i < MAX_PARTY; i++)
+	{
+		m_requestDefense[i] = false;
+	}
 	m_annihilation = true;
 }
 
@@ -467,23 +470,6 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 		m_displayIndex++;
 	}
 
-	// 全員処理済みなら敵ターンへ
-	if (m_displayIndex >= m_party->GetMonsterCount())
-	{
-		m_displayMessage.clear();
-
-		m_displayIndex = 0;
-		m_monsterSelect = 0;
-
-		std::fill(m_selectedAttack.begin(),
-			m_selectedAttack.end(),
-			-1);
-
-		m_state = BattleState::EnemyTurn;
-		m_displaytextTimer = 0;
-		return;
-	}
-
 	m_displaytextTimer++;
 
 	if (m_displaytextTimer == 1)
@@ -502,7 +488,9 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 		}
 
 		Monster::CharacteRistics m_characteRistics = attacks[index].ristics;
-
+		printfDx(L"Attack=%ls Type=%d",
+			attacks[index].name,
+			(int)m_characteRistics);
 		// 発動順を保存
 		UsedAttackInfo info;
 		info.element = m_characteRistics;
@@ -563,10 +551,48 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 
 		}
 		break;
+		case Monster::CharacteRistics::Defense:
+		{
+			m_requestDefense[m_displayIndex] = true; // このターン防御
+			m_displayMessage = monster->GetName() + L"は身を守っている！";
 		}
-		UesElementalAttack(map,player);
-		m_enemy->Damage(attacks[index].power * magnification);
+		break;
+		}
+		//属性単体
+		switch (m_characteRistics)
+		{
+		case Monster::CharacteRistics::Normal:
+			map.NormalBreak(player);
+			break;
 
+		case Monster::CharacteRistics::Fire:
+			map.FireBreak(player);
+			break;
+
+		case Monster::CharacteRistics::Water:
+			map.WaterBreak(player);
+			break;
+
+		case Monster::CharacteRistics::Grass:
+			map.GrassBreak(player);
+			break;
+
+		case Monster::CharacteRistics::Soil:
+			map.SoilBreak(player);
+			break;
+
+		case Monster::CharacteRistics::Wind:
+			map.WindBreak(player);
+			break;
+
+		case Monster::CharacteRistics::Thunder:
+			map.ThunderBreak(player);
+			break;
+		}
+		if (m_characteRistics != Monster::CharacteRistics::Defense)
+		{
+			m_enemy->Damage(attacks[index].power * magnification);
+		}
 
 
 		m_displayMessage = monster->GetName() + L"の" + attacks[index].name + L"！";
@@ -599,6 +625,7 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 
 		if (m_displayIndex >= m_party->GetMonsterCount())
 		{
+			UesElementalAttack(map, player);
 			m_displayMessage.clear();
 
 			m_displayIndex = 0;
@@ -685,10 +712,23 @@ void Battle::UpdateEnemyTurn(SceneManager*sceneManager)
 		{
 			for (int i = 0;i < m_party->GetMonsterCount();i++)//全員に同じダメージを与える
 			{
-				sceneManager->m_monsterCurrentDamge[i] += m_enemy->GetPower();
-				m_monsterhp[i] -= m_enemy->GetPower();
-				if (m_monsterhp[i] - m_enemy->GetPower() < 0)
+				Monster* monster = m_party->GetMonster(i);
+
+				int damage = m_enemy->GetPower();
+
+				if (m_requestDefense[i])
+				{
+					damage /= 2; // 半減
+				}
+
+				monster->Damage(damage);
+
+				m_monsterhp[i] = monster->GetCurrentHitPoint();
+
+				if (m_monsterhp[i] < 0)
+				{
 					m_monsterhp[i] = 0;
+				}
 			}
 			EndTurn();
 		}
@@ -816,54 +856,47 @@ bool Battle::IsEnemyRequested()
 
 void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 {
-	//属性単体
-	if (state & USED_NORMAL)
-	{
-		map.NormalBreak(player);
-	}
-	if (state & USED_FIRE)
-	{
-		map.FireBreak(player);
-	}
-	if (state & USED_WATER)
-	{
-		map.WaterBreak(player);
-	}
-	if (state & USED_GRASS)
-	{
-		map.GrassBreak(player);
-	}
-	if (state & USED_SOIL)
-	{
-		map.SoilBreak(player);
-	}
-	if (state & USED_WIND)
-	{
-		map.WindBreak(player);
-	}
-	if (state & USED_THUNDER)
-	{
-		map.ThunderBreak(player);
-	}
+	printfDx(L"ComboCheck F=%d Wa=%d state=%d",(state & USED_FIRE) != 0,(state & USED_WATER) != 0,state);
 
 	//複合属性
 	
-	//火＋○○
-	if (state & USED_FIRE&& state & USED_WATER)//火＋水
+//火＋○○
+	// 火＋水（順不同）
+	if ((state & USED_FIRE) && (state & USED_WATER))
 	{
 		map.SteamExplosionBreak(player);
+
+		UsedAttackInfo info;
+		info.element = Monster::CharacteRistics::Fire;
+		info.attackName = L"蒸気爆発！";
+
+		m_usedAttackOrder.push_back(info);
 	}
 
 
-	//水＋○○
-	if (state & USED_WATER && state & USED_SOIL)//水＋土
+//水＋○○
+	// 水＋土
+	if ((state & USED_WATER) && (state & USED_SOIL))
 	{
-		map.FloorBreak(player);//次のマップに移動ｏｒ地下マップに移動
+		map.FloorBreak(player);
+
+		UsedAttackInfo info;
+		info.element = Monster::CharacteRistics::Water;
+		info.attackName = L"泥流生成！";
+
+		m_usedAttackOrder.push_back(info);
 	}
 
-	if( state & USED_WATER && state & USED_WIND)//水＋風
+	// 水＋風
+	if ((state & USED_WATER) && (state & USED_WIND))
 	{
-		map.WaterFlowsBreak(player);//上から順に水を流す
+		map.WaterFlowsBreak(player);
+
+		UsedAttackInfo info;
+		info.element = Monster::CharacteRistics::Water;
+		info.attackName = L"激流！";
+
+		m_usedAttackOrder.push_back(info);
 	}
 
 
@@ -894,7 +927,9 @@ void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 	{
 		map.ThunderBreak(player);
 	}
-	
+
+	// 次ターン用にリセット
+	state = USED_NONE;
 }
 
 const std::vector<Battle::UsedAttackInfo>& Battle::GetUsedAttackOrder() const

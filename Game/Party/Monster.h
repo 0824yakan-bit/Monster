@@ -18,6 +18,7 @@ public:
 
     enum class CharacteRistics
     {
+        None,
         Normal,//無属性
         Fire,  //火属性
         Water, //水属性
@@ -40,13 +41,16 @@ public:
 private:
     Type m_type;
     std::wstring m_name;
-    int m_hitpoint;
+    int m_maxHitPoint;
+    int m_currentHitPoint;
     int m_level;
     std::vector<Attack> m_attacks;
 
 public:
     std::wstring GetName() const;
-    int GetHitPoint() const;
+    int GetCurrentHitPoint() const;
+    void Damage(int value);
+
 
 public:
     Monster(Type type);
