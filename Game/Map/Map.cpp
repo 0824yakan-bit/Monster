@@ -9,11 +9,12 @@
 #include<sstream>
 #include<cassert>
 Map::Map()
-	:m_basemap	 {}
-	,m_workmap	 {}
-	,m_ghChip	 {}
-	,m_chipSize	 {}
-	,m_currentMap{}
+	:m_basemap	 { }
+	,m_workmap	 { }
+	,m_ghChip	 { }
+	,m_chipSize	 { }
+	,m_currentMap{ }
+	,m_stageNo	 {0}
 {
 	// グラフィクスハンドルを初期化する
 	for (int i = 0; i < GH_MAX; i++)
@@ -29,6 +30,7 @@ Map::~Map()
 void Map::Initialize(const wchar_t* fileName)
 {
 	m_moveDir = MoveDir::None;
+	m_stageNo = 0;
 
 	m_isTransition = false;
 	m_transition = 0;
@@ -36,7 +38,7 @@ void Map::Initialize(const wchar_t* fileName)
 
 	m_chipSize = 32;
 	m_currentMap = 0;
-	LoadDivGraph(L"Resources/Textures/testmapchip.png",GH_MAX,16,20,m_chipSize,m_chipSize,m_ghChip);	//横１６個、
+	LoadDivGraph(L"Resources/Textures/testmapchip.png",GH_MAX,16,24,m_chipSize,m_chipSize,m_ghChip);	//横１６個、
 	for (auto& gh : m_ghChip)
 	{
 		assert(gh != (-1) && "タイルマップをロードできませんでした");
@@ -55,8 +57,10 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 	{
 		m_moveDir = MoveDir::Right;
 
-		if (m_currentMap >= endMap)
-			m_nextmap = startMap;
+		int local = m_currentMap - startMap;
+
+		if (local >= 8)
+			m_nextmap = m_currentMap - 8; // 8→0, 9→1
 		else
 			m_nextmap = m_currentMap + 2;
 
@@ -68,8 +72,10 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 	{
 		m_moveDir = MoveDir::Left;
 
-		if (m_currentMap <= startMap)
-			m_nextmap = endMap;
+		int local = m_currentMap - startMap;
+
+		if (local < 2)
+			m_nextmap = m_currentMap + 8; // 0→8, 1→9
 		else
 			m_nextmap = m_currentMap - 2;
 
@@ -297,123 +303,151 @@ void Map::ChangeStage(int stageNo)
 	m_currentMap = GetStageStartMap();
 }
 
+/**
+ * @brief 指定範囲のオブジェクトとタイルを置き換える
+ * @param centerX 範囲の中心X座標
+ * @param centerY 範囲の中心Y座標
+ * @param left    中心から左方向の範囲
+ * @param right   中心から右方向の範囲
+ * @param top     中心から上方向の範囲
+ * @param bottom  中心から下方向の範囲
+ * @param targetObject 置換対象のオブジェクトID（負値で全対象）
+ * @param replaceObject 置換後のオブジェクトID
+ * @param replaceType   置換後のタイル種別
+ */
+void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType)
+{
 
+	for (int y = top; y <= bottom; ++y)
+	{
+		for (int x = left; x <= right; ++x)
+		{
+			int tx = centerX + x;
+			int ty = centerY + y;
+
+			// 範囲外防止
+			if (tx < 0 || tx >= MAP_WIDTH ||ty < 0 || ty >= MAP_HEIGHT)
+			{
+				continue;
+			}
+
+			if (targetObject < 0 ||m_objectmap[m_currentMap][ty][tx] == targetObject)
+			{
+				m_objectmap[m_currentMap][ty][tx] = replaceObject;
+				m_basemap[m_currentMap][ty][tx] = replaceType;
+			}
+		}
+	}
+}
 
 		void Map::NormalBreak(PlayerManager& player)
 		{
+			printfDx(L"NormalBleak called");
 			Vector2 position = player.GetPosition();
 
 			int tileX = static_cast<int>(position.x) / m_chipSize;
 			int tileY = static_cast<int>(position.y) / m_chipSize;
 
-			int rightX = tileX + 1;
-
-			if (rightX >= 0 && rightX < MAP_WIDTH &&tileY >= 0 && tileY < MAP_HEIGHT)
-			{
-				if (m_objectmap[m_currentMap][tileY][rightX] == 40)
-				{
-					// 見た目
-					m_objectmap[m_currentMap][tileY][rightX] = 1;
-
-					// 当たり判定（追加）
-					m_basemap[m_currentMap][tileY][rightX] = TileType::Floor;
-				}
-			}
+			BreakArea(tileX, tileY, 0, 1, 0, 0, 40, 1, TileType::Floor);//右１マスを削る
 		}
 
 		void Map::FireBreak(PlayerManager& player)
 		{
+			printfDx(L"FireBreak called\n");
+
 			Vector2 position = player.GetPosition();
 
 			int tileX = static_cast<int>(position.x) / m_chipSize;
 			int tileY = static_cast<int>(position.y) / m_chipSize;
 
-			int rightX = tileX ;
-
-			if (rightX >= 0 && rightX < MAP_WIDTH &&tileY >= 0 && tileY < MAP_HEIGHT)
-			{
-				for (int i = -3;i < 6;i++)
-				{
-					for (int j = -5;j < 10;j++)
-					{
-						if (m_objectmap[m_currentMap][tileY+j][rightX+i] == 40)
-						{
-							// 見た目
-							m_objectmap[m_currentMap][tileY + j][rightX + i] = 1;
-
-							// 当たり判定（追加）
-							m_basemap[m_currentMap][tileY + j][rightX + i] = TileType::Floor;
-						}
-					}
-				}
-
-			}
+			BreakArea(tileX, tileY, -5, 5, -5, 5,57, 1, TileType::Floor);//枯れ木（５７）を燃やす
 		}
 
 		void Map::WaterBreak(PlayerManager& player)
 		{
+			printfDx(L"WaterBreak called");
 			Vector2 position = player.GetPosition();
 
 			int tileX = static_cast<int>(position.x) / m_chipSize;
 			int tileY = static_cast<int>(position.y) / m_chipSize;
 
-			int rightX = tileX + 5;
-
-			if (rightX >= 0 && rightX < MAP_WIDTH && tileY >= 0 && tileY < MAP_HEIGHT)
-			{
-				if (m_objectmap[m_currentMap][tileY][rightX] == 40)
-				{
-					// 見た目
-					m_objectmap[m_currentMap][tileY][rightX] = 1;
-
-					// 当たり判定（追加）
-					m_basemap[m_currentMap][tileY][rightX] = TileType::Floor;
-				}
-			}
+			BreakArea(tileX,tileY, 0, 0, 0, 0,40, 1, TileType::Floor);
 		}
 
 		void Map::GrassBreak(PlayerManager& player)
 		{
+			printfDx(L"GrassBreak called");
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX, tileY, -5, 5, -5, 5, 3, 92, TileType::Floor);//土（３）を草（９２）に変える
 		}
 
 		void Map::SoilBreak(PlayerManager& player)
 		{
+			printfDx(L"SoilBreak called");
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX, tileY, -2, 2, -2, 2, 33, 3, TileType::Floor);//水（３３）を土（３）に変える
+
 		}
 
 		void Map::WindBreak(PlayerManager& player)
 		{
+			printfDx(L"WindBreak called");
+
+			Vector2 position = player.GetPosition();
+
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX, tileY, 0, 3, 0, 0, 40, 57, TileType::Wall);//右３マス分枯れ木に変える
 		}
 
 		void Map::ThunderBreak(PlayerManager& player)
 		{
 		}
 
+////連携技
 		void Map::SteamExplosionBreak(PlayerManager& player)
 		{
 			Vector2 position = player.GetPosition();
+			BreakArea(position.x, position.y, -10, 9, -10, 9,-1, 3, TileType::Floor);
+		}
 
-			int tileX = static_cast<int>(position.x) / m_chipSize;
-			int tileY = static_cast<int>(position.y) / m_chipSize;
+		void Map::FloorBreak(PlayerManager& player)
+		{
+			Vector2 position = player.GetPosition();
 
-			int rightX = tileX;
+			BreakArea(position.x + 5, position.y, 0, 0, 0, 0,-1, 200, TileType::NextFloor);
+		}
 
-			if (rightX >= 0 && rightX < MAP_WIDTH && tileY >= 0 && tileY < MAP_HEIGHT)
+		void Map::WaterFlowsBreak(PlayerManager& player)
+		{
+			for (int y = 0; y < MAP_HEIGHT; ++y)
 			{
-				for (int i = -10;i < 10;i++)
+				for (int x = 0; x < MAP_WIDTH; ++x)
 				{
-					for (int j = -10;j < 10;j++)
+					if (m_objectmap[m_currentMap][y][x] == 200)
 					{
-
-						// 見た目
-						m_objectmap[m_currentMap][tileY + j][rightX + i] = 3;
-
-						// 当たり判定（追加）
-						m_basemap[m_currentMap][tileY + j][rightX + i] = TileType::Floor;
-
+						m_objectmap[m_currentMap][y][x] = 33;
+						m_basemap[m_currentMap][y][x] = TileType::Wall;
 					}
 				}
-
 			}
+		}
+
+		void Map::GrowGrassBreak(PlayerManager& player)
+		{
+		}
+
+		void Map::VolcazationBreak(PlayerManager& player)
+		{
 		}
 
 

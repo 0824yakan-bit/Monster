@@ -60,6 +60,9 @@
     <Filter Include="Game\Enemy\Enemys%28%29">
       <UniqueIdentifier>{58b3aa41-daf5-4cf7-a168-11d40cbdabb1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game\ImageManager">
+      <UniqueIdentifier>{944a9344-a37c-47d1-ba9b-ec5f5585e835}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <!-- ファイル -->
   <ItemGroup>
@@ -168,6 +171,15 @@
     <ClCompile Include="Game\Enemy\Wolf.cpp">
       <Filter>Game\Enemy\Enemys%28%29</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Enemy\Fairy.cpp">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Enemy\Golem.cpp">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\ImageManager\ImageManager.cpp">
+      <Filter>Game\ImageManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Player\PlayerManager.h">
@@ -230,6 +242,15 @@
     <ClInclude Include="Game\Party\Party.h">
       <Filter>Game\Party</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Enemy\Fairy.h">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Enemy\Golem.h">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\ImageManager\ImageManager.h">
+      <Filter>Game\ImageManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -242,6 +263,21 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\testmapchip.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\slime.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\wolf.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\dragon.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\N.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\M.png">
       <Filter>Resources\Textures</Filter>
     </Image>
   </ItemGroup>

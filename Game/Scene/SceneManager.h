@@ -24,6 +24,8 @@ public:
 	std::vector <int> m_renderOrders;
 
 private:
+	ImageManager* m_image = nullptr;
+
 	static constexpr int MAX_PARTY = 4;
 	enum class SceneID
 	{
@@ -47,7 +49,7 @@ public:
 	SceneManager();
 	~SceneManager();
 
-	void Initialize(InputManager& inputmanager, SceneManager& sceneManager, Map&map,Party&party);
+	void Initialize(InputManager& inputmanager, SceneManager& sceneManager, Map&map,Party&party,ImageManager&image);
 	void Update(InputManager& inputmanager,SceneManager&sceneManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle);
 	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
 	void Finalize();

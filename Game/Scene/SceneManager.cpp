@@ -14,11 +14,15 @@ SceneManager::~SceneManager()
 {
 }
 
-void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneManager, Map&map,Party&party)
+void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneManager, Map&map,Party&party,ImageManager&image)
 {
 
     m_currentSceneID = SceneID::Title;
     m_nextSceneID = SceneID::None;
+
+    m_image = &image;
+    m_fieldScene.SetImage(&image);
+    //m_battleScene.SetImage(&image);
 
     InitializeCurrentScene(inputmanager,sceneManager, map,party);
 

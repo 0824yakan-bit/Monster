@@ -9,6 +9,7 @@ public:
 		Floor,
 		Wall,
 		Object,
+		NextFloor
 	};
 	enum class MoveDir
 	{
@@ -23,7 +24,7 @@ public:
 private:
 	static constexpr int MAP_WIDTH = 40;
 	static constexpr int MAP_HEIGHT = 25;
-	static constexpr int GH_MAX = 320;
+	static constexpr int GH_MAX = 384;//24*16
 
 	int m_ghChip[GH_MAX];
 
@@ -35,6 +36,7 @@ private:
 	int m_stageNo = 0;   // 0=ステージ1, 1=ステージ2 ...
 	static constexpr int MAPS_PER_STAGE = 10;
 
+	void BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType);
 	
 
 public:
@@ -85,6 +87,10 @@ public:
 
 	//複合属性
 	void SteamExplosionBreak(PlayerManager& player);//火＋水
+	void FloorBreak(PlayerManager& player);//水＋土
+	void WaterFlowsBreak(PlayerManager& player);//水＋風
+	void GrowGrassBreak(PlayerManager& player);//水＋草
+	void VolcazationBreak(PlayerManager& player);//土＋火
 
 };
 

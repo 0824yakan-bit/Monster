@@ -14,13 +14,16 @@ Monster::Monster(Type type)
         m_hitpoint = 20;
         m_attacks.push_back({ L"たいあたり", 1,CharacteRistics::Normal });
         m_attacks.push_back({ L"スライム液", 5,CharacteRistics::Water });
+        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
         break;
 
     case Type::Wolf:
         m_name = L"ウルフ";
         m_hitpoint = 30;
         m_attacks.push_back({ L"かみつく", 2 ,CharacteRistics::Normal });
-        m_attacks.push_back({ L"ひっかく", 5 ,CharacteRistics::Normal });
+        m_attacks.push_back({ L"かぜおこし", 5 ,CharacteRistics::Wind });
+        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+
         break;
 
     case Type::Dragon:
@@ -28,7 +31,26 @@ Monster::Monster(Type type)
         m_hitpoint = 50;
         m_attacks.push_back({ L"ひのこ",2 ,CharacteRistics::Fire });
         m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
+        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+
         break;
+
+    case Type::Golem:
+        m_name = L"ゴーレム";
+        m_hitpoint = 50;
+        m_attacks.push_back({ L"とっしん",2 ,CharacteRistics::Fire });
+        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
+        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+
+        break;
+
+    case Type::Fairy:
+        m_name = L"フェアリー";
+        m_hitpoint = 50;
+        m_attacks.push_back({ L"とっしん",2 ,CharacteRistics::Fire });
+        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
+        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+
     }
 }
 

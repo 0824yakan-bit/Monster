@@ -11,7 +11,9 @@ public:
     {
         Slime,
         Wolf,
-        Dragon
+        Dragon,
+        Golem,
+        Fairy
     };
 
     enum class CharacteRistics
@@ -22,7 +24,9 @@ public:
         Grass, //草属性
         Soil,  //土属性
         Wind,  //風属性
-        Thunder//雷属性
+        Thunder,//雷属性
+
+        Defense//防御
     };
     CharacteRistics characteRistics;
 
