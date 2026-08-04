@@ -22,6 +22,9 @@ public:
 
 private:
 	static constexpr int MAX_PARTY = 4;
+	bool m_requestDefense[MAX_PARTY];
+
+
 
 	PlayerManager* m_player = nullptr;
 	Party* m_party = nullptr;
@@ -44,6 +47,7 @@ private:
 	
 	enum AttackActive//属性組み合わせ・バトル終了時まで使った属性は保存
 	{
+		USED_NONE   = 0 ,
 		USED_NORMAL = 1 << 0,//通常　攻撃
 		USED_FIRE   = 1 << 1,//　火　属性
 		USED_WATER  = 1 << 2,//　水　属性
