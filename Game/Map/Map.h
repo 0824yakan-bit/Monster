@@ -37,7 +37,7 @@ private:
 	static constexpr int MAPS_PER_STAGE = 10;
 
 	void BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType);
-	
+	int m_breakLevel;//1～50、～10:優しい・報酬小,　20:,　30:,　40:,　50:難しい・報酬大
 
 public:
 	static constexpr int MAP_NUM = 40;

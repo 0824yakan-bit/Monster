@@ -15,6 +15,7 @@ Map::Map()
 	,m_chipSize	 { }
 	,m_currentMap{ }
 	,m_stageNo	 {0}
+	,m_breakLevel{0}
 {
 	// グラフィクスハンドルを初期化する
 	for (int i = 0; i < GH_MAX; i++)
@@ -31,6 +32,8 @@ void Map::Initialize(const wchar_t* fileName)
 {
 	m_moveDir = MoveDir::None;
 	m_stageNo = 0;
+	m_breakLevel = 0;
+
 
 	m_isTransition = false;
 	m_transition = 0;
@@ -317,7 +320,7 @@ void Map::ChangeStage(int stageNo)
  */
 void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType)
 {
-
+	m_breakLevel++;
 	for (int y = top; y <= bottom; ++y)
 	{
 		for (int x = left; x <= right; ++x)
@@ -343,6 +346,7 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 		void Map::NormalBreak(PlayerManager& player)
 		{
 			printfDx(L"NormalBleak called");
+
 			Vector2 position = player.GetPosition();
 
 			int tileX = static_cast<int>(position.x) / m_chipSize;
@@ -412,12 +416,15 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 
 		void Map::ThunderBreak(PlayerManager& player)
 		{
+			printfDx(L"ThunderBreak called");
+
 		}
 
 ////連携技
 		void Map::SteamExplosionBreak(PlayerManager& player)
 		{
 			printfDx(L"SteamExplosionBreak called");
+
 			Vector2 position = player.GetPosition();
 
 			int tileX = static_cast<int>(position.x) / m_chipSize;
@@ -428,9 +435,14 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 
 		void Map::FloorBreak(PlayerManager& player)
 		{
+			printfDx(L"FloorBreak called");
+
 			Vector2 position = player.GetPosition();
 
-			BreakArea(position.x + 5, position.y, 0, 0, 0, 0,-1, 200, TileType::NextFloor);
+			int tileX = static_cast<int>(position.x) / m_chipSize;
+			int tileY = static_cast<int>(position.y) / m_chipSize;
+
+			BreakArea(tileX, tileY, 0, 0, 0, 0,-1, 200, TileType::NextFloor);
 		}
 
 		void Map::WaterFlowsBreak(PlayerManager& player)

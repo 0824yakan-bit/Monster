@@ -23,8 +23,8 @@ public:
 private:
 	static constexpr int MAX_PARTY = 4;
 	bool m_requestDefense[MAX_PARTY];
-
-
+	Monster::CharacteRistics m_characteRistics;
+	bool m_comboPending = false;
 
 	PlayerManager* m_player = nullptr;
 	Party* m_party = nullptr;
@@ -157,5 +157,7 @@ public:
 	const std::vector<UsedAttackInfo>& GetUsedAttackOrder() const;
 
 	void ClearUsedAttackOrder();
+
+	bool IsComboMember(Monster::CharacteRistics type, bool steamcombo, bool floorcombo);
 };
 

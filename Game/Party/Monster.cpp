@@ -33,7 +33,7 @@ Monster::Monster(Type type)
         m_maxHitPoint = 50;
         m_currentHitPoint = m_maxHitPoint;
         m_attacks.push_back({ L"ひのこ",2 ,CharacteRistics::Fire });
-        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
+        m_attacks.push_back({ L"じならし",3 ,CharacteRistics::Soil });
         m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
 
         break;
