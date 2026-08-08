@@ -31,7 +31,7 @@ public:
     ~EnemyManager();
 
     void Initialize(Map& map);
-    void Update();
+    void Update(Map&map);
     void Render();
     void Finalize();
 

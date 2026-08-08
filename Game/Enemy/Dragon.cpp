@@ -35,7 +35,7 @@ void Dragon::Initialize(Map& map, int x, int y)
 	hp = 10;
 }
 
-void Dragon::Update()
+void Dragon::Update(Map& map)
 {
 
 	//moveTimer++;

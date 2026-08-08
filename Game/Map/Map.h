@@ -37,8 +37,8 @@ private:
 	static constexpr int MAPS_PER_STAGE = 10;
 
 	void BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType);
-	
-
+	int m_breakLevel;//1～50、～10:優しい・報酬小,　20:,　30:,　40:,　50:難しい・報酬大
+	int m_level;
 public:
 	static constexpr int MAP_NUM = 40;
 	TileType m_basemap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//当たり判定用のマップデータ
@@ -59,6 +59,8 @@ public:
 
 	void LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][MAP_WIDTH]);
 
+	bool IsWallRect(int px, int py, int width, int height) const;
+
 	TileType GetTileType(int x, int y)const;
 	int GetTileNo(int x, int y) const;
 	void ChangeMap(int mapNo);
@@ -74,6 +76,7 @@ public:
 
 	void ChangeStage(int stageNo);//階層変更関数
 
+	int GetBreakLevel()const;//地形破壊回数
 	//地形破壊
 
 	//属性単体

@@ -69,7 +69,7 @@ void Battle::Initialize(SceneManager*sceneManager)
 	m_annihilation = true;
 }
 
-void Battle::Update(SceneManager*sceneManager, Map& map, PlayerManager& player)
+void Battle::Update(InputManager& inputManager,SceneManager*sceneManager, GameOver& gameOver, Map& map, PlayerManager& player)
 {
 	m_annihilation = true;
 	for (int i = 0;i < m_party->GetMonsterCount();i++)
@@ -80,82 +80,91 @@ void Battle::Update(SceneManager*sceneManager, Map& map, PlayerManager& player)
 			break;
 		}
 	}
-	m_receponsTimer++;
-	if (m_receponsTimer > 15)
+	if (m_annihilation)
 	{
-		if (CheckHitKey(KEY_INPUT_RIGHT))
+		m_state = BattleState::Annihilation;
+
+	}
+	else
+	{
+
+		m_receponsTimer++;
+		if (m_receponsTimer > 15)
 		{
-			m_select++;
-			m_receponsTimer = 0;
-			if (m_select >= COMMAND_NUM)
+			if (CheckHitKey(KEY_INPUT_RIGHT))
 			{
-				m_select = 0;
+				m_select++;
+				m_receponsTimer = 0;
+				if (m_select >= COMMAND_NUM)
+				{
+					m_select = 0;
+				}
 			}
-		}
 
-		if (CheckHitKey(KEY_INPUT_LEFT))
-		{
-			m_select--;
-			m_receponsTimer = 0;
-			if (m_select < 0)
+			if (CheckHitKey(KEY_INPUT_LEFT))
 			{
-				m_select = COMMAND_NUM - 1;
+				m_select--;
+				m_receponsTimer = 0;
+				if (m_select < 0)
+				{
+					m_select = COMMAND_NUM - 1;
+				}
 			}
-		}
-		if (!m_Window && CheckHitKey(KEY_INPUT_RETURN))
-		{
-			m_receponsTimer = 0;
-			m_IsActive = false;
-			m_Window = true;
-
-
-			switch (m_select)//指揮・もちもの・さそう・にげだすの選択　キーカーソルの位置
+			if (!m_Window && CheckHitKey(KEY_INPUT_RETURN))
 			{
-			case 0:
+				m_receponsTimer = 0;
+				m_IsActive = false;
+				m_Window = true;
+
+
+				switch (m_select)//指揮・もちもの・さそう・にげだすの選択　キーカーソルの位置
+				{
+				case 0:
+					m_windowWidth = 0;
+
+					m_state = BattleState::AttackSelect;
+					break;
+
+				case 1:
+					m_windowWidth = 0;
+
+					m_state = BattleState::Tool;
+					break;
+
+				case 2:
+					m_state = BattleState::Scout;
+					break;
+
+				case 3:
+					m_state = BattleState::Run;
+					break;
+
+				case 4:
+					m_state = BattleState::EnemyTurn;
+					break;
+				}
+			}
+
+			if (!m_IsActive && CheckHitKey(KEY_INPUT_BACK) && m_monsterSelect == 0)//詳細から戻る
+			{
+				m_state = BattleState::Command;
+				m_IsActive = true;
+
+				m_Window = false;
 				m_windowWidth = 0;
-
-				m_state = BattleState::AttackSelect;
-				break;
-
-			case 1:
-				m_windowWidth = 0;
-
-				m_state = BattleState::Tool;
-				break;
-
-			case 2:
-				m_state = BattleState::Scout;
-				break;
-
-			case 3:
-				m_state = BattleState::Run;
-				break;
-
-			case 4:
-				m_state = BattleState::EnemyTurn;
-				break;
+				m_windowWidthFront = 0;
 			}
-		}
-		
-		if (!m_IsActive && CheckHitKey(KEY_INPUT_BACK) && m_monsterSelect == 0)//詳細から戻る
-		{
-			m_state = BattleState::Command;
-			m_IsActive = true;
 
-			m_Window = false;
-			m_windowWidth = 0;
-			m_windowWidthFront = 0;
-		}
+			if (m_Window)
+			{
+				m_windowWidthFront += 50;
+				if (m_windowWidthFront > 910)
+					m_windowWidthFront = 910;
+				m_windowWidth += 50;
 
-		if (m_Window)
-		{
-			m_windowWidthFront += 50;
-			if (m_windowWidthFront > 910)
-				m_windowWidthFront = 910;
-			m_windowWidth += 50;
-
-			if (m_windowWidth > 920)
-				m_windowWidth = 920;
+				if (m_windowWidth > 920)
+					m_windowWidth = 920;
+			}
 		}
 	}
 	switch (m_state)//現在の状態
@@ -192,12 +201,12 @@ void Battle::Update(SceneManager*sceneManager, Map& map, PlayerManager& player)
 		break;
 
 	case BattleState::Annihilation:
-		UpdateAnnihilation();
+		UpdateAnnihilation(gameOver,inputManager);
 		break;
 	}
 }
 
-void Battle::Render()
+void Battle::Render(GameOver& gameOver)
 {
 	
 	//戦闘画面
@@ -249,7 +258,7 @@ void Battle::Render()
 		break;
 
 	case BattleState::Annihilation:
-		RenderAnnihilation();
+		RenderAnnihilation(gameOver);
 		break;
 	}
 
@@ -276,8 +285,14 @@ void Battle::Render()
 		}
 	}
 
-	//仮ｈｐ
-	DrawFormatString(500,120,GetColor(0, 255, 255),L"HP : %d",m_enemy->GetHp());
+	if (m_enemy != nullptr)
+	{
+		DrawFormatString(500, 120,GetColor(0, 255, 255),L"HP : %d",m_enemy->GetHp());
+	}
+	else
+	{
+		DrawString(500, 120,L"HP : ---",GetColor(128, 128, 128));
+	}
 
 	DrawFormatString(
 		20, 300,GetColor(0, 0, 0),	L"N:%d F:%d Wa:%d G:%d S:%d T:%d Wi:%d",
@@ -462,14 +477,89 @@ void Battle::RenderAttackSelect()
 
 void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 {
+	if (m_comboPending)
+	{
+		m_displaytextTimer++;
+
+		if (m_displaytextTimer == 1)
+		{
+			UesElementalAttack(map, player);
+		}
+
+		// 1秒表示
+		if (m_displaytextTimer < 60)
+		{
+			return;
+		}
+
+		// 表示終了後に敵死亡判定
+		if (m_enemy->GetHp() <= 0)
+		{
+			m_deadEnemyName = m_enemy->GetName();
+			m_enemyDeadMotion = true;
+			m_enemyDeadOffsetY = 0;
+			m_displaytextTimer = 0;
+			m_comboPending = false;
+			m_state = BattleState::EnemyDead;
+			return;
+		}
+
+		// 次のターンへ
+		m_comboPending = false;
+		m_displayMessage.clear();
+		m_displayIndex = 0;
+		m_monsterSelect = 0;
+
+		std::fill(m_selectedAttack.begin(),m_selectedAttack.end(),-1);
+
+		m_state = BattleState::EnemyTurn;
+		m_displaytextTimer = 0;
+		return;
+	}
+	bool hasFire = false;
+	bool hasWater = false;
+	bool hasGrass = false;
+	bool hasSoil = false;
+	for (int i = 0; i < m_party->GetMonsterCount(); i++)
+	{
+		if (m_selectedAttack[i] < 0) continue;
+
+		auto& attacks = m_party->GetMonster(i)->GetAttacks();
+		auto type = attacks[m_selectedAttack[i]].ristics;
+
+		if (type == Monster::CharacteRistics::Fire)
+			hasFire = true;
+
+		if (type == Monster::CharacteRistics::Water)
+			hasWater = true;
+
+		if (type == Monster::CharacteRistics::Grass)
+			hasGrass = true;
+		
+		if (type == Monster::CharacteRistics::Soil)
+			hasSoil = true;
+	}
+
+	bool steamCombo = hasFire && hasWater;
+	bool floorCombo = hasWater && hasSoil;
 	// HP0 または未選択の仲間を飛ばす
-	while (m_displayIndex < m_party->GetMonsterCount() &&
-		(m_monsterhp[m_displayIndex] <= 0 ||
-			m_selectedAttack[m_displayIndex] < 0))
+	while (m_displayIndex < m_party->GetMonsterCount() &&(m_monsterhp[m_displayIndex] <= 0 ||m_selectedAttack[m_displayIndex] < 0))
 	{
 		m_displayIndex++;
 	}
 
+	if (m_displaytextTimer >= 60)
+	{
+		m_displaytextTimer = 0;
+		m_displayIndex++;
+
+		if (m_displayIndex >= m_party->GetMonsterCount())
+		{
+			m_comboPending = true;
+			m_displaytextTimer = 0;
+			return;
+		}
+	}
 	m_displaytextTimer++;
 
 	if (m_displaytextTimer == 1)
@@ -487,10 +577,10 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 			return;
 		}
 
-		Monster::CharacteRistics m_characteRistics = attacks[index].ristics;
-		printfDx(L"Attack=%ls Type=%d",
-			attacks[index].name,
-			(int)m_characteRistics);
+		m_characteRistics = attacks[index].ristics;
+
+		printfDx(L"Attack=%ls Type=%d",attacks[index].name,(int)m_characteRistics);
+
 		// 発動順を保存
 		UsedAttackInfo info;
 		info.element = m_characteRistics;
@@ -558,44 +648,58 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 		}
 		break;
 		}
-		//属性単体
-		switch (m_characteRistics)
+		bool isComboMember = IsComboMember(m_characteRistics, steamCombo, floorCombo);
+
+		if (m_characteRistics != Monster::CharacteRistics::Defense && !isComboMember)
 		{
-		case Monster::CharacteRistics::Normal:
-			map.NormalBreak(player);
-			break;
-
-		case Monster::CharacteRistics::Fire:
-			map.FireBreak(player);
-			break;
-
-		case Monster::CharacteRistics::Water:
-			map.WaterBreak(player);
-			break;
-
-		case Monster::CharacteRistics::Grass:
-			map.GrassBreak(player);
-			break;
-
-		case Monster::CharacteRistics::Soil:
-			map.SoilBreak(player);
-			break;
-
-		case Monster::CharacteRistics::Wind:
-			map.WindBreak(player);
-			break;
-
-		case Monster::CharacteRistics::Thunder:
-			map.ThunderBreak(player);
-			break;
-		}
-		if (m_characteRistics != Monster::CharacteRistics::Defense)
-		{
+			// 単体ダメージ
 			m_enemy->Damage(attacks[index].power * magnification);
+
+			// 単体属性効果
+			switch (m_characteRistics)
+			{
+			case Monster::CharacteRistics::Normal:
+				map.NormalBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Fire:
+				map.FireBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Water:
+				map.WaterBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Grass:
+				map.GrassBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Soil:
+				map.SoilBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Wind:
+				map.WindBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Thunder:
+				map.ThunderBreak(player);
+				break;
+
+			default:
+				break;
+			}
+		}
+		else if (isComboMember)
+		{
+			//連携条件を満たしたキャラクター用のテキスト
+			m_displayMessage = monster->GetName() + L"は連携の準備をしている！";
 		}
 
-
-		m_displayMessage = monster->GetName() + L"の" + attacks[index].name + L"！";
+		if (!isComboMember)
+		{
+			m_displayMessage = monster->GetName() + L"の" + attacks[index].name + L"！";
+		}
 	}
 	if (m_displaytextTimer < 60)
 	{
@@ -618,27 +722,7 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 	}
 
 
-	if (m_displaytextTimer >= 60)
-	{
-		m_displaytextTimer = 0;
-		m_displayIndex++;
 
-		if (m_displayIndex >= m_party->GetMonsterCount())
-		{
-			UesElementalAttack(map, player);
-			m_displayMessage.clear();
-
-			m_displayIndex = 0;
-			m_monsterSelect = 0;
-
-			std::fill(m_selectedAttack.begin(),	m_selectedAttack.end(),	-1);
-
-			m_state = BattleState::EnemyTurn;
-
-			m_displaytextTimer = 0;
-
-		}
-	}
 }
 
 void Battle::RenderAttackAction()
@@ -679,7 +763,7 @@ void Battle::RenderScout()
 
 void Battle::UpdateRun()
 {
-	//printfDx(L"戻す (%d,%d)\n",	m_player->m_currentposition.x,m_player->m_currentposition.y);
+	//printfDx(L"戻す (%d,%d)\n",m_player->m_currentposition.x,m_player->m_currentposition.y);
 
 
 	m_player->m_position = m_player->m_currentposition;
@@ -784,15 +868,14 @@ void Battle::RenderEnemyDead()
 	DrawString(	60,	550,m_displayMessage.c_str(),GetColor(255, 255, 255));
 }
 
-void Battle::UpdateAnnihilation()
+void Battle::UpdateAnnihilation(GameOver& gameOver,InputManager&inputManager)
 {
-
-
+	gameOver.Update(inputManager);
 }
 
-void Battle::RenderAnnihilation()
+void Battle::RenderAnnihilation(GameOver& gameOver)
 {
-	DrawBox(0, 0, 500, 500, GetColor(255, 255, 255), TRUE);
+	gameOver.Render();
 }
 
 void Battle::EndTurn()
@@ -807,6 +890,11 @@ void Battle::EndTurn()
 	m_windowWidthFront = 0;
 
 	m_select = 0;
+
+	for (int i = 0; i < MAX_PARTY; i++)
+	{
+		m_requestDefense[i] = false;
+	}
 }
 
 
@@ -856,7 +944,8 @@ bool Battle::IsEnemyRequested()
 
 void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 {
-	printfDx(L"ComboCheck F=%d Wa=%d state=%d",(state & USED_FIRE) != 0,(state & USED_WATER) != 0,state);
+	printfDx(L"ComboCheck F=%d Wa=%d state=%d", (state & USED_FIRE) != 0, (state & USED_WATER) != 0, state);
+	printfDx(L"ComboCheck Wa=%d S=%d state=%d",(state & USED_WATER) != 0,(state & USED_SOIL) != 0,state);
 
 	//複合属性
 	
@@ -865,6 +954,11 @@ void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 	if ((state & USED_FIRE) && (state & USED_WATER))
 	{
 		map.SteamExplosionBreak(player);
+
+		int comboDamage = 20; // 好きな威力
+		m_enemy->Damage(comboDamage);
+
+		m_displayMessage = L"蒸気爆発が発動した！";
 
 		UsedAttackInfo info;
 		info.element = Monster::CharacteRistics::Fire;
@@ -879,6 +973,11 @@ void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 	if ((state & USED_WATER) && (state & USED_SOIL))
 	{
 		map.FloorBreak(player);
+
+		int comboDamage = 20; // 好きな威力
+		m_enemy->Damage(comboDamage);
+
+		m_displayMessage = L"地面が崩壊した！";
 
 		UsedAttackInfo info;
 		info.element = Monster::CharacteRistics::Water;
@@ -905,6 +1004,12 @@ void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 	if (state & USED_GRASS && state & USED_WATER)//水＋草
 	{
 		map.GrowGrassBreak(player);//周りに草を生やす＋回復してもいいかも
+
+		UsedAttackInfo info;
+		info.element = Monster::CharacteRistics::Grass;
+		info.attackName = L"草！";
+
+		m_usedAttackOrder.push_back(info);
 	}
 
 
@@ -912,6 +1017,12 @@ void Battle::UesElementalAttack(Map&map,PlayerManager&player)
 	if (state & USED_SOIL&&state&USED_FIRE)//土＋火
 	{
 		map.VolcazationBreak(player);//火山化
+
+		UsedAttackInfo info;
+		info.element = Monster::CharacteRistics::Soil;
+		info.attackName = L"火山化！";
+
+		m_usedAttackOrder.push_back(info);
 	}
 
 
@@ -940,4 +1051,18 @@ const std::vector<Battle::UsedAttackInfo>& Battle::GetUsedAttackOrder() const
 void Battle::ClearUsedAttackOrder()
 {
 	m_usedAttackOrder.clear();
+}
+
+bool Battle::IsComboMember(Monster::CharacteRistics type, bool steamcombo, bool floorcombo)
+{
+	if (steamcombo &&
+		(type == Monster::CharacteRistics::Fire ||
+		 type == Monster::CharacteRistics::Water))
+		return true;
+
+	if(floorcombo &&
+			(type == Monster::CharacteRistics::Water ||
+			 type == Monster::CharacteRistics::Soil))
+		return true;
+	return false;
 }

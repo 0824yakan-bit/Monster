@@ -69,7 +69,7 @@ void Game::Initialize()
 	m_playerManager.Initialize(&m_map);
 	m_enemyManager.Initialize(m_map);
 	m_inputManager.Initialize();
-	m_sceneManager.Initialize(m_inputManager,m_sceneManager, m_map, m_party,m_imageManager);
+	m_sceneManager.Initialize(m_inputManager,m_sceneManager,m_playerManager, m_map, m_party,m_imageManager);
 
 	m_oldMapNo = m_map.GetCurrentMap();
 }

@@ -18,6 +18,9 @@ void Wolf::Initialize(Map& map, int x, int y)
 
 	name = L"ウルフ";
 
+	direction = Direction::Up;
+	moveCounter = 0;
+
 	position.x = x*map.m_chipSize;
 	position.y = y*map.m_chipSize;
 
@@ -34,16 +37,33 @@ void Wolf::Initialize(Map& map, int x, int y)
 	hp = 10;
 }
 
-void Wolf::Update()
+void Wolf::Update(Map& map)
 {
-
-	//moveTimer++;
-	//if (moveTimer == 30)
-	//{
-	//	moveTimer = 0;
-	//	position.x += m_size;
-	//
-	//}
+	moveTimer++;
+	if (moveTimer == 90)
+	{
+		if (moveCounter == -2)
+		{
+			direction = Direction::Up;
+		}
+		if (moveCounter == 2)
+		{
+			direction = Direction::Down;
+		}
+		switch (direction)
+		{
+		case Direction::Up:
+			moveCounter++;
+			moveTimer = 0;
+			position.y -= size.y;
+			break;
+		case Direction::Down:
+			moveCounter--;
+			moveTimer = 0;
+			position.y += size.y;
+			break;
+		}
+	}
 }
 
 void Wolf::Render()

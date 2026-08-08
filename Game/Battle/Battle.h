@@ -1,10 +1,12 @@
 ﻿#pragma once
 #include"Game/Player/PlayerManager.h"
+#include"Game/Scene/GameOver.h"
 #include"Game/Party/Party.h"
 #include "Game/Enemy/Enemy.h"
 
 class Map;
 class SceneManager;
+class GameOver;
 class PlayerMove;
 class Party;
 class Enemy;
@@ -23,8 +25,8 @@ public:
 private:
 	static constexpr int MAX_PARTY = 4;
 	bool m_requestDefense[MAX_PARTY];
-
-
+	Monster::CharacteRistics m_characteRistics;
+	bool m_comboPending = false;
 
 	PlayerManager* m_player = nullptr;
 	Party* m_party = nullptr;
@@ -104,8 +106,8 @@ public:
 	~Battle();
 
 	void Initialize(SceneManager*sceneManager);
-	void Update(SceneManager*sceneManager, Map& map, PlayerManager& player);
-	void Render();
+	void Update(InputManager& inpuManager,SceneManager*sceneManager, GameOver& gameOver, Map& map, PlayerManager& player);
+	void Render(GameOver& gameOver);
 	void Finalize();
 
 	void RenderCommand();//動作選択画面
@@ -132,8 +134,8 @@ public:
 	void RenderEnemyDead();
 
 
-	void UpdateAnnihilation();
-	void RenderAnnihilation();
+	void UpdateAnnihilation(GameOver&gameOver, InputManager& inpuManager);
+	void RenderAnnihilation(GameOver& gameOver);
 
 	void EndTurn();//ターン終了
 
@@ -157,5 +159,7 @@ public:
 	const std::vector<UsedAttackInfo>& GetUsedAttackOrder() const;
 
 	void ClearUsedAttackOrder();
+
+	bool IsComboMember(Monster::CharacteRistics type, bool steamcombo, bool floorcombo);
 };
 
