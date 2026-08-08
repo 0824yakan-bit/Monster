@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include<vector>
+#include<set>
 #include"Game/Battle/Battle.h"
 #include"Game/Maths/Vector2.h"
 class InputManager;
@@ -12,6 +13,7 @@ class FieldScene
 {
 public:
 	std::vector<Battle::UsedAttackInfo> m_attackEffects;
+
 	int m_effectIndex = 0;
 	int m_effectTimer = 0;
 	bool m_playEffect = false;
@@ -19,8 +21,10 @@ public:
 	void SetAttackEffects(const std::vector<Battle::UsedAttackInfo>& effects);
 
 private:
-	bool m_isBattleRequested;
+	bool m_isBattleRequested;//バトルシーン遷移
+	int m_breakLevel;//地形破壊回数
 	ImageManager* m_image=nullptr;
+	
 	Enemy* m_hitEnemy;
 
 	Vector2 Mposition;
@@ -44,6 +48,7 @@ private:
 ////技一覧
 	bool m_isCooperatDetailActive;//詳細表示
 	int m_CooperatDetailSelect;//選択中
+public:
 	enum class CooperatList//技一覧
 	{
 		Empty,
@@ -57,11 +62,16 @@ private:
 	};
 	CooperatList m_cooperatList;
 
+	std::set<CooperatList> m_unlockedSkills;
+	std::vector<CooperatList> m_visibleSkills;
+///ブレイクレベル
+	
+
 public:
 	FieldScene();
 	~FieldScene();
 
-	void Initialize(InputManager& inputmanager, Map& map);
+	void Initialize(InputManager& inputmanager,PlayerManager&playerManager, Map& map);
 	void Update(InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Battle&battle);
 	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map);
 	void Finalize();
@@ -77,7 +87,22 @@ public:
 	void RenderToolCheck();
 	void RenderOperationInstructions();
 
+
+	void Level1();
+	void Level2();
+	void Level3();
+	void Level4();
+	void Level5(EnemyManager&enemyManager, Map& map);
+
+	void LearnSkill(CooperatList skill);
+	bool HasSkill(CooperatList skill) const;
+
+	void SetAttackEffectsFiledScene(CooperatList& effects);
+
+
+
 	void SetImage(ImageManager* image);
+
 
 	bool IsBattleRequested() const;
 

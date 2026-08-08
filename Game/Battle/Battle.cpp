@@ -69,7 +69,7 @@ void Battle::Initialize(SceneManager*sceneManager)
 	m_annihilation = true;
 }
 
-void Battle::Update(SceneManager*sceneManager, Map& map, PlayerManager& player)
+void Battle::Update(InputManager& inputManager,SceneManager*sceneManager, GameOver& gameOver, Map& map, PlayerManager& player)
 {
 	m_annihilation = true;
 	for (int i = 0;i < m_party->GetMonsterCount();i++)
@@ -80,82 +80,91 @@ void Battle::Update(SceneManager*sceneManager, Map& map, PlayerManager& player)
 			break;
 		}
 	}
-	m_receponsTimer++;
-	if (m_receponsTimer > 15)
+	if (m_annihilation)
 	{
-		if (CheckHitKey(KEY_INPUT_RIGHT))
+		m_state = BattleState::Annihilation;
+
+	}
+	else
+	{
+
+		m_receponsTimer++;
+		if (m_receponsTimer > 15)
 		{
-			m_select++;
-			m_receponsTimer = 0;
-			if (m_select >= COMMAND_NUM)
+			if (CheckHitKey(KEY_INPUT_RIGHT))
 			{
-				m_select = 0;
+				m_select++;
+				m_receponsTimer = 0;
+				if (m_select >= COMMAND_NUM)
+				{
+					m_select = 0;
+				}
 			}
-		}
 
-		if (CheckHitKey(KEY_INPUT_LEFT))
-		{
-			m_select--;
-			m_receponsTimer = 0;
-			if (m_select < 0)
+			if (CheckHitKey(KEY_INPUT_LEFT))
 			{
-				m_select = COMMAND_NUM - 1;
+				m_select--;
+				m_receponsTimer = 0;
+				if (m_select < 0)
+				{
+					m_select = COMMAND_NUM - 1;
+				}
 			}
-		}
-		if (!m_Window && CheckHitKey(KEY_INPUT_RETURN))
-		{
-			m_receponsTimer = 0;
-			m_IsActive = false;
-			m_Window = true;
-
-
-			switch (m_select)//指揮・もちもの・さそう・にげだすの選択　キーカーソルの位置
+			if (!m_Window && CheckHitKey(KEY_INPUT_RETURN))
 			{
-			case 0:
+				m_receponsTimer = 0;
+				m_IsActive = false;
+				m_Window = true;
+
+
+				switch (m_select)//指揮・もちもの・さそう・にげだすの選択　キーカーソルの位置
+				{
+				case 0:
+					m_windowWidth = 0;
+
+					m_state = BattleState::AttackSelect;
+					break;
+
+				case 1:
+					m_windowWidth = 0;
+
+					m_state = BattleState::Tool;
+					break;
+
+				case 2:
+					m_state = BattleState::Scout;
+					break;
+
+				case 3:
+					m_state = BattleState::Run;
+					break;
+
+				case 4:
+					m_state = BattleState::EnemyTurn;
+					break;
+				}
+			}
+
+			if (!m_IsActive && CheckHitKey(KEY_INPUT_BACK) && m_monsterSelect == 0)//詳細から戻る
+			{
+				m_state = BattleState::Command;
+				m_IsActive = true;
+
+				m_Window = false;
 				m_windowWidth = 0;
-
-				m_state = BattleState::AttackSelect;
-				break;
-
-			case 1:
-				m_windowWidth = 0;
-
-				m_state = BattleState::Tool;
-				break;
-
-			case 2:
-				m_state = BattleState::Scout;
-				break;
-
-			case 3:
-				m_state = BattleState::Run;
-				break;
-
-			case 4:
-				m_state = BattleState::EnemyTurn;
-				break;
+				m_windowWidthFront = 0;
 			}
-		}
-		
-		if (!m_IsActive && CheckHitKey(KEY_INPUT_BACK) && m_monsterSelect == 0)//詳細から戻る
-		{
-			m_state = BattleState::Command;
-			m_IsActive = true;
 
-			m_Window = false;
-			m_windowWidth = 0;
-			m_windowWidthFront = 0;
-		}
+			if (m_Window)
+			{
+				m_windowWidthFront += 50;
+				if (m_windowWidthFront > 910)
+					m_windowWidthFront = 910;
+				m_windowWidth += 50;
 
-		if (m_Window)
-		{
-			m_windowWidthFront += 50;
-			if (m_windowWidthFront > 910)
-				m_windowWidthFront = 910;
-			m_windowWidth += 50;
-
-			if (m_windowWidth > 920)
-				m_windowWidth = 920;
+				if (m_windowWidth > 920)
+					m_windowWidth = 920;
+			}
 		}
 	}
 	switch (m_state)//現在の状態
@@ -192,12 +201,12 @@ void Battle::Update(SceneManager*sceneManager, Map& map, PlayerManager& player)
 		break;
 
 	case BattleState::Annihilation:
-		UpdateAnnihilation();
+		UpdateAnnihilation(gameOver,inputManager);
 		break;
 	}
 }
 
-void Battle::Render()
+void Battle::Render(GameOver& gameOver)
 {
 	
 	//戦闘画面
@@ -249,7 +258,7 @@ void Battle::Render()
 		break;
 
 	case BattleState::Annihilation:
-		RenderAnnihilation();
+		RenderAnnihilation(gameOver);
 		break;
 	}
 
@@ -643,8 +652,43 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 
 		if (m_characteRistics != Monster::CharacteRistics::Defense && !isComboMember)
 		{
-			// 通常・草・土などはここで単体攻撃
+			// 単体ダメージ
 			m_enemy->Damage(attacks[index].power * magnification);
+
+			// 単体属性効果
+			switch (m_characteRistics)
+			{
+			case Monster::CharacteRistics::Normal:
+				map.NormalBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Fire:
+				map.FireBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Water:
+				map.WaterBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Grass:
+				map.GrassBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Soil:
+				map.SoilBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Wind:
+				map.WindBreak(player);
+				break;
+
+			case Monster::CharacteRistics::Thunder:
+				map.ThunderBreak(player);
+				break;
+
+			default:
+				break;
+			}
 		}
 		else if (isComboMember)
 		{
@@ -824,15 +868,14 @@ void Battle::RenderEnemyDead()
 	DrawString(	60,	550,m_displayMessage.c_str(),GetColor(255, 255, 255));
 }
 
-void Battle::UpdateAnnihilation()
+void Battle::UpdateAnnihilation(GameOver& gameOver,InputManager&inputManager)
 {
-
-
+	gameOver.Update(inputManager);
 }
 
-void Battle::RenderAnnihilation()
+void Battle::RenderAnnihilation(GameOver& gameOver)
 {
-	DrawBox(0, 0, 500, 500, GetColor(255, 255, 255), TRUE);
+	gameOver.Render();
 }
 
 void Battle::EndTurn()
@@ -847,6 +890,11 @@ void Battle::EndTurn()
 	m_windowWidthFront = 0;
 
 	m_select = 0;
+
+	for (int i = 0; i < MAX_PARTY; i++)
+	{
+		m_requestDefense[i] = false;
+	}
 }
 
 
@@ -1016,4 +1064,5 @@ bool Battle::IsComboMember(Monster::CharacteRistics type, bool steamcombo, bool 
 			(type == Monster::CharacteRistics::Water ||
 			 type == Monster::CharacteRistics::Soil))
 		return true;
+	return false;
 }

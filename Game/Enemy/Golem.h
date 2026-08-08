@@ -10,7 +10,7 @@ public:
 	~Golem();
 
 	void Initialize(Map& map, int x, int y)override;
-	void Update()override;
+	void Update(Map& map)override;
 	void Render()override;
 	void Finalize()override;
 

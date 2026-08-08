@@ -180,6 +180,9 @@
     <ClCompile Include="Game\ImageManager\ImageManager.cpp">
       <Filter>Game\ImageManager</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Scene\GameOver.cpp">
+      <Filter>Game\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Player\PlayerManager.h">
@@ -251,6 +254,9 @@
     <ClInclude Include="Game\ImageManager\ImageManager.h">
       <Filter>Game\ImageManager</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Scene\GameOver.h">
+      <Filter>Game\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -278,6 +284,24 @@
       <Filter>Resources\Textures</Filter>
     </Image>
     <Image Include="Resources\Textures\M.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\front.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\golem.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\back.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\fairy.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\right.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\left.png">
       <Filter>Resources\Textures</Filter>
     </Image>
   </ItemGroup>

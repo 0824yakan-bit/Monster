@@ -1,7 +1,12 @@
 #include"Game/Enemy/Enemy.h"
 
 Enemy::Enemy()
-    :m_image()
+    :m_image    {}
+    ,type       {}
+    ,power      {}
+    ,name       {}
+    ,moveTimer  {}
+    ,hp         {}
 {
 
 }

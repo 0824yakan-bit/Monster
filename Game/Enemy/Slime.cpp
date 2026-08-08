@@ -14,9 +14,13 @@ Slime::~Slime()
 
 void Slime::Initialize(Map& map, int x, int y)
 {
+
 	type = EnemyType::Slime;
 
 	name = L"スライム";
+
+	direction = Direction::Right;
+	moveCounter = 0;
 
 	position.x = x*map.m_chipSize;
 	position.y = y*map.m_chipSize;
@@ -34,16 +38,47 @@ void Slime::Initialize(Map& map, int x, int y)
 	hp = 10;
 }
 
-void Slime::Update()
+void Slime::Update(Map&map)
 {
-   
-	//moveTimer++;
-	//if (moveTimer == 30)
-	//{
-	//	moveTimer = 0;
-	//	position.x += m_size;
-	//
-	//}
+	moveTimer++;
+	level=map.GetBreakLevel();
+	switch (level)
+	{
+	case 0:
+		if (moveTimer == 120)
+		{
+			if (moveCounter == 0)
+			{
+				direction = Direction::Right;
+			}
+			if (moveCounter == 5)
+			{
+				direction = Direction::Left;
+			}
+			switch (direction)
+			{
+			case Direction::Right:
+				moveCounter++;
+				moveTimer = 0;
+				position.x += size.x;
+				break;
+			case Direction::Left:
+				moveCounter--;
+				moveTimer = 0;
+				position.x -= size.x;
+				break;
+			}
+			break;
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+		}
+	}
 }
 
 void Slime::Render()

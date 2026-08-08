@@ -14,7 +14,7 @@ SceneManager::~SceneManager()
 {
 }
 
-void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneManager, Map&map,Party&party,ImageManager&image)
+void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneManager,PlayerManager&playerManager, Map&map,Party&party,ImageManager&image)
 {
 
     m_currentSceneID = SceneID::Title;
@@ -24,7 +24,9 @@ void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneMan
     m_fieldScene.SetImage(&image);
     //m_battleScene.SetImage(&image);
 
-    InitializeCurrentScene(inputmanager,sceneManager, map,party);
+    m_gameOver.Initialize();
+
+    InitializeCurrentScene(inputmanager,sceneManager,playerManager, map,party);
 
     for (int i = 0;i < MAX_PARTY;i++)//現在のパーティのHP
     {
@@ -40,7 +42,7 @@ void SceneManager::Update(InputManager& inputmanager,SceneManager&sceneManager,P
     // シーン切り替え要求があれば切り替える
     if (m_nextSceneID != SceneID::None)
     {
-        ChangeScene(inputmanager,sceneManager,map,party);
+        ChangeScene(inputmanager,sceneManager,playerManager,map,party);
     }
 }
 
@@ -62,7 +64,7 @@ void SceneManager::NextSceneID(SceneID requestSceneID)
     m_nextSceneID = requestSceneID;
 }
 
-void SceneManager::ChangeScene(InputManager& inputmanager, SceneManager& sceneManager, Map&map,Party&party)
+void SceneManager::ChangeScene(InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party)
 {
     // 現在シーンの終了処理
     FinalizeCurrentScene();
@@ -72,15 +74,15 @@ void SceneManager::ChangeScene(InputManager& inputmanager, SceneManager& sceneMa
     m_nextSceneID = SceneID::None;
 
     // 次のシーンの初期化
-    InitializeCurrentScene(inputmanager,sceneManager, map,party);
+    InitializeCurrentScene(inputmanager,sceneManager,playerManager, map,party);
 }
 
-void SceneManager::InitializeCurrentScene(InputManager& inputmanager,SceneManager&sceneManager,Map&map,Party&party)
+void SceneManager::InitializeCurrentScene(InputManager& inputmanager,SceneManager&sceneManager,PlayerManager&playerManager,Map&map,Party&party)
 {
     switch (m_currentSceneID)
     {
     case SceneID::Title :   m_titleScene .Initialize(inputmanager);  break;
-    case SceneID::Field :   m_fieldScene .Initialize(inputmanager,map);   break;
+    case SceneID::Field :   m_fieldScene .Initialize(inputmanager,playerManager,map);   break;
     case SceneID::Battle:   m_battleScene.Initialize(inputmanager,sceneManager,map,party);   break;
     
     default:      assert(!"シーンIDが不正です");break;
@@ -117,7 +119,7 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
 
     case SceneID::Battle:
 
-        m_battleScene.Update(inputmanager,sceneManager,enemyManager,map,party,playerManager);
+        m_battleScene.Update(inputmanager,sceneManager,m_fieldScene,m_gameOver,enemyManager,map,party,playerManager);
         //printfDx(L"FieldRequested!!\n");
         if (m_battleScene.IsFieldRequested())
         {
@@ -143,7 +145,7 @@ void SceneManager::RenderCurrentScene(PlayerManager& playerManager, EnemyManager
     {
     case SceneID::Title:   m_titleScene.Render();  break;
     case SceneID::Field:    m_fieldScene.Render(playerManager,enemyManager,map);   break;
-    case SceneID::Battle:   m_battleScene.Render(party);   break;
+    case SceneID::Battle:   m_battleScene.Render(m_gameOver,party);   break;
 
 
     default:      assert(!"シーンIDが不正です");break;

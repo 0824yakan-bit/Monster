@@ -9,13 +9,19 @@
 #include<sstream>
 #include<cassert>
 Map::Map()
-	:m_basemap	 { }
-	,m_workmap	 { }
-	,m_ghChip	 { }
-	,m_chipSize	 { }
-	,m_currentMap{ }
-	,m_stageNo	 {0}
-	,m_breakLevel{0}
+	:m_basemap		{ }
+	,m_workmap		{ }
+	,m_ghChip		{ }
+	,m_chipSize		{ }
+	,m_currentMap	{ }
+	,m_stageNo		{0}
+	,m_breakLevel	{0}
+	,m_transition	{ }
+	,m_objectmap	{ }
+	,m_nextmap		{ }
+	,m_moveDir		{ }
+	,m_level		{ }
+	,m_isTransition	{ }
 {
 	// グラフィクスハンドルを初期化する
 	for (int i = 0; i < GH_MAX; i++)
@@ -54,9 +60,12 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 {
 	int startMap = GetStageStartMap();
 	int endMap = GetStageEndMap();
+
+	int playerW = playerManager.m_size.x;
+	int playerH = playerManager.m_size.y;
+
 	// 右端
-	if (!m_isTransition &&
-		playerManager.m_position.x + m_chipSize >= Screen::RIGHT)
+	if (!m_isTransition &&playerManager.m_position.x + playerW >= Screen::RIGHT)
 	{
 		m_moveDir = MoveDir::Right;
 
@@ -100,7 +109,7 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 	}
 	// 下端
 	if (!m_isTransition &&
-		playerManager.m_position.y + m_chipSize >= Screen::BOTTOM)
+		playerManager.m_position.y + playerH>= Screen::BOTTOM)
 	{
 		m_moveDir = MoveDir::Down;
 
@@ -128,9 +137,9 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 			if (m_moveDir == MoveDir::Right)
 				playerManager.m_position.x = 0+m_chipSize;
 			else if (m_moveDir == MoveDir::Left)
-				playerManager.m_position.x = Screen::RIGHT - m_chipSize*2;
+				playerManager.m_position.x = Screen::RIGHT - playerW-m_chipSize;
 			else if (m_moveDir == MoveDir::Up)
-				playerManager.m_position.y = Screen::BOTTOM - m_chipSize-16;
+				playerManager.m_position.y = Screen::BOTTOM - playerH-m_chipSize-16;
 			else if (m_moveDir == MoveDir::Down)
 				playerManager.m_position.y = 0+m_chipSize;
 			m_moveDir = MoveDir::None;
@@ -263,6 +272,19 @@ void Map::LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][
 	printf("Map0[5][38] = %d\n", m_workmap[0][5][38]);
 }
 
+bool Map::IsWallRect(int px, int py, int width, int height) const
+{
+	int left = px / m_chipSize;
+	int right = (px + width - 1) / m_chipSize;
+	int top = py / m_chipSize;
+	int bottom = (py + height - 1) / m_chipSize;
+
+	return GetTileType(left, top) == TileType::Wall ||
+		GetTileType(right, top) == TileType::Wall ||
+		GetTileType(left, bottom) == TileType::Wall ||
+		GetTileType(right, bottom) == TileType::Wall;
+}
+
 Map::TileType Map::GetTileType(int x, int y)const
 {
 	if(x < -1 || x >= MAP_WIDTH+1 ||
@@ -306,6 +328,10 @@ void Map::ChangeStage(int stageNo)
 	m_currentMap = GetStageStartMap();
 }
 
+int Map::GetBreakLevel()const
+{
+	return m_level;
+}
 /**
  * @brief 指定範囲のオブジェクトとタイルを置き換える
  * @param centerX 範囲の中心X座標
@@ -320,7 +346,11 @@ void Map::ChangeStage(int stageNo)
  */
 void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType)
 {
-	m_breakLevel++;
+	if (m_breakLevel < 40)
+	{
+		m_breakLevel++;
+	}
+	m_level = m_breakLevel / 10;
 	for (int y = top; y <= bottom; ++y)
 	{
 		for (int x = left; x <= right; ++x)
@@ -353,6 +383,7 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 			int tileY = static_cast<int>(position.y) / m_chipSize;
 
 			BreakArea(tileX, tileY, 0, 1, 0, 0, 40, 1, TileType::Floor);//右１マスを削る
+			BreakArea(tileX, tileY, -10, 10, -10, 10, -1, 1, TileType::Floor);//右１マスを削る
 		}
 
 		void Map::FireBreak(PlayerManager& player)
@@ -410,8 +441,8 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 			int tileX = static_cast<int>(position.x) / m_chipSize;
 			int tileY = static_cast<int>(position.y) / m_chipSize;
 
-			BreakArea(tileX, tileY, 3, 3, 0, 0, 40, 57, TileType::Wall);//左右３マス分枯れ木に変える
-			BreakArea(tileX, tileY, 3, 3, 0, 0, 41, 57, TileType::Wall);//左右３マス分枯れ木に変える
+			BreakArea(tileX, tileY, -3, 3, -1, 2, 40, 57, TileType::Wall);//左右３マス分枯れ木に変える
+			BreakArea(tileX, tileY, -3, 3, -1, 2, 41, 57, TileType::Wall);//左右３マス分枯れ木に変える
 		}
 
 		void Map::ThunderBreak(PlayerManager& player)
@@ -442,7 +473,7 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 			int tileX = static_cast<int>(position.x) / m_chipSize;
 			int tileY = static_cast<int>(position.y) / m_chipSize;
 
-			BreakArea(tileX, tileY, 0, 0, 0, 0,-1, 200, TileType::NextFloor);
+			BreakArea(tileX+3, tileY, -2, 2, -2, 2,-1, 200, TileType::NextFloor);
 		}
 
 		void Map::WaterFlowsBreak(PlayerManager& player)

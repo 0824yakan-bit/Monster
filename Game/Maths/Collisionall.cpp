@@ -10,8 +10,8 @@ bool Collisionall::HitCharacter(PlayerManager& player, Enemy* enemy)
     return AABB(
         player.m_position.x,
         player.m_position.y,
-        player.m_size,
-        player.m_size,
+        player.m_size.x,
+        player.m_size.y,
 
         enemy->position.x,
         enemy->position.y,

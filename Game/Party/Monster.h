@@ -24,8 +24,8 @@ public:
         Water, //水属性
         Grass, //草属性
         Soil,  //土属性
-        Wind,  //風属性
         Thunder,//雷属性
+        Wind,  //風属性
 
         Defense//防御
     };

@@ -24,11 +24,18 @@ void Golem::Initialize(Map& map, int x, int y)
 	size.x = map.m_chipSize * 2;
 	size.y = map.m_chipSize * 2;
 
+
+	renderPosition.x = 500.0f;
+	renderPosition.y = 100.0f;
+
+	renderSize.x = 200.0f;
+	renderSize.y = 200.0f;
+
 	power = 10;
 	hp = 10;
 }
 
-void Golem::Update()
+void Golem::Update(Map& map)
 {
 
 	//moveTimer++;
@@ -42,7 +49,8 @@ void Golem::Update()
 
 void Golem::Render()
 {
-	DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
+	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
+	m_image->DrawGolem(position, size);
 }
 
 void Golem::Finalize()
@@ -57,5 +65,6 @@ void Golem::OnHit(PlayerManager& playermanager)
 
 void Golem::RenderBattle()
 {
-	DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
+	//DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
+	m_image->DrawGolem(renderPosition, renderSize);
 }

@@ -7,6 +7,33 @@
 #include"Game/Enemy/Enemy.h"
 #include"Game/Enemy/EnemyManager.h"
 
+static FieldScene::CooperatList ToCooperatList(Monster::CharacteRistics type)
+{
+	switch (type)
+	{
+	case Monster::CharacteRistics::Fire:
+		return FieldScene::CooperatList::Fire;
+
+	case Monster::CharacteRistics::Water:
+		return FieldScene::CooperatList::Water;
+
+	case Monster::CharacteRistics::Grass:
+		return FieldScene::CooperatList::Grass;
+
+	case Monster::CharacteRistics::Soil:
+		return FieldScene::CooperatList::Soil;
+
+	case Monster::CharacteRistics::Wind:
+		return FieldScene::CooperatList::Wind;
+
+	case Monster::CharacteRistics::Thunder:
+		return FieldScene::CooperatList::Thunder;
+
+	default:
+		return FieldScene::CooperatList::None;
+	}
+}
+
 BattleScene::BattleScene()
 	:m_isFieldRequested{false}
 	,m_isReplaceSelect{false}
@@ -42,8 +69,9 @@ void BattleScene::Initialize(InputManager& inputmanager,SceneManager&sceneManage
 	m_receponsTimer = 0;
 }
 
-void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, EnemyManager& enemyManager,Map&map, Party& party,PlayerManager&player)
+void BattleScene::Update(InputManager& inputManager,SceneManager&sceneManager,FieldScene&fieldScene, GameOver& gameOver, EnemyManager& enemyManager,Map&map, Party& party,PlayerManager&player)
 {
+	inputManager.Update();
 	m_receponsTimer++;
 	//printfDx(L"Field=%d Join=%d HP=%d\n",m_isFieldRequested,m_isJoinRequested,m_enemy ? m_enemy->GetHp() : -1);
 
@@ -60,12 +88,15 @@ void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, E
 
 			if (select != -1)
 			{
+				Monster* learnedMonster = m_pendingMonster.get();
+
 				party.RemoveMonster(select);
 				party.AddMonster(std::move(m_pendingMonster));
 
-				enemyManager.RemoveEnemy(m_enemy);
-				m_enemy = nullptr;
-				m_isFieldRequested = true;
+				for (const auto& atk : learnedMonster->GetAttacks())
+				{
+					fieldScene.LearnSkill(ToCooperatList(atk.ristics));
+				}
 			}
 
 		}
@@ -89,7 +120,13 @@ void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, E
 	}
 	if (!m_isJoinRequested && !m_isReplaceSelect && m_enemy)
 	{
-		m_battle->Update(&sceneManager,map,player);
+		m_battle->Update(inputManager ,&sceneManager,gameOver,map,player);
+		// GameOverからタイトル要求が来たら
+		if (gameOver.IsTitleRequest())
+		{
+			m_isTitleRequested = true;
+			return;
+		}
 	}
 
 	if (m_battle->IsFieldRequested())
@@ -157,7 +194,17 @@ void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, E
 
 						if (party.GetMonsterCount() < 4)
 						{
+							// 追加前に生ポインタを保持
+							Monster* learnedMonster = monster.get();
+
 							party.AddMonster(std::move(monster));
+
+							// モンスターが持つ技から属性を習得
+							for (const auto& atk : learnedMonster->GetAttacks())
+							{
+								printfDx(L"Learn %d\n", (int)atk.ristics);
+								fieldScene.LearnSkill(ToCooperatList(atk.ristics));
+							}
 
 							enemyManager.RemoveEnemy(m_enemy);
 							m_enemy = nullptr;
@@ -238,19 +285,10 @@ void BattleScene::Update(InputManager& inputmanager,SceneManager&sceneManager, E
 			{
 				printfDx(L"仲間はいません\n");
 			}
-		
 	}
-	if (m_battle->GetAnnihilation())
-	{
-		if (CheckHitKey(KEY_INPUT_RETURN))
-		{
-			m_isTitleRequested = true;
-		}
 
-		return;
-	}
 }
-void BattleScene::Render(Party&party)
+void BattleScene::Render(GameOver& gameOver,Party&party)
 {
 	if (!m_enemy)
 	{
@@ -271,11 +309,11 @@ void BattleScene::Render(Party&party)
 		break;
 	}
 
-	m_battle->Render();
+	m_battle->Render(gameOver);
 
 	if (m_battle->GetAnnihilation())
 	{
-		m_battle->RenderAnnihilation();
+		m_battle->RenderAnnihilation(gameOver);
 	}
 
 	if (m_isJoinRequested)

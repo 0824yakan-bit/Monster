@@ -2,7 +2,18 @@
 #include "Game/Scene/FieldScene.h"
 
 #include"Game/Maths/Collisionall.h"
+#include"Game/Party/Monster.h"
 #include"Game/Battle/Battle.h"
+
+static std::vector<Battle::UsedAttackInfo>MakeFieldEffect(Monster::CharacteRistics element, const wchar_t* name)
+{
+    Battle::UsedAttackInfo info;
+    info.element = element;
+    info.attackName = name;
+
+    return { info };
+}
+
 FieldScene::FieldScene()
     :m_hitEnemy{nullptr}
     ,m_isBattleRequested{false}
@@ -13,6 +24,7 @@ FieldScene::FieldScene()
     ,m_isCooperatDetailActive{false}
     ,m_CooperatDetailSelect{0}
     ,m_cooperatList{CooperatList::Empty}
+    
 {
 }
 
@@ -20,8 +32,18 @@ FieldScene::~FieldScene()
 {
 }
 
-void FieldScene::Initialize(InputManager& inputmanager, Map& map)
+
+void FieldScene::Initialize(InputManager& inputmanager,PlayerManager&playerManager, Map& map)
 {
+    playerManager.SetImage(m_image);
+
+    // 初回だけ登録
+    if (m_unlockedSkills.empty())
+    {
+        m_unlockedSkills.insert(CooperatList::None);//初期スライム用
+        m_unlockedSkills.insert(CooperatList::Water);//初期スライム用
+    }
+
     m_isMapActive = false;
     m_isMenuActive = false;
 
@@ -50,6 +72,7 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
 {
     inputManager.Update();
     map.Update(inputManager, playerManager);
+    m_breakLevel = map.GetBreakLevel();
 
 ////マップ表示・メニュー表示状態管理
    // printfDx(L"現在 (%d,%d)\n", playerManager.m_position.x,playerManager.m_position.y);
@@ -104,30 +127,10 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
         {
             if (m_isCooperatDetailActive)//連携技選択
             {
-                switch (m_CooperatDetailSelect)
+                if (m_CooperatDetailSelect >= 0 &&
+                    m_CooperatDetailSelect < (int)m_visibleSkills.size())
                 {
-                case 0:
-                    m_cooperatList = CooperatList::None;
-                    break;
-                case 1:
-                    printfDx(L"Fire selected");
-                    m_cooperatList = CooperatList::Fire;
-                    break;
-                case 2:
-                    m_cooperatList = CooperatList::Water;
-                    break;
-                case 3:
-                    m_cooperatList = CooperatList::Grass;
-                    break;
-                case 4:
-                    m_cooperatList = CooperatList::Soil;
-                    break;
-                case 5:
-                    m_cooperatList = CooperatList::Wind;
-                    break;
-                case 6:
-                    m_cooperatList = CooperatList::Thunder;
-                    break;
+                    m_cooperatList = m_visibleSkills[m_CooperatDetailSelect];
                 }
             }
             else//メニュー
@@ -175,58 +178,73 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
         case CooperatList::None:
             map.NormalBreak(playerManager);
             printfDx(L"UsedNormalBreak");
+            SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::None, L""));
+
             m_isMenuActive = false;
             m_isCooperatDetailActive = false;
-
+            m_cooperatList = CooperatList::Empty;
             break;
 
         case CooperatList::Fire:
             map.FireBreak(playerManager);
+            SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Fire, L""));
+
             printfDx(L"UsedFireBreak");
             m_isMenuActive = false;
             m_isCooperatDetailActive = false;
-
+            m_cooperatList = CooperatList::Empty;
             break;
 
         case CooperatList::Water:
             map.WaterBreak(playerManager);
+            SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Water, L""));
+
             printfDx(L"UsedWaterBreak");
             m_isMenuActive = false;
             m_isCooperatDetailActive = false;
-
+            m_cooperatList = CooperatList::Empty;
             break;
 
         case CooperatList::Grass:
             map.GrassBreak(playerManager);
+            SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Grass, L""));
+
             printfDx(L"UsedGrassBreak");
             m_isMenuActive = false;
             m_isCooperatDetailActive = false;
-
+            m_cooperatList = CooperatList::Empty;
             break;
 
         case CooperatList::Soil:
             map.SoilBreak(playerManager);
+            SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Soil, L""));
+
             printfDx(L"UsedSoilBreak");
             m_isMenuActive = false;
             m_isCooperatDetailActive = false;
-
-            break;
-
-        case CooperatList::Wind:
-            map.WindBreak(playerManager);
-            printfDx(L"UsedWindBreak");
-            m_isMenuActive = false;
-            m_isCooperatDetailActive = false;
-
+            m_cooperatList = CooperatList::Empty;
             break;
 
         case CooperatList::Thunder:
             map.ThunderBreak(playerManager);
+            SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Thunder, L""));
+
             printfDx(L"UsedThunderBreak");
             m_isMenuActive = false;
             m_isCooperatDetailActive = false;
             m_cooperatList = CooperatList::Empty;
             break;
+
+        case CooperatList::Wind:
+            map.WindBreak(playerManager);
+            SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Wind, L""));
+
+            printfDx(L"UsedWindBreak");
+            m_isMenuActive = false;
+            m_isCooperatDetailActive = false;
+            m_cooperatList = CooperatList::Empty;
+            break;
+
 
         }
     }// if(m_isMenuActive)
@@ -241,7 +259,7 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
         playerManager.m_invicible = false;
     }
 /////エネミー管理
-    enemyManager.Update();
+    enemyManager.Update(map);
 
     Enemy* enemy = enemyManager.CheckHit(playerManager);
 
@@ -271,7 +289,31 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
             }
         }
     }
-/////
+/////ブレイクレベル管理
+        int m_level = m_breakLevel / 10;
+        switch (m_level)
+        {
+        case 0://一段階目//初期
+            Level5(enemyManager,map);
+
+            break;
+        case 1://二段階目
+            Level2();
+
+            break;
+        case 2://三段階目
+            Level3();
+
+            break;
+        case 3://四段階目
+            Level4();
+
+            break;
+        case 4://五段階目//最大
+            Level5(enemyManager,map);
+
+            break;
+        }
     
 
 }
@@ -331,7 +373,7 @@ void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager
 
         float cursorY = positiony + 50.0f * m_menuListSelect;
 
-        DrawBox(positionx, cursorY, positionx + sizex, cursorY + sizey, GetColor(0, 255, 255), FALSE);
+        DrawBoxAA(positionx, cursorY, positionx + sizex, cursorY + sizey, GetColor(0, 255, 255), FALSE);
         SetFontSize(30);
         DrawString(60, 70, L"技", GetColor(0, 0, 0), TRUE);
         DrawString(60, 120, L"仲間", GetColor(0, 0, 0), TRUE);
@@ -365,6 +407,8 @@ void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager
         printfDx(L"m_image is nullptr!");
         return;
     }
+    DrawFormatString(10, 200, GetColor(255, 255, 255), L"BreakLevel:%d", m_breakLevel, TRUE);//ブレイクレベル
+
     m_image->DrawM(Mposition, size);
     m_image->DrawN(Nposition, size);
 
@@ -404,20 +448,71 @@ void FieldScene::RenderCooperativeMove()
     float sizex = 200.0f;
     float sizey = 50.0f;
 
+    // 表示中の技一覧を作り直す
+    m_visibleSkills.clear();
+
+    auto AddSkill = [&](CooperatList skill)
+        {
+            if (HasSkill(skill))
+            {
+                m_visibleSkills.push_back(skill);
+            }
+        };
+
+    AddSkill(CooperatList::None);
+    AddSkill(CooperatList::Fire);
+    AddSkill(CooperatList::Water);
+    AddSkill(CooperatList::Grass);
+    AddSkill(CooperatList::Soil);
+    AddSkill(CooperatList::Wind);
+    AddSkill(CooperatList::Thunder);
+
+    // カーソル補正
+    if (m_visibleSkills.empty())
+    {
+        return;
+    }
+
+    if (m_CooperatDetailSelect < 0)
+    {
+        m_CooperatDetailSelect = (int)m_visibleSkills.size() - 1;
+    }
+
+    if (m_CooperatDetailSelect >= (int)m_visibleSkills.size())
+    {
+        m_CooperatDetailSelect = 0;
+    }
+
     float cursorY = positiony + 50.0f * m_CooperatDetailSelect;
 
-    DrawBox(positionx, cursorY, positionx + sizex, cursorY + sizey, GetColor(0, 0, 0), FALSE);
-
+    DrawBoxAA(positionx, cursorY,
+        positionx + sizex, cursorY + sizey,
+        GetColor(0, 0, 0), FALSE);
 
     SetFontSize(50);
-    DrawFormatString(250,  50, GetColor(0, 0, 0), L"技一覧", TRUE);
-    DrawFormatString(250, 150, GetColor(0, 0, 0), L"無属性", TRUE);
-    DrawFormatString(250, 200, GetColor(0, 0, 0), L"火属性", TRUE);
-    DrawFormatString(250, 250, GetColor(0, 0, 0), L"水属性", TRUE);
-    DrawFormatString(250, 300, GetColor(0, 0, 0), L"草属性", TRUE);
-    DrawFormatString(250, 350, GetColor(0, 0, 0), L"土属性", TRUE);
-    DrawFormatString(250, 400, GetColor(0, 0, 0), L"風属性", TRUE);
-    DrawFormatString(250, 450, GetColor(0, 0, 0), L"雷属性", TRUE);
+    DrawString(250, 50, L"技一覧", GetColor(0, 0, 0), TRUE);
+
+    int y = 150;
+
+    for (auto skill : m_visibleSkills)
+    {
+        const wchar_t* name = L"";
+
+        switch (skill)
+        {
+        case CooperatList::None:    name = L"無属性"; break;
+        case CooperatList::Fire:    name = L"火属性"; break;
+        case CooperatList::Water:   name = L"水属性"; break;
+        case CooperatList::Grass:   name = L"草属性"; break;
+        case CooperatList::Soil:    name = L"土属性"; break;
+        case CooperatList::Wind:    name = L"風属性"; break;
+        case CooperatList::Thunder: name = L"雷属性"; break;
+        default: break;
+        }
+
+        DrawString(250, y, name, GetColor(0, 0, 0), TRUE);
+        y += 50;
+    }
 
     SetFontSize(10);
 }
@@ -440,6 +535,40 @@ void FieldScene::RenderOperationInstructions()
     DrawString(500, 500, L"操作説明オープン", GetColor(0, 0, 0), TRUE);
 }
 
+void FieldScene::Level1()
+{
+}
+
+void FieldScene::Level2()
+{
+
+}
+
+void FieldScene::Level3()
+{
+}
+
+void FieldScene::Level4()
+{
+}
+
+void FieldScene::Level5(EnemyManager&enemyManager, Map& map)
+{
+    enemyManager.Update(map);
+}
+
+
+
+void FieldScene::LearnSkill(CooperatList skill)
+{
+    printfDx(L"FieldScene LearnSkill %d\n", (int)skill);
+    m_unlockedSkills.insert(skill);
+}
+
+bool FieldScene::HasSkill(CooperatList skill) const
+{
+    return m_unlockedSkills.count(skill) > 0;
+}
 
 
 
@@ -473,3 +602,4 @@ void FieldScene::SetAttackEffects( const std::vector<Battle::UsedAttackInfo>& ef
     m_effectTimer = 0;
     m_playEffect = !effects.empty();
 }
+

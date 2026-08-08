@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Game/Battle/Battle.h"
+#include"Game/Scene/FieldScene.h"
 class InputManager;
 class FieldScene;
 class SceneManager;
@@ -40,8 +41,8 @@ public:
 	~BattleScene();
 
 	void Initialize(InputManager& inputmanager,SceneManager&sceneManager,Map&map,Party&party);
-	void Update(InputManager& inputmanager,SceneManager&sceneManager,EnemyManager&enemyManager,Map&map,Party&party,PlayerManager&player);
-	void Render(Party&party);
+	void Update(InputManager& inputmanager,SceneManager&sceneManager,FieldScene&fieldScene, GameOver& gameOver,EnemyManager&enemyManager,Map&map,Party&party,PlayerManager&player);
+	void Render(GameOver& gameOver,Party&party);
 	void Finalize();
 
 	bool IsFieldRequested()const;

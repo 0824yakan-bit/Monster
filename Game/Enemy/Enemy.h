@@ -22,6 +22,14 @@ public:
     };
     EnemyType type;
 
+    enum Direction
+    {
+        Up,
+        Down,
+        Left,
+        Right,
+    };
+    Direction direction;
 
     const wchar_t* name;
 
@@ -35,7 +43,10 @@ public:
 
     int power;
 
+    int level;
+
     int moveTimer;
+    int moveCounter;
 
 public:
     void Damage(int power);//パーティのpower
@@ -49,7 +60,7 @@ public:
     virtual ~Enemy() = default;
 
     virtual void Initialize(Map& map,int x,int y) = 0;
-    virtual void Update() = 0;
+    virtual void Update(Map&map) = 0;
     virtual void Render() = 0;//マップシーンでの描画
     virtual void Finalize() = 0;
 

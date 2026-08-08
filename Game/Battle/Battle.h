@@ -1,10 +1,12 @@
 ﻿#pragma once
 #include"Game/Player/PlayerManager.h"
+#include"Game/Scene/GameOver.h"
 #include"Game/Party/Party.h"
 #include "Game/Enemy/Enemy.h"
 
 class Map;
 class SceneManager;
+class GameOver;
 class PlayerMove;
 class Party;
 class Enemy;
@@ -104,8 +106,8 @@ public:
 	~Battle();
 
 	void Initialize(SceneManager*sceneManager);
-	void Update(SceneManager*sceneManager, Map& map, PlayerManager& player);
-	void Render();
+	void Update(InputManager& inpuManager,SceneManager*sceneManager, GameOver& gameOver, Map& map, PlayerManager& player);
+	void Render(GameOver& gameOver);
 	void Finalize();
 
 	void RenderCommand();//動作選択画面
@@ -132,8 +134,8 @@ public:
 	void RenderEnemyDead();
 
 
-	void UpdateAnnihilation();
-	void RenderAnnihilation();
+	void UpdateAnnihilation(GameOver&gameOver, InputManager& inpuManager);
+	void RenderAnnihilation(GameOver& gameOver);
 
 	void EndTurn();//ターン終了
 

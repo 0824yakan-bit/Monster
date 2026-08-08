@@ -33,7 +33,10 @@ namespace
         {2,3,10,10},
 
         //map3
-        {3,1,1,10}
+        {3,1,1,10},
+
+        //map4
+        {4,4,15,15},
     };
 }
 
@@ -62,9 +65,11 @@ void EnemyManager::Initialize(Map& map)
         case 2:
             CreateDragon(data.x, data.y, map);
             break;
+
         case 3:
             CreateGolem(data.x, data.y, map);
             break;
+
         case 4:
             CreateFairy(data.x, data.y, map);
             break;
@@ -74,11 +79,12 @@ void EnemyManager::Initialize(Map& map)
 
 }
 
-void EnemyManager::Update()
+void EnemyManager::Update(Map&map)
 {
+
     for (auto& enemy : m_enemies)
     {
-        enemy->Update();
+        enemy->Update(map);
     }
 }
 
@@ -168,6 +174,9 @@ void EnemyManager::CreateDragon(int x, int y, Map& map)
 void EnemyManager::CreateGolem(int x, int y, Map& map)
 {
     auto golem = std::make_unique<Golem>();
+
+    golem->SetImage(m_image);
+
     golem->Initialize(map, x, y);
 
     m_enemies.push_back(std::move(golem));
@@ -176,6 +185,9 @@ void EnemyManager::CreateGolem(int x, int y, Map& map)
 void EnemyManager::CreateFairy(int x, int y, Map& map)
 {
     auto fairy = std::make_unique<Fairy>();
+
+    fairy->SetImage(m_image);
+
     fairy->Initialize(map, x, y);
 
     m_enemies.push_back(std::move(fairy));
