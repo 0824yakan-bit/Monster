@@ -25,7 +25,7 @@ private:
 public:
 
 public:
-	PlayerMove();
+	PlayerMove(Map&map);
 	~PlayerMove();
 
 	void Initialize(Map*map,PlayerManager& palayermanager);

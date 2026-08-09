@@ -1,9 +1,10 @@
 #include "pch.h"
 #include "Game/TileRole/TileRole.h"
 
-TileRole::TileRole()
-	:map{}
-	,m_currentTileNo{}
+TileRole::TileRole(Map&map)
+	:map{map}
+	,m_currentTileNo{0}
+	,m_chipsize{0}
 {
 }
 

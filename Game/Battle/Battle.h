@@ -66,6 +66,11 @@ private:
 	int m_monsterhp[MAX_PARTY];//パーティの現在のhp・4体まで
 	int m_displayIndex;//現在の味方行動表示
 	int m_select;
+	bool m_playAttackEffect = false;
+	int  m_attackEffectTimer = 0;
+	static constexpr int ATTACK_EFFECT_DURATION = 150;
+	Monster::CharacteRistics m_effectElement = Monster::CharacteRistics::None;
+
 	int m_receponsTimer;
 	int m_displaytextTimer;
 	std::wstring m_deadEnemyName;

@@ -4,9 +4,9 @@
 #include"Game/Player/PlayerManager.h"
 #include"Game/Map/Map.h"
 #include"Game/Battle/Battle.h"
-PlayerMove::PlayerMove()
+PlayerMove::PlayerMove(Map&map)
 	:m_inputManager {}
-	
+	,m_tileRole{map}
 
 	,m_speed		{}
 	,m_movetimer	{}

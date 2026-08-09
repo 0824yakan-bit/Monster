@@ -11,6 +11,7 @@
 Map::Map()
 	:m_basemap		{ }
 	,m_workmap		{ }
+	,m_fog			{false}
 	,m_ghChip		{ }
 	,m_chipSize		{ }
 	,m_currentMap	{ }
@@ -55,6 +56,17 @@ void Map::Initialize(const wchar_t* fileName)
 
 	LoadMapChip(L"Resources/CSV/map.csv", m_workmap);
 	LoadMapChip(L"Resources/CSV/object.csv",m_objectmap);
+
+	for (int map = 0;map < MAP_NUM;++map)
+	{
+		for (int y = 0;y < MAP_HEIGHT;++y)
+		{
+			for (int x = 0;x < MAP_WIDTH;++x)
+			{
+				m_fog[map][y][x] = true;
+			}
+		}
+	}
 }
 void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 {
@@ -145,6 +157,10 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 			m_moveDir = MoveDir::None;
 		}
 	}
+	int px = playerManager.m_position.x / m_chipSize;
+	int py = playerManager.m_position.y / m_chipSize;
+
+	RevealArea(px, py, 4);
 }
 void Map::Render()
 {
@@ -190,8 +206,16 @@ void Map::DrawCurrentMap(int offsetX, int offsetY)
 			{
 				DrawGraph(x * m_chipSize + offsetX,y * m_chipSize + offsetY,m_ghChip[objectNo],	TRUE);
 			}
+		///霧描画
+			if (m_fog[m_currentMap][y][x])
+			{
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+				DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+			}
 		}
 	}
+
 }
 void Map::DrawNextMap(int offsetX, int offsetY)
 {
@@ -208,6 +232,14 @@ void Map::DrawNextMap(int offsetX, int offsetY)
 			if (objectNo >= 0)
 			{
 				DrawGraph(x * m_chipSize + offsetX,y * m_chipSize + offsetY,m_ghChip[objectNo],	TRUE);
+			}
+
+		///霧描画
+			if (m_fog[m_nextmap][y][x])
+			{
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 200);
+				DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}
 	}
@@ -372,7 +404,23 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 		}
 	}
 }
+void Map::RevealArea(int centerX, int centerY, int radius)
+{
+	for (int y = -radius; y <= radius; ++y)
+	{
+		for (int x = -radius; x <= radius; ++x)
+		{
+			int tx = centerX + x;
+			int ty = centerY + y;
 
+			if (tx < 0 || tx >= MAP_WIDTH ||
+				ty < 0 || ty >= MAP_HEIGHT)
+				continue;
+
+			m_fog[m_currentMap][ty][tx] = false;
+		}
+	}
+}
 		void Map::NormalBreak(PlayerManager& player)
 		{
 			printfDx(L"NormalBleak called");
@@ -383,7 +431,8 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 			int tileY = static_cast<int>(position.y) / m_chipSize;
 
 			BreakArea(tileX, tileY, 0, 1, 0, 0, 40, 1, TileType::Floor);//右１マスを削る
-			BreakArea(tileX, tileY, -10, 10, -10, 10, -1, 1, TileType::Floor);//右１マスを削る
+			BreakArea(tileX, tileY, -1, 1, -1, 1, -1, 1, TileType::Floor);
+			RevealArea(tileX, tileY, 3);
 		}
 
 		void Map::FireBreak(PlayerManager& player)

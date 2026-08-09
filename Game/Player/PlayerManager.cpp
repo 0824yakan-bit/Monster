@@ -3,8 +3,9 @@
 
 #include"Game/ImageManager/ImageManager.h"
 
-PlayerManager::PlayerManager()
-	:map(nullptr)
+PlayerManager::PlayerManager(Map&map)
+	:map()
+	,m_playerMove(map)
 	,m_position{0,0}
 	,m_size{0,0}
 	,m_invicible{false}
@@ -32,12 +33,12 @@ void PlayerManager::Initialize(Map*map)
 
 	 m_position.x = 5*m_size.x;
 	 m_position.y = 5*m_size.y;
-	playermove.Initialize(map,*this);
+	m_playerMove.Initialize(map,*this);
 }
 
 void PlayerManager::Update(Map*map)
 {
-	playermove.Update(map,this);
+	m_playerMove.Update(map,this);
 
 	
 
@@ -45,7 +46,7 @@ void PlayerManager::Update(Map*map)
 
 void PlayerManager::Render(Map* map)
 {
-	playermove.Render(map,this);
+	m_playerMove.Render(map,this);
 	switch(m_direction)
 	{
 	case Direction::Up:
@@ -67,7 +68,7 @@ void PlayerManager::Render(Map* map)
 
 void PlayerManager::Finalize()
 {
-	playermove.Finalize();
+	m_playerMove.Finalize();
 
 }
 

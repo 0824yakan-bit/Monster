@@ -7,7 +7,7 @@ class ImageManager;
 class PlayerManager
 {
 private:
-	PlayerMove playermove;
+	PlayerMove m_playerMove;
 	Map* map;
 	ImageManager* m_image = nullptr;
 
@@ -28,7 +28,7 @@ public:
 
 	bool m_invicible;//にげる選択時のみ
 public:
-	PlayerManager();
+	PlayerManager(Map&map);
 	~PlayerManager();
 
 	void Initialize(Map*map);

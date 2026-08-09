@@ -9,7 +9,7 @@ private:
 	int   m_chipsize;
 	float m_currentTileNo;
 public:
-	TileRole();
+	TileRole(Map&map);
 		~TileRole();
 
 	void Initialize(const Map&map);

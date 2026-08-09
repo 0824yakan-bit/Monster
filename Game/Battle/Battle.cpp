@@ -204,6 +204,17 @@ void Battle::Update(InputManager& inputManager,SceneManager*sceneManager, GameOv
 		UpdateAnnihilation(gameOver,inputManager);
 		break;
 	}
+
+/// 攻撃エフェクト更新
+	if (m_playAttackEffect)
+	{
+		m_attackEffectTimer++;
+
+		if (m_attackEffectTimer >= ATTACK_EFFECT_DURATION)
+		{
+			m_playAttackEffect = false;
+		}
+	}
 }
 
 void Battle::Render(GameOver& gameOver)
@@ -284,7 +295,47 @@ void Battle::Render(GameOver& gameOver)
 			m_enemy->RenderBattle();
 		}
 	}
+	// 攻撃エフェクト描画
+	if (m_playAttackEffect)
+	{
+		// 残り時間から透明度を計算
+		float rate = 1.0f - (float)m_attackEffectTimer / ATTACK_EFFECT_DURATION;
+		int alpha = (int)(180 * rate); // 最大180
 
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+
+		switch (m_effectElement)
+		{
+		case Monster::CharacteRistics::Fire:
+			DrawBox(0, 0, 1280, 720, GetColor(255, 80, 0), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Water:
+			DrawBox(0, 0, 1280, 720, GetColor(0, 120, 255), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Grass:
+			DrawBox(0, 0, 1280, 720, GetColor(0, 200, 0), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Soil:
+			DrawBox(0, 0, 1280, 720, GetColor(139, 69, 19), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Wind:
+			DrawBox(0, 0, 1280, 720, GetColor(180, 180, 180), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Thunder:
+			DrawBox(0, 0, 1280, 720, GetColor(255, 255, 0), TRUE);
+			break;
+
+		default:
+			break;
+		}
+
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
 	if (m_enemy != nullptr)
 	{
 		DrawFormatString(500, 120,GetColor(0, 255, 255),L"HP : %d",m_enemy->GetHp());
@@ -578,6 +629,10 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 		}
 
 		m_characteRistics = attacks[index].ristics;
+		// エフェクト開始
+		m_effectElement = m_characteRistics;
+		m_playAttackEffect = true;
+		m_attackEffectTimer = 0;
 
 		printfDx(L"Attack=%ls Type=%d",attacks[index].name,(int)m_characteRistics);
 
@@ -732,6 +787,7 @@ void Battle::RenderAttackAction()
 		DrawBox(40, 530, 1240, 690,GetColor(0, 0, 0), TRUE);
 		DrawString(	50,	550,m_displayMessage.c_str(),GetColor(255,255,255));
 	}
+
 }
 
 void Battle::UpdateTool()

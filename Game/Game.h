@@ -39,16 +39,16 @@ public:
 	// システム関連
 	static constexpr const wchar_t* TITLE = L"Sample Game";   ///< ゲームタイトル
 	//
+private:
 	ImageManager m_imageManager;
-
+	Map m_map;
 	PlayerManager m_playerManager;
 	EnemyManager m_enemyManager;
-	Map m_map;
 	InputManager m_inputManager;
 	SceneManager m_sceneManager;
 	Battle m_battle;
-
 	Party m_party;
+
 
 	//
 

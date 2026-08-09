@@ -44,6 +44,7 @@ public:
 	TileType m_basemap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//当たり判定用のマップデータ
 	int m_workmap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//描画用のマップデータ
 	int m_objectmap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//m_workmapの上から物体を表示
+	bool m_fog[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//霧の有無
 
 
 
@@ -78,7 +79,7 @@ public:
 
 	int GetBreakLevel()const;//地形破壊回数
 	//地形破壊
-
+	void RevealArea(int centerX, int centerY, int radius);
 	//属性単体
 	void NormalBreak (PlayerManager& player);//無属性
 	void FireBreak   (PlayerManager& player);//火属性
