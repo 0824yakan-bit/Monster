@@ -5,17 +5,17 @@
 class Collisionall
 {
 public:
-    float x;
-    float y;
-    float width;
-    float height;
+    int x;
+    int y;
+    int width;
+    int height;
 
 
     static bool AABB(
-        float x1, float y1,
-        float w1, float h1,
-        float x2, float y2,
-        float w2, float h2);
+        int x1, int y1,
+        int w1, int h1,
+        int x2, int y2,
+        int w2, int h2);
 
     static bool HitCharacter(PlayerManager& player, Enemy* enemy);
 

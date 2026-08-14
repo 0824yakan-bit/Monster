@@ -1,16 +1,12 @@
 ﻿#pragma once
+#include "Game/TileRole/TileRole.h"
+
 class InputManager;
 class PlayerManager;
 class Map
 {
 public:
-	enum class TileType
-	{
-		Floor,
-		Wall,
-		Object,
-		NextFloor
-	};
+
 	enum class MoveDir
 	{
 		None,
@@ -33,10 +29,13 @@ private:
 	int m_transition;
 
 private:
+	TileRole m_tileRole;
+
 	int m_stageNo = 0;   // 0=ステージ1, 1=ステージ2 ...
 	static constexpr int MAPS_PER_STAGE = 10;
+	int dangerAdd = 1;
 
-	void BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType);
+	void BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType,int dangerAdd);
 	int m_breakLevel;//1～50、～10:優しい・報酬小,　20:,　30:,　40:,　50:難しい・報酬大
 	int m_level;
 public:
@@ -44,6 +43,7 @@ public:
 	TileType m_basemap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//当たり判定用のマップデータ
 	int m_workmap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//描画用のマップデータ
 	int m_objectmap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//m_workmapの上から物体を表示
+	bool m_fog[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//霧の有無
 
 
 
@@ -60,6 +60,8 @@ public:
 	void LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][MAP_WIDTH]);
 
 	bool IsWallRect(int px, int py, int width, int height) const;
+	bool IsTreasureRect(int px, int py, int width, int height) const;
+	
 
 	TileType GetTileType(int x, int y)const;
 	int GetTileNo(int x, int y) const;
@@ -78,6 +80,9 @@ public:
 
 	int GetBreakLevel()const;//地形破壊回数
 	//地形破壊
+	void RevealArea(int centerX, int centerY, int radius);
+
+	void UsedTreasure(PlayerManager& player);//宝箱使用後
 
 	//属性単体
 	void NormalBreak (PlayerManager& player);//無属性

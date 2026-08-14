@@ -24,13 +24,19 @@
  * @param なし
  */
 Game::Game()
-	:m_inputManager{}
+	: m_inputManager{}
+	, m_map{}
+	, m_playerManager{}
+	, m_enemyManager{}
+	, m_sceneManager{}
+	, m_battle{}
+	, m_party{}
 	, m_key{ 0 }
 	, m_oldKey{ 0 }
+	, m_oldMapNo{ 0 }
 	, m_WorldTimer{ 0 }
 {
-	// 乱数の初期値を設定
-	SRand(static_cast<int>(time(nullptr)));
+	SRand(static_cast<unsigned int>(time(nullptr)));
 }
 
 

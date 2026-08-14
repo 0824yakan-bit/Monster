@@ -213,8 +213,14 @@
     <Image Include="Resources\Textures\M.png" />
     <Image Include="Resources\Textures\N.png" />
     <Image Include="Resources\Textures\right.png" />
+    <Image Include="Resources\Textures\river.png" />
     <Image Include="Resources\Textures\wolf.png" />
     <Image Include="Resources\Textures\slime.png" />
+    <Image Include="Resources\Textures\ボス部屋.png" />
+    <Image Include="Resources\Textures\平原.png" />
+    <Image Include="Resources\Textures\森.png" />
+    <Image Include="Resources\Textures\火山地帯.png" />
+    <Image Include="Resources\Textures\砂漠.png" />
     <ResourceCompile Include="EmbeddedResources\Resource.rc" />
     <Image Include="EmbeddedResources\Icon\Game.ico" />
     <!-- リソースファイル -->

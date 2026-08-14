@@ -7,7 +7,7 @@ class ImageManager;
 class PlayerManager
 {
 private:
-	PlayerMove playermove;
+	PlayerMove m_playerMove;
 	Map* map;
 	ImageManager* m_image = nullptr;
 
@@ -32,12 +32,13 @@ public:
 	~PlayerManager();
 
 	void Initialize(Map*map);
-	void Update(Map*map);
-	void Render(Map* map);
+	void Update(FieldScene* field, Map*map);
+	void Render(FieldScene* field,Map* map);
 	void Finalize();
 
 	Vector2 GetPosition();
 	int GetSpeed();
 	void SetImage(ImageManager* image);
+	Direction GetDirection()const;
 };
 

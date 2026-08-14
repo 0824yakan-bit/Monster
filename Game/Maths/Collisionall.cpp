@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "Game/Maths/Collisionall.h"
 #include "Game/Enemy/Enemy.h"
-bool Collisionall::AABB(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2)
+bool Collisionall::AABB(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2)
 {
     return(x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2);
 }

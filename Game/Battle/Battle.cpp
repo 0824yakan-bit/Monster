@@ -36,6 +36,10 @@ void Battle::Initialize(SceneManager*sceneManager)
 {
 	m_usedAttackOrder.clear();
 
+	drawBgPosition.x = 10;
+	drawBgPosition.y = 10;
+	drawBgSize.x = 1260;
+	drawBgSize.y = 500;
 	m_select = 0;
 	m_displayIndex = 0;
 	m_state = BattleState::Command;
@@ -66,7 +70,7 @@ void Battle::Initialize(SceneManager*sceneManager)
 	{
 		m_requestDefense[i] = false;
 	}
-	m_annihilation = true;
+	m_annihilation = false;
 }
 
 void Battle::Update(InputManager& inputManager,SceneManager*sceneManager, GameOver& gameOver, Map& map, PlayerManager& player)
@@ -82,8 +86,13 @@ void Battle::Update(InputManager& inputManager,SceneManager*sceneManager, GameOv
 	}
 	if (m_annihilation)
 	{
-		m_state = BattleState::Annihilation;
-
+		// 最初のフレームでは状態だけ切り替える
+		if (m_state != BattleState::Annihilation)
+		{
+			m_state = BattleState::Annihilation;
+			m_displaytextTimer = 0;
+			return; // ← このフレームでは UpdateAnnihilation を呼ばない
+		}
 	}
 	else
 	{
@@ -204,25 +213,91 @@ void Battle::Update(InputManager& inputManager,SceneManager*sceneManager, GameOv
 		UpdateAnnihilation(gameOver,inputManager);
 		break;
 	}
+
+/// 攻撃エフェクト更新
+	if (m_playAttackEffect)
+	{
+		m_attackEffectTimer++;
+
+		if (m_attackEffectTimer >= ATTACK_EFFECT_DURATION)
+		{
+			m_playAttackEffect = false;
+		}
+	}
 }
 
-void Battle::Render(GameOver& gameOver)
+void Battle::Render(GameOver& gameOver,Map&map)
 {
-	
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 50);
+
 	//戦闘画面
 	DrawBox(10, 10, 1270, 500, GetColor(255, 255, 255), TRUE);
 	//敵配置
 	DrawBox(50, 50, 1230, 460, GetColor(255, 0, 0), FALSE);
 	//コマンド選択位置
 	DrawBox(20, 520, 1260, 700, GetColor(255, 255, 255), TRUE);
+
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+	switch (map.GetCurrentMap())
+	{
+	case 0:
+		m_image->DrawForest(drawBgPosition, drawBgSize);//背景森描画
+		break;
+
+	case 1:
+		m_image->DrawPlain(drawBgPosition, drawBgSize);
+		break;
+
+	case 2:
+		m_image->DrawRiver(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 3:
+		m_image->DrawVolcano(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 4:
+		m_image->DrawCastle(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 5:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 6:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 7:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 8:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 9:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
+		break;
+	}
+
+
 	for (int i = 0;i < MAX_PARTY;i++)
 	{
 		DrawFormatString(30+(i*200), 30,  GetColor(0, 0, 0), L"%d", m_monsterhp[i]);//パーティの現在のHP表示
 
 	}
-	//printfDx(L"%s", m_annihilation ? L"true" : L"false");
 
-		//
+
 	switch (m_state)
 	{
 	case BattleState::Command:
@@ -258,7 +333,10 @@ void Battle::Render(GameOver& gameOver)
 		break;
 
 	case BattleState::Annihilation:
-		RenderAnnihilation(gameOver);
+		if (!gameOver.IsTitleRequest())
+		{
+			RenderAnnihilation(gameOver);
+		}
 		break;
 	}
 
@@ -284,7 +362,47 @@ void Battle::Render(GameOver& gameOver)
 			m_enemy->RenderBattle();
 		}
 	}
+	// 攻撃エフェクト描画
+	if (m_playAttackEffect)
+	{
+		// 残り時間から透明度を計算
+		float rate = 1.0f - (float)m_attackEffectTimer / ATTACK_EFFECT_DURATION;
+		int alpha = (int)(180 * rate); // 最大180
 
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+
+		switch (m_effectElement)
+		{
+		case Monster::CharacteRistics::Fire:
+			DrawBox(0, 0, 1280, 720, GetColor(255, 80, 0), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Water:
+			DrawBox(0, 0, 1280, 720, GetColor(0, 120, 255), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Grass:
+			DrawBox(0, 0, 1280, 720, GetColor(0, 200, 0), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Soil:
+			DrawBox(0, 0, 1280, 720, GetColor(139, 69, 19), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Wind:
+			DrawBox(0, 0, 1280, 720, GetColor(180, 180, 180), TRUE);
+			break;
+
+		case Monster::CharacteRistics::Thunder:
+			DrawBox(0, 0, 1280, 720, GetColor(255, 255, 0), TRUE);
+			break;
+
+		default:
+			break;
+		}
+
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
 	if (m_enemy != nullptr)
 	{
 		DrawFormatString(500, 120,GetColor(0, 255, 255),L"HP : %d",m_enemy->GetHp());
@@ -578,6 +696,10 @@ void Battle::UpdateAttackAction(Map&map,PlayerManager&player)
 		}
 
 		m_characteRistics = attacks[index].ristics;
+		// エフェクト開始
+		m_effectElement = m_characteRistics;
+		m_playAttackEffect = true;
+		m_attackEffectTimer = 0;
 
 		printfDx(L"Attack=%ls Type=%d",attacks[index].name,(int)m_characteRistics);
 
@@ -732,6 +854,7 @@ void Battle::RenderAttackAction()
 		DrawBox(40, 530, 1240, 690,GetColor(0, 0, 0), TRUE);
 		DrawString(	50,	550,m_displayMessage.c_str(),GetColor(255,255,255));
 	}
+
 }
 
 void Battle::UpdateTool()
@@ -905,6 +1028,11 @@ void Battle::EndTurn()
 
 
 
+
+void Battle::SetImage(ImageManager* image)
+{
+	m_image = image;
+}
 
 void Battle::SetPlayer(PlayerManager* player)
 {

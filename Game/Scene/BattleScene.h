@@ -11,6 +11,9 @@ class Map;
 class BattleScene
 {
 private:
+	Vector2 drawBgPosition;
+	Vector2 drawBgSize;
+
 	enum class TeamJoin
 	{
 		Join,//加入
@@ -23,6 +26,7 @@ private:
 	int m_joinSelect;
 	bool m_isJoinRequested;
 
+	ImageManager* m_image = nullptr;
 	Battle* m_battle;
 	PlayerManager* m_player;
 	Enemy* m_enemy;
@@ -42,7 +46,7 @@ public:
 
 	void Initialize(InputManager& inputmanager,SceneManager&sceneManager,Map&map,Party&party);
 	void Update(InputManager& inputmanager,SceneManager&sceneManager,FieldScene&fieldScene, GameOver& gameOver,EnemyManager&enemyManager,Map&map,Party&party,PlayerManager&player);
-	void Render(GameOver& gameOver,Party&party);
+	void Render(GameOver& gameOver,Party&party,Map&map);
 	void Finalize();
 
 	bool IsFieldRequested()const;
@@ -51,6 +55,7 @@ public:
 	bool IsTitleRequested()const;
 	void ResetTitleRequest();
 
+	void SetImage(ImageManager* image);
 	void SetPlayer(PlayerManager* player);
 	void SetEnemy(Enemy* enemy);
 

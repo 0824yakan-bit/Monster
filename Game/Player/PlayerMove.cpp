@@ -1,20 +1,18 @@
 ﻿#include "pch.h"
 #include "Game/Player/PlayerMove.h"
 
+#include"Game/Scene/FieldScene.h"
 #include"Game/Player/PlayerManager.h"
 #include"Game/Map/Map.h"
 #include"Game/Battle/Battle.h"
 PlayerMove::PlayerMove()
 	:m_inputManager {}
-	
 
 	,m_speed		{}
 	,m_movetimer	{}
 	,m_chipsize		{}
 	,m_mapX			{}
 	,m_mapY			{}
-	,type			{}
-	,nexttile		{}
 	,m_nextmapX		{}
 	,m_nextmapY		{}
 {
@@ -29,7 +27,6 @@ PlayerMove::~PlayerMove()
 
 void PlayerMove::Initialize(Map* map,PlayerManager& playermanager)
 {
-	m_tileRole	  .Initialize(*map);
 	m_inputManager.Initialize();
 
 	//初期値＝１マス分移動
@@ -37,18 +34,30 @@ void PlayerMove::Initialize(Map* map,PlayerManager& playermanager)
 	m_chipsize		= map		   ->GetChipSize();
 
 	m_movetimer = 0;
+
+	m_hitTreasure = false;
 }
 
-void PlayerMove::Update(Map*map,PlayerManager*playermanager)
+void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager)
 {
 
 	m_mapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
 	m_mapY = static_cast<int>(playermanager->m_position.y) / m_chipsize;
 	type = map->GetTileType(m_mapX, m_mapY);
-	m_tileRole.Update(*map,playermanager->m_position);
 	m_inputManager.Update();
 	m_movetimer--;
 
+	m_hitTreasure = map->IsTreasureRect(
+		static_cast<int>(playermanager->m_position.x),
+		static_cast<int>(playermanager->m_position.y),
+		playermanager->m_size.x,
+		playermanager->m_size.y);
+
+	if (m_hitTreasure)
+	{
+		field->UpdateTreasureOpen(m_inputManager, *playermanager,*map);
+		return;
+	}
 
 	if (m_movetimer < 0)
 	{
@@ -92,21 +101,22 @@ void PlayerMove::Update(Map*map,PlayerManager*playermanager)
 				 int bottom = static_cast<int>(playermanager->m_position.y + playerH - 1) / m_chipsize;
 
 				 // 4マスのどれかが壁なら戻す
-				 bool hitWall =
-					 map->GetTileType(left, top) == Map::TileType::Wall ||
-					 map->GetTileType(right, top) == Map::TileType::Wall ||
-					 map->GetTileType(left, bottom) == Map::TileType::Wall ||
-					 map->GetTileType(right, bottom) == Map::TileType::Wall;
+				 bool hitWall = map->IsWallRect(
+					 static_cast<int>(playermanager->m_position.x),
+					 static_cast<int>(playermanager->m_position.y),
+					 playermanager->m_size.x,
+					 playermanager->m_size.y);
 
 				 if (hitWall)
 				 {
 					 playermanager->m_position = playermanager->m_oldposition;
 				 }
+				
 		m_movetimer = 5;
 	}
 }
 
-void PlayerMove::Render(Map*map, PlayerManager* playermanager)
+void PlayerMove::Render(FieldScene* field, Map*map, PlayerManager* playermanager)
 {
 	//DrawBox(playermanager->m_position.x, playermanager->m_position.y, playermanager->m_position.x+32, playermanager->m_position.y+32, GetColor(255, 255, 255), TRUE);
  
@@ -117,15 +127,15 @@ void PlayerMove::Render(Map*map, PlayerManager* playermanager)
 
 	switch (type)
 	{
-	case Map::TileType::Floor:
+	case TileType::Floor:
 		name = L"Floor";
 		break;
 
-	case Map::TileType::Wall:
+	case TileType::Wall:
 		name = L"Wall";
 		break;
 
-	case Map::TileType::Object:
+	case TileType::Object:
 		name = L"Object";
 		break;
 	}
@@ -133,7 +143,10 @@ void PlayerMove::Render(Map*map, PlayerManager* playermanager)
 	int tileNo = map->GetTileNo(m_mapX, m_mapY);
 
 	DrawFormatString(10, 30, GetColor(255, 255, 0), L"TileNo : %d", tileNo);//チップナンバー
-
+	if (m_hitTreasure)
+	{
+		field->RenderTreasureOpen();
+	}
 }
 
 void PlayerMove::Finalize()
