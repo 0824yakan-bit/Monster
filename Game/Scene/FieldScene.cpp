@@ -24,6 +24,8 @@ FieldScene::FieldScene()
     ,m_isCooperatDetailActive{false}
     ,m_CooperatDetailSelect{0}
     ,m_cooperatList{CooperatList::Empty}
+    ,m_isTreasureOpen{false}
+    ,m_breakLevel{}
     
 {
 }
@@ -58,14 +60,14 @@ void FieldScene::Initialize(InputManager& inputmanager,PlayerManager&playerManag
 
 
     //画像配置
-    Mposition.x = 10.0f;
-    Mposition.y = 600.0f;
+    Mposition.x = 10;
+    Mposition.y = 600;
     
-    Nposition.x = 50.0f;
-    Nposition.y = 650.0f;
+    Nposition.x = 50;
+    Nposition.y = 650;
 
-    size.x = 50.0f;
-    size.y = 50.0f;
+    size.x = 50;
+    size.y = 50;
 }
 
 void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map&map,Battle&battle)
@@ -251,7 +253,7 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
 
 /////プレイヤー管理
 
-    if (!m_isMapActive && !m_isMenuActive)playerManager.Update(&map);
+    if (!m_isMapActive && !m_isMenuActive)playerManager.Update(this, &map);
 
 
     if (playerManager.m_oldposition != playerManager.m_position)
@@ -321,7 +323,7 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
 void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map)
 {
     map.Render();
-    playerManager.Render(&map);
+    playerManager.Render(this,&map);
     enemyManager.Render();
     if (m_playEffect && m_effectIndex < m_attackEffects.size())
     {
@@ -571,6 +573,33 @@ bool FieldScene::HasSkill(CooperatList skill) const
 }
 
 
+
+
+
+void FieldScene::UpdateTreasureOpen(InputManager& inputManager,PlayerManager& playerManager,Map&map)
+{
+    if (!m_isTreasureOpen)
+    {
+        m_isTreasureOpen = true;
+    }
+    if (m_isTreasureOpen)
+    {
+        if (inputManager.IsTrigger(KEY_INPUT_BACK))
+        {
+            m_isTreasureOpen = false;
+            map.UsedTreasure(playerManager);
+            playerManager.m_position = playerManager.m_oldposition;
+        }
+    }
+}
+void FieldScene::RenderTreasureOpen()
+{
+    if (m_isTreasureOpen)
+    {
+        DrawString(200, 200, L"Treasure Open!", GetColor(255, 255, 0));
+    }
+
+}
 
 
 

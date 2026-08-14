@@ -28,11 +28,11 @@ void Slime::Initialize(Map& map, int x, int y)
 	size.x = map.m_chipSize;
 	size.y = map.m_chipSize;
 
-	renderPosition.x = 500.0f;
-	renderPosition.y = 100.0f;
+	renderPosition.x = 500;
+	renderPosition.y = 100;
 
-	renderSize.x = 200.0f;
-	renderSize.y = 200.0f;
+	renderSize.x = 200;
+	renderSize.y = 200;
 
 	power = 2;
 	hp = 10;

@@ -19,6 +19,13 @@ void ImageManager::LoadTextures()
 	textures.push_back({ L"N", LoadGraph(L"Resources/Textures/N.png") });
 	textures.push_back({ L"M", LoadGraph(L"Resources/Textures/M.png") });
 
+	textures.push_back({ L"forest",LoadGraph(L"Resources/Textures/forest.png") });
+	textures.push_back({ L"plain",LoadGraph(L"Resources/Textures/plain.png") });
+	textures.push_back({ L"river",LoadGraph(L"Resources/Textures/river.png") });
+	textures.push_back({ L"desert",LoadGraph(L"Resources/Textures/desert.png") });
+	textures.push_back({ L"volcano",LoadGraph(L"Resources/Textures/volcano.png") });
+	textures.push_back({L"castle",LoadGraph(L"Resources/Textures/castle.png") });
+
 }
 
 int ImageManager::GetTexture(const std::wstring& name)
@@ -32,6 +39,7 @@ int ImageManager::GetTexture(const std::wstring& name)
 	}
 	return-1;
 }
+/// プレイヤー画像
 void ImageManager::DrawPlayer1(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"player1");
@@ -57,7 +65,7 @@ void ImageManager::DrawPlayer4(Vector2 position, Vector2 size)
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }
 
-
+///モンスター画像
 void ImageManager::DrawSlime(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"Slime");
@@ -106,6 +114,45 @@ void ImageManager::DrawN(Vector2 position, Vector2 size)
 void ImageManager::DrawM(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"M");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+
+///背景画像
+void ImageManager::DrawForest(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"forest");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawPlain(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"plain");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawRiver(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"river");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawDesrt(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"desert");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawVolcano(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"volcano");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawCastle(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"castle");
 
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }

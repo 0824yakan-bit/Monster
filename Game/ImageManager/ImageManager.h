@@ -31,5 +31,12 @@ public:
 
 	void DrawN(Vector2 position, Vector2 size);
 	void DrawM(Vector2 position,Vector2 size);
+
+	void DrawForest(Vector2 position, Vector2 size);
+	void DrawPlain(Vector2 position, Vector2 size);
+	void DrawRiver(Vector2 position, Vector2 size);
+	void DrawDesrt(Vector2 position, Vector2 size);
+	void DrawVolcano(Vector2 position, Vector2 size);
+	void DrawCastle(Vector2 position, Vector2 size);
 };
 

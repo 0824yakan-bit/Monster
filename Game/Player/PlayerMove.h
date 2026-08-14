@@ -3,14 +3,15 @@
 #include"Game/InputManager/InputManager.h"
 #include"Game/Map/Map.h"
 #include"Game/TileRole/TileRole.h"
+class FieldScene;
 class PlayerManager;
 class Battle;
 class PlayerMove
 {
 private:
 	Vector2 m_maponposition;
-	Map::TileType type;
-	Map::TileType nexttile;
+	TileType type;
+	TileType nexttile;
 	InputManager m_inputManager;
 	TileRole m_tileRole;
 
@@ -22,15 +23,17 @@ private:
 	int m_speed;
 	int m_movetimer;
 	int m_chipsize;
+
+	bool m_hitTreasure;
 public:
 
 public:
-	PlayerMove(Map&map);
+	PlayerMove();
 	~PlayerMove();
 
 	void Initialize(Map*map,PlayerManager& palayermanager);
-	void Update(Map*map, PlayerManager* playermanager);
-	void Render(Map*map, PlayerManager* playermanager);
+	void Update(FieldScene* field,Map*map, PlayerManager* playermanager);
+	void Render(FieldScene* field, Map*map, PlayerManager* playermanager);
 	void Finalize();
 };
 

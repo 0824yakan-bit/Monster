@@ -60,6 +60,11 @@ void BattleScene::Initialize(InputManager& inputmanager,SceneManager&sceneManage
 	m_battle->SetParty(&party);
 	m_battle->Initialize(&sceneManager);
 
+	drawBgPosition.x = 0;
+	drawBgPosition.y = 0;
+	drawBgSize.x = 1280;
+	drawBgSize.y = 720;
+
 	m_isJoinRequested = false;
 	m_isReplaceSelect = false;
 	m_isFieldRequested = false;
@@ -288,30 +293,74 @@ void BattleScene::Update(InputManager& inputManager,SceneManager&sceneManager,Fi
 	}
 
 }
-void BattleScene::Render(GameOver& gameOver,Party&party)
+void BattleScene::Render(GameOver& gameOver,Party&party,Map&map)
 {
+	if (m_isTitleRequested)
+	{
+		return;
+	}
 	if (!m_enemy)
 	{
 		return;
 	}
-	switch (m_enemy->type)
+	switch (map.GetCurrentMap())
 	{
-	case Enemy::EnemyType::Slime:
-		DrawBox(0, 0, 1280, 720, GetColor(128, 128, 128), TRUE);
+	case 0:
+		m_image->DrawForest(drawBgPosition, drawBgSize);//背景森描画
 		break;
 
-	case Enemy::EnemyType::Wolf:
-		DrawBox(0, 0, 1280, 720, GetColor(255, 0, 0), TRUE);
+	case 1:
+		m_image->DrawPlain(drawBgPosition, drawBgSize);
 		break;
 
-	case Enemy::EnemyType::Dragon:
-		DrawBox(0, 0, 1280, 720, GetColor(255, 255, 0), TRUE);
+	case 2:
+		m_image->DrawDesrt(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 3:
+		m_image->DrawVolcano(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 4:
+		m_image->DrawCastle(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 5:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 6:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 7:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 8:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
+		break;
+
+	case 9:
+		m_image->DrawForest(drawBgPosition, drawBgSize);
+
 		break;
 	}
+	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
+	DrawBox(0, 0, 1280, 720, GetColor(128, 128, 128), TRUE);
+	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-	m_battle->Render(gameOver);
 
-	if (m_battle->GetAnnihilation())
+	m_battle->Render(gameOver,map);
+
+	if (m_battle->GetAnnihilation() && !gameOver.IsTitleRequest())
 	{
 		m_battle->RenderAnnihilation(gameOver);
 	}
@@ -376,6 +425,12 @@ bool BattleScene::IsJoinRequested()const
 	return m_isJoinRequested;
 }
 
+
+void BattleScene::SetImage(ImageManager* image)
+{
+	m_image = image;
+	m_battle->SetImage(image);
+}
 
 void BattleScene::SetPlayer(PlayerManager* player)
 {

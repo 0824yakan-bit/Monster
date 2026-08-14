@@ -37,6 +37,8 @@ Map::~Map()
 
 void Map::Initialize(const wchar_t* fileName)
 {
+	m_tileRole.Initialize();
+
 	m_moveDir = MoveDir::None;
 	m_stageNo = 0;
 	m_breakLevel = 0;
@@ -107,7 +109,7 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 		m_isTransition = true;
 	}
 	//上から
-	if (!m_isTransition && playerManager.m_position.y < Screen::TOP)
+	if (!m_isTransition && playerManager.m_position.y <= Screen::TOP)
 	{
 		m_moveDir = MoveDir::Up;
 
@@ -164,6 +166,7 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 }
 void Map::Render()
 {
+
 	if (m_moveDir == MoveDir::Right)
 	{
 		DrawCurrentMap(-m_transition, 0);
@@ -209,9 +212,10 @@ void Map::DrawCurrentMap(int offsetX, int offsetY)
 		///霧描画
 			if (m_fog[m_currentMap][y][x])
 			{
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-				DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
+			//DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
+				//DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
+				//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}
 	}
@@ -237,9 +241,10 @@ void Map::DrawNextMap(int offsetX, int offsetY)
 		///霧描画
 			if (m_fog[m_nextmap][y][x])
 			{
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 200);
-				DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
+			//DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
+				//DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
+				//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}
 	}
@@ -288,20 +293,15 @@ void Map::LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][
 				{
 					tile = std::stoi(item);
 				}
+				// 画像ID保存
 				mapData[map][y][x] = tile;
 
-				if (tile >= 0 && tile < 32)
-					m_basemap[map][y][x] = TileType::Floor;
-				else if (tile <= 80)
-					m_basemap[map][y][x] = TileType::Wall;
-				else
-					m_basemap[map][y][x] = TileType::Object;
+				// 役割をTileRoleに問い合わせて保存
+				m_basemap[map][y][x] = m_tileRole.GetType(tile);
 			}
 		}
 	}
 	ifs.close();
-	
-	printf("Map0[5][38] = %d\n", m_workmap[0][5][38]);
 }
 
 bool Map::IsWallRect(int px, int py, int width, int height) const
@@ -316,19 +316,32 @@ bool Map::IsWallRect(int px, int py, int width, int height) const
 		GetTileType(left, bottom) == TileType::Wall ||
 		GetTileType(right, bottom) == TileType::Wall;
 }
-
-Map::TileType Map::GetTileType(int x, int y)const
+bool Map::IsTreasureRect(int px, int py, int width, int height) const
 {
-	if(x < -1 || x >= MAP_WIDTH+1 ||
-		y < -1 || y >= MAP_HEIGHT+1)
+	int left = px / m_chipSize;
+	int right = (px + width - 1) / m_chipSize;
+	int top = py / m_chipSize;
+	int bottom = (py + height - 1) / m_chipSize;
+
+	return GetTileType(left, top) == TileType::Treasure ||
+		GetTileType(right, top) == TileType::Treasure ||
+		GetTileType(left, bottom) == TileType::Treasure ||
+		GetTileType(right, bottom) == TileType::Treasure;
+}
+
+TileType Map::GetTileType(int x, int y) const
+{
+	if (x < 0 || x >= MAP_WIDTH ||
+		y < 0 || y >= MAP_HEIGHT)
 	{
-		return TileType::Wall;   // 範囲外は壁扱い
+		return TileType::Wall;
 	}
+
 	return m_basemap[m_currentMap][y][x];
 }
 int Map::GetTileNo(int x, int y) const
 {
-	return m_workmap[m_currentMap][y][x];
+	return m_objectmap[m_currentMap][y][x];
 }
 
 void Map::ChangeMap(int mapNo)
@@ -375,13 +388,11 @@ int Map::GetBreakLevel()const
  * @param targetObject 置換対象のオブジェクトID（負値で全対象）
  * @param replaceObject 置換後のオブジェクトID
  * @param replaceType   置換後のタイル種別
+ * @param dangerAdd   属性ごとの上昇量
  */
-void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType)
+void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType, int dangerAdd)
 {
-	if (m_breakLevel < 40)
-	{
-		m_breakLevel++;
-	}
+	m_breakLevel = std::min(40, m_breakLevel + dangerAdd);
 	m_level = m_breakLevel / 10;
 	for (int y = top; y <= bottom; ++y)
 	{
@@ -401,6 +412,7 @@ void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bo
 				m_objectmap[m_currentMap][ty][tx] = replaceObject;
 				m_basemap[m_currentMap][ty][tx] = replaceType;
 			}
+			RevealArea(tx, ty, 2);
 		}
 	}
 }
@@ -421,108 +433,168 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 		}
 	}
 }
+
+		void Map::UsedTreasure(PlayerManager& player)
+		{
+			printfDx(L"UsedTreasure called");
+
+			Vector2 pos = player.GetPosition();
+
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
+
+			BreakArea(tx, ty, 0, 1, 0, 1, 96, 1, TileType::Floor, 0);//プレイヤー範囲内宝箱を使用済みにする
+			BreakArea(tx, ty, 0, 1, 0, 1, 97, 1, TileType::Floor, 0);
+		}
+
+
 		void Map::NormalBreak(PlayerManager& player)
 		{
 			printfDx(L"NormalBleak called");
 
-			Vector2 position = player.GetPosition();
+			Vector2 pos = player.GetPosition();
 
-			int tileX = static_cast<int>(position.x) / m_chipSize;
-			int tileY = static_cast<int>(position.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tileX, tileY, 0, 1, 0, 0, 40, 1, TileType::Floor);//右１マスを削る
-			BreakArea(tileX, tileY, -1, 1, -1, 1, -1, 1, TileType::Floor);
-			RevealArea(tileX, tileY, 3);
+			BreakArea(tx, ty, 0, 1, 0, 0, 40, 1, TileType::Floor,0);//右１マスを削る
+			BreakArea(tx, ty, -1, 1, -1, 1, -1, 1, TileType::Floor,1);
 		}
 
 		void Map::FireBreak(PlayerManager& player)
 		{
 			printfDx(L"FireBreak called\n");
 
-			Vector2 position = player.GetPosition();
+			Vector2 pos = player.GetPosition();
 
-			int tileX = static_cast<int>(position.x) / m_chipSize;
-			int tileY = static_cast<int>(position.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tileX, tileY, -5, 5, -5, 5,57, 1, TileType::Floor);//枯れ木（５７）を燃やす
+			BreakArea(tx, ty, -5, 5, -5, 5,57, 1, TileType::Floor,3);//枯れ木（５７）を燃やす
+
 		}
 
 		void Map::WaterBreak(PlayerManager& player)
 		{
 			printfDx(L"WaterBreak called");
-			Vector2 position = player.GetPosition();
+			Vector2 pos = player.GetPosition();
 
-			int tileX = static_cast<int>(position.x) / m_chipSize;
-			int tileY = static_cast<int>(position.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tileX,tileY, 0, 0, 0, 0,40, 1, TileType::Floor);
+			BreakArea(tx, ty, 0, 0, 0, 0,40, 1, TileType::Floor,1);
 		}
 
 		void Map::GrassBreak(PlayerManager& player)
 		{
 			printfDx(L"GrassBreak called");
-			Vector2 position = player.GetPosition();
+			Vector2 pos = player.GetPosition();
 
-			int tileX = static_cast<int>(position.x) / m_chipSize;
-			int tileY = static_cast<int>(position.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tileX, tileY, -5, 5, -5, 5, 3, 92, TileType::Floor);//土（３）を草（９２）に変える
+			BreakArea(tx, ty, -5, 5, -5, 5, 3, 92, TileType::Floor,0);//土（３）を草（９２）に変える
+
 		}
 
 		void Map::SoilBreak(PlayerManager& player)
 		{
 			printfDx(L"SoilBreak called");
-			Vector2 position = player.GetPosition();
+			Vector2 pos = player.GetPosition();
 
-			int tileX = static_cast<int>(position.x) / m_chipSize;
-			int tileY = static_cast<int>(position.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tileX, tileY, -2, 2, -2, 2, 33, 3, TileType::Floor);//水（３３）を土（３）に変える
-
+			BreakArea(tx, ty, -2, 2, -2, 2, 33, 3, TileType::Floor,2);//水（３３）を土（３）に変える
 		}
 
 		void Map::WindBreak(PlayerManager& player)
 		{
 			printfDx(L"WindBreak called");
 
-			Vector2 position = player.GetPosition();
+			Vector2 pos = player.GetPosition();
 
-			int tileX = static_cast<int>(position.x) / m_chipSize;
-			int tileY = static_cast<int>(position.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tileX, tileY, -3, 3, -1, 2, 40, 57, TileType::Wall);//左右３マス分枯れ木に変える
-			BreakArea(tileX, tileY, -3, 3, -1, 2, 41, 57, TileType::Wall);//左右３マス分枯れ木に変える
+			PlayerManager::Direction dir = player.GetDirection();
+
+			const int length = 6; // 風の長さ
+
+			switch (dir)
+			{
+			case PlayerManager::Direction::Right:
+				// → 右へ一直線
+				BreakArea(tx + 1, ty, 0, length, 0, 1,40, 57, TileType::Wall, 2);
+				BreakArea(tx + 1, ty, 0, length, 0, 1,41, 57, TileType::Wall, 2);
+				break;
+
+			case PlayerManager::Direction::Left:
+				// ← 左へ一直線
+				BreakArea(tx - 1, ty, -length, 0, 0, 1,40, 57, TileType::Wall, 2);
+				BreakArea(tx - 1, ty, -length, 0, 0, 1,41, 57, TileType::Wall, 2);
+				break;
+
+			case PlayerManager::Direction::Up:
+				// ↑ 上へ一直線
+				BreakArea(tx, ty - 1, 0, 1, -length, 0,40, 57, TileType::Wall, 2);
+				BreakArea(tx, ty - 1, 0, 1, -length, 0,41, 57, TileType::Wall, 2);
+				break;
+
+			case PlayerManager::Direction::Down:
+				// ↓ 下へ一直線
+				BreakArea(tx, ty + 1, 0, 1, 0, length,40, 57, TileType::Wall, 2);
+				BreakArea(tx, ty + 1, 0, 1, 0, length,41, 57, TileType::Wall, 2);
+				break;
+			}
 		}
 
 		void Map::ThunderBreak(PlayerManager& player)
 		{
-			printfDx(L"ThunderBreak called");
+			Vector2 pos = player.GetPosition();
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
 
+
+			// 隠し壁(250)を可視化
+			for (int y = -10; y <= 10; ++y)
+			{
+				for (int x = -10; x <= 10; ++x)
+				{
+					int nx = tx + x;
+					int ny = ty + y;
+
+					if (nx < 0 || nx >= MAP_WIDTH ||
+						ny < 0 || ny >= MAP_HEIGHT)
+						continue;
+
+					if (m_objectmap[m_currentMap][ny][nx] == 250)
+					{
+						m_objectmap[m_currentMap][ny][nx] = 251;
+					}
+				}
+			}
+
+			m_breakLevel = std::min(40, m_breakLevel + 1);
 		}
 
 ////連携技
 		void Map::SteamExplosionBreak(PlayerManager& player)
 		{
-			printfDx(L"SteamExplosionBreak called");
+			Vector2 pos = player.GetPosition();
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			Vector2 position = player.GetPosition();
-
-			int tileX = static_cast<int>(position.x) / m_chipSize;
-			int tileY = static_cast<int>(position.y) / m_chipSize;
-
-			BreakArea(tileX,tileY, -10, 10, -10, 10,-1, 3, TileType::Floor);
+			BreakArea(tx, ty, -6, 6, -6, 6, -1, 3, TileType::Floor, 5);
 		}
 
 		void Map::FloorBreak(PlayerManager& player)
 		{
-			printfDx(L"FloorBreak called");
+			Vector2 pos = player.GetPosition();
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			Vector2 position = player.GetPosition();
-
-			int tileX = static_cast<int>(position.x) / m_chipSize;
-			int tileY = static_cast<int>(position.y) / m_chipSize;
-
-			BreakArea(tileX+3, tileY, -2, 2, -2, 2,-1, 200, TileType::NextFloor);
+			BreakArea(tx + 3, ty, -1, 1, -1, 1, -1, 200, TileType::NextFloor, 20);
 		}
 
 		void Map::WaterFlowsBreak(PlayerManager& player)

@@ -3,12 +3,13 @@
 
 #include"Game/ImageManager/ImageManager.h"
 
-PlayerManager::PlayerManager(Map&map)
+PlayerManager::PlayerManager()
 	:map()
-	,m_playerMove(map)
+	,m_playerMove()
 	,m_position{0,0}
 	,m_size{0,0}
 	,m_invicible{false}
+	,m_direction{}
 {
 
 }
@@ -36,17 +37,17 @@ void PlayerManager::Initialize(Map*map)
 	m_playerMove.Initialize(map,*this);
 }
 
-void PlayerManager::Update(Map*map)
+void PlayerManager::Update(FieldScene* field, Map*map)
 {
-	m_playerMove.Update(map,this);
+	m_playerMove.Update(field, map,this);
 
 	
 
 }
 
-void PlayerManager::Render(Map* map)
+void PlayerManager::Render(FieldScene* field,Map* map)
 {
-	m_playerMove.Render(map,this);
+	m_playerMove.Render(field,map,this);
 	switch(m_direction)
 	{
 	case Direction::Up:
@@ -84,4 +85,9 @@ int PlayerManager::GetSpeed()//１マス分移動
 void PlayerManager::SetImage(ImageManager* image)
 {
 	m_image = image;
+}
+
+PlayerManager::Direction PlayerManager::GetDirection() const
+{
+	return m_direction;
 }

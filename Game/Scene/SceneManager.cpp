@@ -22,7 +22,7 @@ void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneMan
 
     m_image = &image;
     m_fieldScene.SetImage(&image);
-    //m_battleScene.SetImage(&image);
+    m_battleScene.SetImage(&image);
 
     m_gameOver.Initialize();
 
@@ -145,7 +145,7 @@ void SceneManager::RenderCurrentScene(PlayerManager& playerManager, EnemyManager
     {
     case SceneID::Title:   m_titleScene.Render();  break;
     case SceneID::Field:    m_fieldScene.Render(playerManager,enemyManager,map);   break;
-    case SceneID::Battle:   m_battleScene.Render(m_gameOver,party);   break;
+    case SceneID::Battle:   m_battleScene.Render(m_gameOver,party,map);   break;
 
 
     default:      assert(!"シーンIDが不正です");break;

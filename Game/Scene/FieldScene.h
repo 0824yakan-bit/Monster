@@ -12,6 +12,8 @@ class Battle;
 class FieldScene
 {
 public:
+	bool m_isTreasureOpen;
+
 	std::vector<Battle::UsedAttackInfo> m_attackEffects;
 
 	int m_effectIndex = 0;
@@ -97,9 +99,9 @@ public:
 	void LearnSkill(CooperatList skill);
 	bool HasSkill(CooperatList skill) const;
 
-	void SetAttackEffectsFiledScene(CooperatList& effects);
 
-
+	void UpdateTreasureOpen(InputManager&inputManager,PlayerManager&playerManager,Map&map);//宝箱に触れているとき
+	void RenderTreasureOpen();
 
 	void SetImage(ImageManager* image);
 

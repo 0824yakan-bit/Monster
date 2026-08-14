@@ -25,8 +25,8 @@
  */
 Game::Game()
 	: m_inputManager{}
-	, m_map{}                 // 先にMap生成
-	, m_playerManager{ m_map }  // そのMapを渡す
+	, m_map{}
+	, m_playerManager{}
 	, m_enemyManager{}
 	, m_sceneManager{}
 	, m_battle{}

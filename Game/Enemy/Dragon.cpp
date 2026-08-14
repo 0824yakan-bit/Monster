@@ -25,11 +25,11 @@ void Dragon::Initialize(Map& map, int x, int y)
 	size.y = map.m_chipSize*5;
 
 
-	renderPosition.x = 500.0f;
-	renderPosition.y = 100.0f;
+	renderPosition.x = 500;
+	renderPosition.y = 100;
 
-	renderSize.x = 200.0f;
-	renderSize.y = 200.0f;
+	renderSize.x = 200;
+	renderSize.y = 200;
 
 	power = 10;
 	hp = 10;

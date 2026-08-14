@@ -28,16 +28,17 @@ public:
 
 	bool m_invicible;//にげる選択時のみ
 public:
-	PlayerManager(Map&map);
+	PlayerManager();
 	~PlayerManager();
 
 	void Initialize(Map*map);
-	void Update(Map*map);
-	void Render(Map* map);
+	void Update(FieldScene* field, Map*map);
+	void Render(FieldScene* field,Map* map);
 	void Finalize();
 
 	Vector2 GetPosition();
 	int GetSpeed();
 	void SetImage(ImageManager* image);
+	Direction GetDirection()const;
 };
 

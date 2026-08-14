@@ -28,9 +28,14 @@ private:
 	Monster::CharacteRistics m_characteRistics;
 	bool m_comboPending = false;
 
+	ImageManager* m_image = nullptr;
 	PlayerManager* m_player = nullptr;
 	Party* m_party = nullptr;
 	Enemy* m_enemy = nullptr;
+
+	Vector2 drawBgPosition;
+	Vector2 drawBgSize;
+
 
 	enum class BattleState
 	{
@@ -112,7 +117,7 @@ public:
 
 	void Initialize(SceneManager*sceneManager);
 	void Update(InputManager& inpuManager,SceneManager*sceneManager, GameOver& gameOver, Map& map, PlayerManager& player);
-	void Render(GameOver& gameOver);
+	void Render(GameOver& gameOver,Map&map);
 	void Finalize();
 
 	void RenderCommand();//動作選択画面
@@ -144,7 +149,7 @@ public:
 
 	void EndTurn();//ターン終了
 
-
+	void SetImage(ImageManager* image);
 	void SetPlayer(PlayerManager* player);
 	void SetParty(Party* party);
 	void SetEnemy(Enemy* enemy);
