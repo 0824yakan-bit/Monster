@@ -46,6 +46,12 @@ private:
 	//エリア開放
 	bool m_isbossAreaOpen;
 
+	//ボスエリアまでの階段の座標
+	static constexpr int X_LEFT		= 20;//左
+	static constexpr int X_RIGHT	= 21;//右
+	static constexpr int Y_TOP		= 10;//上
+	static constexpr int Y_BOTTOM	= 11;//下
+
 	// ブレイク情報
 	int dangerAdd = 1;
 	int m_breakLevel;	// 地形破壊回数(ブレイクカウント)
@@ -94,7 +100,9 @@ public:
 	// 当たり判定
 	bool IsWallRect		(int px,int py,int width,int height) const;	// 壁との当たり判定
 
-	bool IsTreasureRect	(int px,int py,int width,int height) const;	// 宝箱との当たり判定
+	bool IsTreasureRect(int px, int py, int width, int height) const;	// 宝箱との当たり判定
+
+	bool IsNextFloorRect	(int px,int py,int width,int height) const;	// 階段との当たり判定
 
 	TileType GetTileType	(int x, int y) const;	// 指定座標のタイル種類を取得
 	int		 GetTileNo		(int x, int y) const;	// 指定座標のオブジェクト番号を取得
@@ -110,7 +118,9 @@ public:
 	void	ChangeStage		(int stageNo);	// ステージを変更
 
 	//エリア開放
-	void	OpenBossArea	();				//ボスエリア開放
+	void	OpenBossArea	();				//ラスボスエリア開放
+	//エリア移動
+	void	EnterBossArea	();				//ラスボスエリア侵入
 
 	// マップ描画
 	void	DrawCurrentMap	(int offsetX, int offsetY);		// 現在のマップを描画

@@ -25,6 +25,7 @@ private:
 	int m_chipsize;
 
 	bool m_hitTreasure;
+	bool m_hitNextFloor;
 public:
 
 public:

@@ -59,6 +59,20 @@ void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager,Ac
 		return;
 	}
 
+	m_hitNextFloor = map->IsNextFloorRect(
+		static_cast<int>(playermanager->m_position.x),
+		static_cast<int>(playermanager->m_position.y),
+		playermanager->m_size.x,
+		playermanager->m_size.y);
+
+	if (m_hitNextFloor)
+	{
+		map->EnterBossArea();
+		playermanager->m_position.x = 10 * playermanager->m_size.x;
+		playermanager->m_position.y = 10 * playermanager->m_size.y;
+		return;
+	}
+
 	if (m_movetimer < 0)
 	{
 		playermanager->m_oldposition=playermanager->m_position ;
@@ -86,10 +100,10 @@ void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager,Ac
 			playermanager->m_direction = playermanager->Direction::Down;
 
 		}
-		m_nextmapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
-			 m_nextmapY = static_cast<int>(playermanager->m_position.y) / m_chipsize;
-			 
-			 nexttile = map->GetTileType(m_nextmapX, m_nextmapY);
+			m_nextmapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
+			m_nextmapY = static_cast<int>(playermanager->m_position.y) / m_chipsize;
+			
+			nexttile = map->GetTileType(m_nextmapX, m_nextmapY);
 				 // プレイヤーサイズ(2マス = 64x64)
 				 int playerW = playermanager->m_size.x;
 				 int playerH = playermanager->m_size.y;
