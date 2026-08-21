@@ -4,12 +4,14 @@
 
 #include"Game/InputManager/InputManager.h"
 #include"Game/Player/PlayerManager.h"
+#include"Game/Enemy/BossManager.h"
 #include"Game/Screen.h"
 #include<fstream>
 #include<sstream>
 #include<cassert>
-Map::Map(Accessory& accessory)
-	:m_accessory{ accessory }
+Map::Map(Accessory& accessory,BossManager& bossManager)
+	:m_accessory	{ accessory }
+	,m_bossManager	{ bossManager}
 	,m_basemap		{ }
 	,m_workmap		{ }
 	,m_fog			{false}
@@ -17,6 +19,7 @@ Map::Map(Accessory& accessory)
 	,m_chipSize		{ }
 	,m_currentMap	{ }
 	,m_stageNo		{0}
+	,m_isbossAreaOpen{false}
 	,m_breakLevel	{0}
 	,m_transition	{ }
 	,m_objectmap	{ }
@@ -42,6 +45,7 @@ void Map::Initialize(const wchar_t* fileName)
 
 	m_moveDir = MoveDir::None;
 	m_stageNo = 0;
+	m_isbossAreaOpen = false;
 	m_breakLevel = 0;
 
 
@@ -73,17 +77,31 @@ void Map::Initialize(const wchar_t* fileName)
 }
 void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 {
+	//デバッグ用キー
 	if (CheckHitKey(KEY_INPUT_0))m_level = 0;
 	if (CheckHitKey(KEY_INPUT_1))m_level = 1;
 	if (CheckHitKey(KEY_INPUT_2))m_level = 2;
 	if (CheckHitKey(KEY_INPUT_3))m_level = 3;
-	if (CheckHitKey(KEY_INPUT_4))m_level = 4;
+	if (CheckHitKey(KEY_INPUT_4))m_level = 4
+		;
+	if (CheckHitKey(KEY_INPUT_5))m_bossManager.DefeatBoss(0);//boss1撃破
+	if (CheckHitKey(KEY_INPUT_6))m_bossManager.DefeatBoss(1);//boss2撃破
+	if (CheckHitKey(KEY_INPUT_7))m_bossManager.DefeatBoss(2);//boss3撃破
+	//デバッグ用キー　終了
+
 	m_fogdensity = m_level * 150;
 	int startMap = GetStageStartMap();
 	int endMap = GetStageEndMap();
 
 	int playerW = playerManager.m_size.x;
 	int playerH = playerManager.m_size.y;
+
+	if (m_bossManager.IsAllBossDefeated())
+	{
+		// 9番マップへの道を開く
+		OpenBossArea();
+
+	}
 
 	if (m_currentMap != 9)//9の画面端は移動不可
 	{
@@ -393,6 +411,23 @@ void Map::ChangeStage(int stageNo)
 {
 	m_stageNo = stageNo;
 	m_currentMap = GetStageStartMap();
+}
+
+void Map::OpenBossArea()
+{
+	if (!m_isbossAreaOpen)//マップチップを変更したか
+	{
+		m_objectmap[8][10][30] = 288;
+		m_objectmap[8][11][30] = 288;
+		m_objectmap[8][10][31] = 288;
+		m_objectmap[8][11][31] = 288;
+		m_basemap[8][10][30] = TileType::NextFloor;
+		m_basemap[8][11][30] = TileType::NextFloor;
+		m_basemap[8][10][31] = TileType::NextFloor;
+		m_basemap[8][11][31] = TileType::NextFloor;
+
+		m_isbossAreaOpen = true;//変更済みにする
+	}
 }
 
 int Map::GetBreakLevel()const

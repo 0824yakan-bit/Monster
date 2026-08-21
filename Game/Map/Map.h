@@ -5,6 +5,7 @@
 
 class InputManager;
 class PlayerManager;
+class BossManager;
 
 class Map
 {
@@ -32,7 +33,8 @@ private:
 	int	 m_nextmap;
 	int	 m_transition;
 
-	Accessory& m_accessory;
+	Accessory	& m_accessory;
+	BossManager	& m_bossManager;
 
 	// タイル情報
 	TileRole m_tileRole;
@@ -40,6 +42,9 @@ private:
 	// ステージ情報
 	int m_stageNo = 0;					// 0 = ステージ1、1 = ステージ2 ...
 	static constexpr int MAPS_PER_STAGE = 10;
+
+	//エリア開放
+	bool m_isbossAreaOpen;
 
 	// ブレイク情報
 	int dangerAdd = 1;
@@ -74,7 +79,7 @@ public:
 
 public:
 	// コンストラクタ・デストラクタ
-	Map(Accessory& accessory);
+	Map(Accessory& accessory,BossManager&bossManager);
 	~Map();
 
 	// 初期化・更新・描画
@@ -91,25 +96,28 @@ public:
 
 	bool IsTreasureRect	(int px,int py,int width,int height) const;	// 宝箱との当たり判定
 
-	TileType GetTileType(int x, int y) const;	// 指定座標のタイル種類を取得
-	int GetTileNo		(int x, int y) const;			// 指定座標のオブジェクト番号を取得
+	TileType GetTileType	(int x, int y) const;	// 指定座標のタイル種類を取得
+	int		 GetTileNo		(int x, int y) const;	// 指定座標のオブジェクト番号を取得
 
 	// マップ移動
-	void ChangeMap		(int mapNo);	// マップを変更
-	int GetChipSize		() const;		// マップチップサイズを取得
-	int GetCurrentMap	() const;		// 現在のマップ番号を取得
+	void	ChangeMap		(int mapNo);	// マップを変更
+	int		GetChipSize		() const;		// マップチップサイズを取得
+	int		GetCurrentMap	() const;		// 現在のマップ番号を取得
 
 	// ステージ管理
-	int GetStageStartMap() const;	// ステージ内の1エリア目を取得
-	int GetStageEndMap	() const;		// ステージ内の10エリア目を取得
-	void ChangeStage	(int stageNo);	// ステージを変更
+	int		GetStageStartMap() const;		// ステージ内の1エリア目を取得
+	int		GetStageEndMap	() const;		// ステージ内の10エリア目を取得
+	void	ChangeStage		(int stageNo);	// ステージを変更
+
+	//エリア開放
+	void	OpenBossArea	();				//ボスエリア開放
 
 	// マップ描画
-	void DrawCurrentMap	(int offsetX, int offsetY);	// 現在のマップを描画
-	void DrawNextMap	(int offsetX, int offsetY);		// 次のマップを描画
+	void	DrawCurrentMap	(int offsetX, int offsetY);		// 現在のマップを描画
+	void	DrawNextMap		(int offsetX, int offsetY);		// 次のマップを描画
 
 	// ブレイクレベル
-	int GetBreakLevel() const;	// 地形破壊回数を取得
+	int	GetBreakLevel() const;	// 地形破壊回数を取得
 
 	// 霧
 	void RevealArea(int centerX,int centerY,int radius);	// 指定範囲の霧を晴らす
