@@ -41,6 +41,10 @@ public:
 
     void RemoveEnemy(Enemy* enemy);
 
+    void CreateRandomEnemy(Map& map, int x, int y);
+    Enemy* CreateBattleEnemy(Map& map, Enemy::EnemyType type);
+
+
     void CreateSlime(int x, int y, Map& map);
     void CreateWolf(int x, int y, Map& map);
     void CreateDragon(int x, int y, Map& map);

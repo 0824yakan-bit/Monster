@@ -1,6 +1,10 @@
 ﻿#pragma once
+#include<iostream>
 #include<vector>
+#include<random>
 #include<set>
+#include<algorithm>
+#include<iterator>
 #include"Game/Battle/Battle.h"
 #include"Game/Maths/Vector2.h"
 class InputManager;
@@ -69,13 +73,27 @@ public:
 ///ブレイクレベル
 	
 
+///宝箱中身
+	enum class TreasureList
+	{
+		Empty,
+		None,
+		Fire,
+		Water,
+		Grass,
+		Soil,
+		Wind,
+		Thunder,
+	};
+
+	std::vector<int> result;
 public:
 	FieldScene();
 	~FieldScene();
 
 	void Initialize(InputManager& inputmanager,PlayerManager&playerManager, Map& map);
-	void Update(InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Battle&battle);
-	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map);
+	void Update(InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Battle&battle,Accessory&accessory);
+	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map, Accessory& accessory);
 	void Finalize();
 
 
@@ -100,8 +118,8 @@ public:
 	bool HasSkill(CooperatList skill) const;
 
 
-	void UpdateTreasureOpen(InputManager&inputManager,PlayerManager&playerManager,Map&map);//宝箱に触れているとき
-	void RenderTreasureOpen();
+	void UpdateTreasureOpen(InputManager&inputManager,PlayerManager&playerManager,Map&map,Accessory&accessory);//宝箱に触れているとき
+	void RenderTreasureOpen(Accessory& accessory);
 
 	void SetImage(ImageManager* image);
 

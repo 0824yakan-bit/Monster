@@ -53,16 +53,16 @@ public:
 	~SceneManager();
 
 	void Initialize(InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party,ImageManager&image);
-	void Update(InputManager& inputmanager,SceneManager&sceneManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle);
-	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
+	void Update(InputManager& inputmanager,SceneManager&sceneManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
+	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
 	void Finalize();
 
 	void NextSceneID(SceneID nextSceneID);
 	void ChangeScene(InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party);
 
 	void InitializeCurrentScene(InputManager& inputmanager, SceneManager& sceneManager,PlayerManager&playerManager, Map&map,Party&party);
-	void UpdateCurrentScene(InputManager& inputmanager,SceneManager&sceneManagerz,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle);
-	void RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party);
+	void UpdateCurrentScene(InputManager& inputmanager,SceneManager&sceneManagerz,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
+	void RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
 	void FinalizeCurrentScene();
 
 

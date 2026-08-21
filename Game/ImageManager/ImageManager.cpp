@@ -26,6 +26,10 @@ void ImageManager::LoadTextures()
 	textures.push_back({ L"volcano",LoadGraph(L"Resources/Textures/volcano.png") });
 	textures.push_back({L"castle",LoadGraph(L"Resources/Textures/castle.png") });
 
+	textures.push_back({ L"commandbox1",LoadGraph(L"Resources/Textures/commandbox1.png") });
+	textures.push_back({ L"commandbox2",LoadGraph(L"Resources/Textures/commandbox2.png") });
+
+
 }
 
 int ImageManager::GetTexture(const std::wstring& name)
@@ -119,7 +123,7 @@ void ImageManager::DrawM(Vector2 position, Vector2 size)
 }
 
 
-///背景画像
+///バトルシーン背景画像
 void ImageManager::DrawForest(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"forest");
@@ -153,6 +157,21 @@ void ImageManager::DrawVolcano(Vector2 position, Vector2 size)
 void ImageManager::DrawCastle(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"castle");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+
+//バトルシーンUI画像
+void ImageManager::DrawCommandbox1(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"commandbox1");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawCommandbox2(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"commandbox2");
 
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }

@@ -25,7 +25,8 @@
  */
 Game::Game()
 	: m_inputManager{}
-	, m_map{}
+	, m_accessory{}
+	, m_map{m_accessory}
 	, m_playerManager{}
 	, m_enemyManager{}
 	, m_sceneManager{}
@@ -74,6 +75,7 @@ void Game::Initialize()
 	m_map.Initialize(L"Resources/map.csv");
 	m_playerManager.Initialize(&m_map);
 	m_enemyManager.Initialize(m_map);
+	m_accessory.Initialize();
 	m_inputManager.Initialize();
 	m_sceneManager.Initialize(m_inputManager,m_sceneManager,m_playerManager, m_map, m_party,m_imageManager);
 
@@ -99,7 +101,7 @@ void Game::Update(float elapsedTime)
 
 
 	// ゲームの更新
-	m_sceneManager.Update(m_inputManager,m_sceneManager, m_playerManager, m_enemyManager, m_map, m_party,m_battle);
+	m_sceneManager.Update(m_inputManager,m_sceneManager, m_playerManager, m_enemyManager, m_map, m_party,m_battle,m_accessory);
 	if (m_sceneManager.IsTitleRequested())
 	{
 		m_sceneManager.ResetTitleRequest();
@@ -127,7 +129,7 @@ void Game::Update(float elapsedTime)
 void Game::Render()
 {
 	// ゲームの描画
-	m_sceneManager.Render(m_playerManager, m_enemyManager, m_map, m_party);
+	m_sceneManager.Render(m_playerManager, m_enemyManager, m_map, m_party,m_accessory);
 
 }
 

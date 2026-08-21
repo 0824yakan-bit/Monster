@@ -7,6 +7,7 @@ class ImageManager;
 class PlayerManager
 {
 private:
+	
 	PlayerMove m_playerMove;
 	Map* map;
 	ImageManager* m_image = nullptr;
@@ -32,8 +33,8 @@ public:
 	~PlayerManager();
 
 	void Initialize(Map*map);
-	void Update(FieldScene* field, Map*map);
-	void Render(FieldScene* field,Map* map);
+	void Update(FieldScene* field, Map*map,Accessory*accessory);
+	void Render(FieldScene* field,Map* map, Accessory* accessory);
 	void Finalize();
 
 	Vector2 GetPosition();

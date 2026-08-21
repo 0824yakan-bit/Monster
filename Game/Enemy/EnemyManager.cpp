@@ -79,19 +79,28 @@ void EnemyManager::Initialize(Map& map)
 
 }
 
-void EnemyManager::Update(Map&map)
+void EnemyManager::Update(Map& map)
 {
-
     for (auto& enemy : m_enemies)
     {
+        if (enemy->IsBattleEnemy())
+        {
+            continue;
+        }
+
         enemy->Update(map);
     }
 }
-
 void EnemyManager::Render()
 {
     for (auto& enemy : m_enemies)
     {
+        // Battle専用敵はFieldSceneでは描画しない
+        if (enemy->IsBattleEnemy())
+        {
+            continue;
+        }
+
         enemy->Render();
     }
 }
@@ -111,15 +120,19 @@ void EnemyManager::SetImage(ImageManager* image)
 
 Enemy* EnemyManager::CheckHit(PlayerManager& playermanager)
 {
-
     for (auto& enemy : m_enemies)
     {
+        // Battle専用敵はFieldSceneでは当たり判定しない
+        if (enemy->IsBattleEnemy())
+        {
+            continue;
+        }
 
         if (Collisionall::HitCharacter(playermanager, enemy.get()))
         {
             enemy->OnHit(playermanager);
-            return enemy.get();
 
+            return enemy.get();
         }
     }
 
@@ -138,6 +151,75 @@ void EnemyManager::RemoveEnemy(Enemy* enemy)
     m_enemies.erase(it, m_enemies.end());
 }
 
+void EnemyManager::CreateRandomEnemy(Map& map, int x, int y)
+{
+    int type = GetRand(4);
+
+    switch (type)
+    {
+    case 0:
+        CreateSlime(x, y, map);
+        break;
+
+    case 1:
+        CreateWolf(x, y, map);
+        break;
+
+    case 2:
+        CreateDragon(x, y, map);
+        break;
+
+    case 3:
+        CreateGolem(x, y, map);
+        break;
+
+    case 4:
+        CreateFairy(x, y, map);
+        break;
+    }
+}
+Enemy* EnemyManager::CreateBattleEnemy(
+    Map& map,
+    Enemy::EnemyType type)
+{
+    switch (type)
+    {
+    case Enemy::EnemyType::Slime:
+        CreateSlime(0, 0, map);
+        break;
+
+    case Enemy::EnemyType::Wolf:
+        CreateWolf(0, 0, map);
+        break;
+
+    case Enemy::EnemyType::Dragon:
+        CreateDragon(0, 0, map);
+        break;
+
+    case Enemy::EnemyType::Golem:
+        CreateGolem(0, 0, map);
+        break;
+
+    case Enemy::EnemyType::Fairy:
+        CreateFairy(0, 0, map);
+        break;
+
+    default:
+        return nullptr;
+    }
+
+    if (m_enemies.empty())
+    {
+        return nullptr;
+    }
+
+    Enemy* enemy = m_enemies.back().get();
+
+    // ★ Battle専用敵であることを設定
+    enemy->SetBattleEnemy(true);
+
+    return enemy;
+}
 void EnemyManager::CreateSlime(int x, int y, Map& map)
 {
     auto slime = std::make_unique<Slime>();

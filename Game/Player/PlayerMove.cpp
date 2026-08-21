@@ -38,7 +38,7 @@ void PlayerMove::Initialize(Map* map,PlayerManager& playermanager)
 	m_hitTreasure = false;
 }
 
-void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager)
+void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager,Accessory*accessory)
 {
 
 	m_mapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
@@ -55,7 +55,7 @@ void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager)
 
 	if (m_hitTreasure)
 	{
-		field->UpdateTreasureOpen(m_inputManager, *playermanager,*map);
+		field->UpdateTreasureOpen(m_inputManager, *playermanager,*map,*accessory);
 		return;
 	}
 
@@ -116,7 +116,7 @@ void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager)
 	}
 }
 
-void PlayerMove::Render(FieldScene* field, Map*map, PlayerManager* playermanager)
+void PlayerMove::Render(FieldScene* field, Map*map, PlayerManager* playermanager, Accessory* accessory)
 {
 	//DrawBox(playermanager->m_position.x, playermanager->m_position.y, playermanager->m_position.x+32, playermanager->m_position.y+32, GetColor(255, 255, 255), TRUE);
  
@@ -145,7 +145,7 @@ void PlayerMove::Render(FieldScene* field, Map*map, PlayerManager* playermanager
 	DrawFormatString(10, 30, GetColor(255, 255, 0), L"TileNo : %d", tileNo);//チップナンバー
 	if (m_hitTreasure)
 	{
-		field->RenderTreasureOpen();
+		field->RenderTreasureOpen(*accessory);
 	}
 }
 

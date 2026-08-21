@@ -1,12 +1,15 @@
 ﻿#pragma once
+
+#include "Game/Party/Accessory.h"
 #include "Game/TileRole/TileRole.h"
 
 class InputManager;
 class PlayerManager;
+
 class Map
 {
 public:
-
+	// マップ移動方向
 	enum class MoveDir
 	{
 		None,
@@ -17,88 +20,116 @@ public:
 	};
 
 	MoveDir m_moveDir;
+
 private:
-	static constexpr int MAP_WIDTH = 40;
+	// マップサイズ
+	static constexpr int MAP_WIDTH	= 40;
 	static constexpr int MAP_HEIGHT = 25;
-	static constexpr int GH_MAX = 384;//24*16
+	static constexpr int GH_MAX		= 384;	// 24 * 16
 
-	int m_ghChip[GH_MAX];
-
+	// マップ移動
 	bool m_isTransition;
-	int m_nextmap;
-	int m_transition;
+	int	 m_nextmap;
+	int	 m_transition;
 
-private:
+	Accessory& m_accessory;
+
+	// タイル情報
 	TileRole m_tileRole;
 
-	int m_stageNo = 0;   // 0=ステージ1, 1=ステージ2 ...
+	// ステージ情報
+	int m_stageNo = 0;					// 0 = ステージ1、1 = ステージ2 ...
 	static constexpr int MAPS_PER_STAGE = 10;
+
+	// ブレイク情報
 	int dangerAdd = 1;
+	int m_breakLevel;	// 地形破壊回数(ブレイクカウント)
+	int m_level;		//ブレイクレベル
 
-	void BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType,int dangerAdd);
-	int m_breakLevel;//1～50、～10:優しい・報酬小,　20:,　30:,　40:,　50:難しい・報酬大
-	int m_level;
+
+	// グラフィックハンドル
+	int m_ghChip[GH_MAX];
+
+	// 地形破壊
+	void BreakArea(
+		int centerX,int centerY,			//中心
+		int left,int right,					//左右
+		int top,int bottom,					//上下
+		int targetObject,int replaceObject,	//元チップ:変更後チップ
+		TileType replaceType,int dangerAdd);//チップの状態判定変更:ブレイクカウント追加	// 指定範囲の地形を破壊・変更
+
 public:
+	// マップデータ
 	static constexpr int MAP_NUM = 40;
-	TileType m_basemap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//当たり判定用のマップデータ
-	int m_workmap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//描画用のマップデータ
-	int m_objectmap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//m_workmapの上から物体を表示
-	bool m_fog[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//霧の有無
 
+	TileType	m_basemap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 当たり判定用
+	int			m_workmap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 描画用
+	int			m_objectmap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// オブジェクト描画用
+	bool		m_fog		[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 霧の有無
 
+	int m_fogdensity;	// 霧濃度：薄い0 ～ 濃い400
 
-	int m_currentMap;
-	int m_chipSize;
+	int m_currentMap;	// 現在のマップ番号
+	int m_chipSize;		// マップチップのサイズ
+
 public:
-	Map();
+	// コンストラクタ・デストラクタ
+	Map(Accessory& accessory);
 	~Map();
-	void Initialize(const wchar_t* fileName);
-	void Update(InputManager& inputManager, PlayerManager& playerManager);
-	void Render();
-	void Finalize();
 
-	void LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][MAP_WIDTH]);
+	// 初期化・更新・描画
+	void Initialize	(const wchar_t* fileName);	// マップの初期化
+	void Update		(InputManager& inputManager, PlayerManager& playerManager);	// マップの更新
+	void Render		();							// マップの描画
+	void Finalize	();							// マップの終了処理
 
-	bool IsWallRect(int px, int py, int width, int height) const;
-	bool IsTreasureRect(int px, int py, int width, int height) const;
-	
+	// マップデータ読み込み
+	void LoadMapChip(const wchar_t* fileName,int mapData[MAP_NUM][MAP_HEIGHT][MAP_WIDTH]);	// CSVからマップデータを読み込む
 
-	TileType GetTileType(int x, int y)const;
-	int GetTileNo(int x, int y) const;
-	void ChangeMap(int mapNo);
-	int GetChipSize()const;
-	int GetCurrentMap()const;
+	// 当たり判定
+	bool IsWallRect		(int px,int py,int width,int height) const;	// 壁との当たり判定
 
-	int GetStageStartMap() const;//階層の中の１エリア目
+	bool IsTreasureRect	(int px,int py,int width,int height) const;	// 宝箱との当たり判定
 
-	int GetStageEndMap() const;//階層の中の１０エリア目
+	TileType GetTileType(int x, int y) const;	// 指定座標のタイル種類を取得
+	int GetTileNo		(int x, int y) const;			// 指定座標のオブジェクト番号を取得
 
-	void DrawCurrentMap(int offsetX, int offsetY);
-	void DrawNextMap(int offsetX, int offsetY);
+	// マップ移動
+	void ChangeMap		(int mapNo);	// マップを変更
+	int GetChipSize		() const;		// マップチップサイズを取得
+	int GetCurrentMap	() const;		// 現在のマップ番号を取得
 
-	void ChangeStage(int stageNo);//階層変更関数
+	// ステージ管理
+	int GetStageStartMap() const;	// ステージ内の1エリア目を取得
+	int GetStageEndMap	() const;		// ステージ内の10エリア目を取得
+	void ChangeStage	(int stageNo);	// ステージを変更
 
-	int GetBreakLevel()const;//地形破壊回数
-	//地形破壊
-	void RevealArea(int centerX, int centerY, int radius);
+	// マップ描画
+	void DrawCurrentMap	(int offsetX, int offsetY);	// 現在のマップを描画
+	void DrawNextMap	(int offsetX, int offsetY);		// 次のマップを描画
 
-	void UsedTreasure(PlayerManager& player);//宝箱使用後
+	// ブレイクレベル
+	int GetBreakLevel() const;	// 地形破壊回数を取得
 
-	//属性単体
-	void NormalBreak (PlayerManager& player);//無属性
-	void FireBreak   (PlayerManager& player);//火属性
-	void WaterBreak  (PlayerManager& player);//水属性
-	void GrassBreak  (PlayerManager& player);//草属性
-	void SoilBreak   (PlayerManager& player);//土属性
-	void WindBreak   (PlayerManager& player);//風属性
-	void ThunderBreak(PlayerManager& player);//雷属性
+	// 霧
+	void RevealArea(int centerX,int centerY,int radius);	// 指定範囲の霧を晴らす
 
-	//複合属性
-	void SteamExplosionBreak(PlayerManager& player);//火＋水
-	void FloorBreak(PlayerManager& player);//水＋土
-	void WaterFlowsBreak(PlayerManager& player);//水＋風
-	void GrowGrassBreak(PlayerManager& player);//水＋草
-	void VolcazationBreak(PlayerManager& player);//土＋火
+	// 宝箱
+	void UsedTreasure		(PlayerManager& player);	// 宝箱を使用済みにする
 
+	// 属性単体
+	void NormalBreak		(PlayerManager& player);// 無属性の地形破壊
+	void FireBreak			(PlayerManager& player);// 火属性の地形破壊
+	void WaterBreak			(PlayerManager& player);// 水属性の地形破壊
+	void GrassBreak			(PlayerManager& player);// 草属性の地形破壊
+	void SoilBreak			(PlayerManager& player);// 土属性の地形破壊
+	void WindBreak			(PlayerManager& player);// 風属性の地形破壊
+	void ThunderBreak		(PlayerManager& player);// 雷属性の地形破壊
+
+	// 複合属性
+	void SteamExplosionBreak(PlayerManager& player);// 火＋水
+	void FloorBreak			(PlayerManager& player);// 水＋土
+	void WaterFlowsBreak	(PlayerManager& player);// 水＋風
+	void GrowGrassBreak		(PlayerManager& player);// 水＋草
+	void VolcazationBreak	(PlayerManager& player);// 土＋火
 };
-

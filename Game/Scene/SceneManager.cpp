@@ -34,10 +34,10 @@ void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneMan
     }
 }
 
-void SceneManager::Update(InputManager& inputmanager,SceneManager&sceneManager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle)
+void SceneManager::Update(InputManager& inputmanager,SceneManager&sceneManager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory)
 {
     // 現在シーン更新
-    UpdateCurrentScene(inputmanager,sceneManager,playerManager,enemyManager,map,party,battle);
+    UpdateCurrentScene(inputmanager,sceneManager,playerManager,enemyManager,map,party,battle,accessory);
 
     // シーン切り替え要求があれば切り替える
     if (m_nextSceneID != SceneID::None)
@@ -46,10 +46,10 @@ void SceneManager::Update(InputManager& inputmanager,SceneManager&sceneManager,P
     }
 }
 
-void SceneManager::Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party)
+void SceneManager::Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory)
 {
     DrawFormatString(10, 100, GetColor(255, 255, 255), L"%d", m_currentSceneID);
-    RenderCurrentScene(playerManager,enemyManager,map,party);
+    RenderCurrentScene(playerManager,enemyManager,map,party, accessory);
 }
 
 void SceneManager::Finalize()
@@ -89,7 +89,7 @@ void SceneManager::InitializeCurrentScene(InputManager& inputmanager,SceneManage
     }
 }
 
-void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sceneManager,PlayerManager&playerManager,EnemyManager&enemyManager,Map&map,Party&party,Battle&battle)
+void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sceneManager,PlayerManager&playerManager,EnemyManager&enemyManager,Map&map,Party&party,Battle&battle,Accessory&accessory)
 {
     switch (m_currentSceneID)
     {
@@ -106,12 +106,13 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
 
     case SceneID::Field:
    
-        m_fieldScene.Update(inputmanager,playerManager,enemyManager,map,battle);
+        m_fieldScene.Update(inputmanager,playerManager,enemyManager,map,battle,accessory);
 
         if (m_fieldScene.IsBattleRequested())
         {
             m_battleScene.SetPlayer(&playerManager);
             m_battleScene.SetEnemy(m_fieldScene.GetHitEnemy());
+            m_battleScene.SetEnemyManager(&enemyManager);
             NextSceneID(SceneID::Battle);
         }
 
@@ -126,6 +127,7 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
             m_fieldScene.SetAttackEffects(m_battleScene.GetUsedAttackOrder());
 
             m_battleScene.ClearUsedAttackOrder();
+            m_battleScene.SetEnemy(nullptr);
 
             NextSceneID(SceneID::Field);
         }
@@ -139,12 +141,12 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
     }
 }
 
-void SceneManager::RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party)
+void SceneManager::RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory)
 {
     switch (m_currentSceneID)
     {
     case SceneID::Title:   m_titleScene.Render();  break;
-    case SceneID::Field:    m_fieldScene.Render(playerManager,enemyManager,map);   break;
+    case SceneID::Field:    m_fieldScene.Render(playerManager,enemyManager,map,accessory);   break;
     case SceneID::Battle:   m_battleScene.Render(m_gameOver,party,map);   break;
 
 

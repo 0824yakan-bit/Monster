@@ -1,4 +1,6 @@
-﻿#include "pch.h"
+﻿
+
+#include "pch.h"
 #include "Game/Scene/FieldScene.h"
 
 #include"Game/Maths/Collisionall.h"
@@ -70,7 +72,7 @@ void FieldScene::Initialize(InputManager& inputmanager,PlayerManager&playerManag
     size.y = 50;
 }
 
-void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map&map,Battle&battle)
+void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map&map,Battle&battle,Accessory&accessory)
 {
     inputManager.Update();
     map.Update(inputManager, playerManager);
@@ -253,7 +255,7 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
 
 /////プレイヤー管理
 
-    if (!m_isMapActive && !m_isMenuActive)playerManager.Update(this, &map);
+    if (!m_isMapActive && !m_isMenuActive)playerManager.Update(this, &map,&accessory);
 
 
     if (playerManager.m_oldposition != playerManager.m_position)
@@ -320,11 +322,15 @@ void FieldScene::Update(InputManager& inputManager,PlayerManager& playerManager,
 
 }
 
-void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map)
+void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map, Accessory& accessory)
 {
     map.Render();
-    playerManager.Render(this,&map);
-    enemyManager.Render();
+    
+    playerManager.Render(this, &map,&accessory);
+    if (!m_isTreasureOpen)
+    {
+        enemyManager.Render();
+    }
     if (m_playEffect && m_effectIndex < m_attackEffects.size())
     {
         const auto& info = m_attackEffects[m_effectIndex];
@@ -487,9 +493,7 @@ void FieldScene::RenderCooperativeMove()
 
     float cursorY = positiony + 50.0f * m_CooperatDetailSelect;
 
-    DrawBoxAA(positionx, cursorY,
-        positionx + sizex, cursorY + sizey,
-        GetColor(0, 0, 0), FALSE);
+    DrawBoxAA(positionx, cursorY,positionx + sizex, cursorY + sizey,GetColor(0, 0, 0), FALSE);
 
     SetFontSize(50);
     DrawString(250, 50, L"技一覧", GetColor(0, 0, 0), TRUE);
@@ -576,27 +580,55 @@ bool FieldScene::HasSkill(CooperatList skill) const
 
 
 
-void FieldScene::UpdateTreasureOpen(InputManager& inputManager,PlayerManager& playerManager,Map&map)
+void FieldScene::UpdateTreasureOpen(InputManager& inputManager,PlayerManager& playerManager,Map&map,Accessory&accessory)
 {
+
     if (!m_isTreasureOpen)
     {
         m_isTreasureOpen = true;
+        result.clear();
+        int a = 3;
+        std::random_device rd;
+        std::mt19937 gen(rd());
+
+        std::shuffle(accessory.elementTypes.begin(), accessory.elementTypes.end(), gen);
+
+        result.assign(accessory.elementTypes.begin(), accessory.elementTypes.begin() + std::min<std::size_t>(a, accessory.elementTypes.size()));
+        
+
     }
     if (m_isTreasureOpen)
     {
+        accessory.GetAccessory(Accessory::NOMAL);
+
         if (inputManager.IsTrigger(KEY_INPUT_BACK))
         {
+            accessory.Upgrade(Accessory::NOMAL);
+            accessory.Upgrade(Accessory::FIRE);
+            accessory.Upgrade(Accessory::WATER);
+            accessory.Upgrade(Accessory::GRASS);
+            accessory.Upgrade(Accessory::SOIL);
+            accessory.Upgrade(Accessory::THUNDER);
+            accessory.Upgrade(Accessory::WIND);
             m_isTreasureOpen = false;
             map.UsedTreasure(playerManager);
             playerManager.m_position = playerManager.m_oldposition;
         }
     }
 }
-void FieldScene::RenderTreasureOpen()
+void FieldScene::RenderTreasureOpen(Accessory&accessory)
 {
     if (m_isTreasureOpen)
     {
+        DrawBox(30, 30, 1250, 690, GetColor(255, 255, 255), TRUE);
         DrawString(200, 200, L"Treasure Open!", GetColor(255, 255, 0));
+
+        for (int i = 0;i < result.size(); i++)
+        {
+            DrawFormatString( 150 + i * 400,200,GetColor(0,0,0),L"%d  %ls",i + 1,accessory.GetElementName(static_cast<Accessory::ElementType>(result[i])));
+            DrawFormatString( 150 + i * 400,250, GetColor(0, 0, 0), L"%d", accessory.GetAccessory(static_cast<Accessory::ElementType>(result[i])).level);
+        }
+
     }
 
 }

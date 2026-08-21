@@ -29,11 +29,17 @@ private:
 	ImageManager* m_image = nullptr;
 	Battle* m_battle;
 	PlayerManager* m_player;
+	EnemyManager* m_enemyManager;
 	Enemy* m_enemy;
 	const wchar_t* m_enemyName;
 	SceneManager* m_scenemanager;
 
 	bool m_isReplaceSelect;
+	// [0] 左
+	 // [1] エンカウント敵・中央
+	 // [2] 右
+	std::vector<Enemy*> m_battleEnemies;
+
 	std::unique_ptr<Monster> m_pendingMonster;
 
 	bool m_isFieldRequested;
@@ -52,12 +58,21 @@ public:
 	bool IsFieldRequested()const;
 	bool IsJoinRequested()const;
 
+
 	bool IsTitleRequested()const;
 	void ResetTitleRequest();
 
 	void SetImage(ImageManager* image);
 	void SetPlayer(PlayerManager* player);
+	void SetEnemyManager(EnemyManager* enemyManager);
 	void SetEnemy(Enemy* enemy);
+
+	void SetBattleEnemyPositions();
+	void CreateBattleEnemies(Map& map);
+	void SetBattleEnemies();
+
+	// 現在の攻撃対象
+	Enemy* GetTargetEnemy() const;
 
 	const std::vector<Battle::UsedAttackInfo>& GetUsedAttackOrder() const;
 	void ClearUsedAttackOrder();

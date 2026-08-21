@@ -37,17 +37,16 @@ void PlayerManager::Initialize(Map*map)
 	m_playerMove.Initialize(map,*this);
 }
 
-void PlayerManager::Update(FieldScene* field, Map*map)
+void PlayerManager::Update(FieldScene* field, Map*map,Accessory*accessory)
 {
-	m_playerMove.Update(field, map,this);
+	m_playerMove.Update(field, map,this,accessory);
 
 	
 
 }
 
-void PlayerManager::Render(FieldScene* field,Map* map)
+void PlayerManager::Render(FieldScene* field,Map* map, Accessory* accessory)
 {
-	m_playerMove.Render(field,map,this);
 	switch(m_direction)
 	{
 	case Direction::Up:
@@ -63,6 +62,7 @@ void PlayerManager::Render(FieldScene* field,Map* map)
 		m_image->DrawPlayer4(m_position, m_size);
 		break;
 	}
+	m_playerMove.Render(field,map,this,accessory);
 	
 
 }

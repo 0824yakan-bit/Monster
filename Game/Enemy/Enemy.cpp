@@ -41,3 +41,18 @@ void Enemy::SetImage(ImageManager* image)
 {
     m_image = image;
 }
+
+Vector2 Enemy::GetPosition()
+{
+    return Vector2(position.x,position.y);
+}
+
+void Enemy::SetBattleEnemy(bool battleEnemy)
+{
+    m_isBattleEnemy = battleEnemy;
+}
+
+bool Enemy::IsBattleEnemy() const
+{
+    return m_isBattleEnemy;
+}

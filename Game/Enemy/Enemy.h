@@ -47,13 +47,20 @@ public:
 
     int moveTimer;
     int moveCounter;
-
+private:
+    bool m_isBattleEnemy = false;
 public:
     void Damage(int power);//パーティのpower
     int GetPower()const;
     int GetHp() const;
     const wchar_t* GetName() const;
     void SetImage(ImageManager* image);
+    Vector2 GetPosition();
+
+    void SetBattleEnemy(bool battleEnemy);
+
+    bool IsBattleEnemy() const;
+
 
 public:
     Enemy();
