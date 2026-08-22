@@ -261,10 +261,23 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 
 	//フィールドへ戻る要求
-
 	if (m_battle->IsFieldRequested())
 	{
-		//戦闘前の位置へ戻す
+		// 逃走成功なら次の戦闘の敵を+1
+		if (m_battle->IsRunSuccess())
+		{
+			m_runEnemyBonus++;
+
+			// 最大+2まで
+			if (m_runEnemyBonus > 2)
+			{
+				m_runEnemyBonus = 2;
+			}
+
+			m_battle->ResetRunSuccess();
+		}
+
+		// 戦闘前の位置へ戻す
 		if (m_player != nullptr)
 		{
 			m_player->m_position = m_player->m_oldposition;
@@ -277,8 +290,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 
 	//仲間加入選択
-
-
 	if (m_isJoinRequested)
 	{
 		m_battle->SetJoinWindow(true);
@@ -302,8 +313,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 
 			//決定
-
-
 			else if (CheckHitKey(KEY_INPUT_RETURN))
 			{
 				//倒したエンカウント敵
@@ -317,8 +326,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 
 				//仲間にする
-
-
 				if (m_joinSelect == 0)
 				{
 					std::unique_ptr<Monster>monster;
@@ -349,8 +356,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 
 					//パーティに空きがある
-
-
 					if (party.GetMonsterCount() < 4)
 					{
 						//AddMonster前にポインタを保存
@@ -394,7 +399,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 				//仲間にしない
 
-
 				else
 				{
 					m_battle->RemoveEnemy(targetEnemy);
@@ -417,8 +421,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 	//デバッグ用
 	//Dキー：パーティ情報確認
-
-
 	if (CheckHitKey(KEY_INPUT_D))
 	{
 		if (party.GetMonsterCount() > 0)
@@ -519,8 +521,6 @@ void BattleScene::Render(GameOver& gameOver, Party& party, Map& map)
 
 
 	//戦闘画面の暗幕
-
-
 	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 120);
 
 	DrawBox(0, 0, 1280, 720, GetColor(128, 128, 128), TRUE);
@@ -587,8 +587,6 @@ void BattleScene::Render(GameOver& gameOver, Party& party, Map& map)
 
 
 	//モンスター交換画面
-
-
 	if (m_isReplaceSelect)
 	{
 		DrawBox(0, 0, 1280, 1280, GetColor(255, 255, 255), TRUE);
@@ -625,8 +623,6 @@ void BattleScene::Render(GameOver& gameOver, Party& party, Map& map)
 
 
 //終了処理
-
-
 void BattleScene::Finalize()
 {
 	SetFontSize(20);
@@ -690,9 +686,16 @@ void BattleScene::CreateBattleEnemies(Map& map)
 		//追加敵2体
 		addCount = 2;
 	}
+	// 逃走成功による追加
+	addCount += m_runEnemyBonus;
+
+	// エンカウントする敵1体を含めて最大3体
+	if (addCount > 2)
+	{
+		addCount = 2;
+	}
 
 	//追加敵生成
-
 	for (int i = 0;i < addCount;i++)
 	{
 		Enemy::EnemyType type = static_cast<Enemy::EnemyType>(GetRand(4));
@@ -862,3 +865,4 @@ void BattleScene::ClearUsedAttackOrder()
 {
 	m_battle->ClearUsedAttackOrder();
 }
+

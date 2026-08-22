@@ -45,6 +45,7 @@ private:
 	bool m_isFieldRequested;
 	bool m_isTitleRequested;
 
+	int m_runEnemyBonus;
 	bool m_battleWin;
 public:
 	BattleScene();

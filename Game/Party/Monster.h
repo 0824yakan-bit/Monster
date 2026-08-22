@@ -48,6 +48,7 @@ private:
 
 public:
     std::wstring GetName() const;
+    int GetMaxHitPoint() const;
     int GetCurrentHitPoint() const;
     void Damage(int value);
 

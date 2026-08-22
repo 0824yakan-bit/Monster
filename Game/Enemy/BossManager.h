@@ -1,4 +1,4 @@
-class BossManager
+﻿class BossManager
 {
 private:
     bool m_bossDefeated[3];//FALSE::生存・TRUE::撃破

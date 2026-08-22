@@ -11,23 +11,25 @@
 
 
 Battle::Battle()
-: m_receponsTimer{}
+: m_receponsTimer	{}
 , m_displaytextTimer{}
-, m_Window{}
-, m_windowWidth{}
+, m_Window			{}
+, m_windowWidth		{}
 , m_windowWidthFront{}
-, m_IsActive{}
-, m_isJoinWindow{}
-, m_select{}
-, m_state{}
-, m_displayIndex{}
-, m_attackSelect{}
-, m_monsterSelect{}
-, m_monsterhp{}
-, m_isRun{}
+, m_IsActive		{}
+, m_isJoinWindow	{}
+, m_select			{}
+, m_state			{}
+, m_displayIndex	{}
+, m_attackSelect	{}
+, m_requestDefense	{}
+,m_characteRistics	{}
+, m_monsterSelect	{}
+, m_monsterhp		{}
+, m_isRun			{}
 , m_isFieldRequested{}
 , m_isEnemyRequested{}
-, m_annihilation{}
+, m_annihilation	{}
 {
 }
 
@@ -53,14 +55,39 @@ void Battle::Initialize(SceneManager* sceneManager)
 
 	//コマンドボックス
 	drawCommandBoxPosition1.x =40;
-	drawCommandBoxPosition1.y =530;
-	drawCommandBoxSize1.x = 300;
-	drawCommandBoxSize1.y = 160;
+	drawCommandBoxPosition1.y =500;
+	drawCommandBoxSize1.x = 250;
+	drawCommandBoxSize1.y = 190;
 
-	drawCommandBoxPosition2.x = 20;
-	drawCommandBoxPosition2.y = 480;
-	drawCommandBoxSize2.x = 1240;
-	drawCommandBoxSize2.y = 230;
+	//敵情報
+	drawCommandBoxPosition1_1.x = 300;
+	drawCommandBoxPosition1_1.y = 500;
+	drawCommandBoxSize1_1.x = 900;
+	drawCommandBoxSize1_1.y = 190;
+
+	//各キャラコマンド一覧
+	drawCommandBoxPosition2.x = 120;
+	drawCommandBoxPosition2.y = 550;
+	drawCommandBoxSize2.x = 410;
+	drawCommandBoxSize2.y = 160;
+
+	//NAME・HP
+	drawCommandBoxPosition2_1.x = 120;
+	drawCommandBoxPosition2_1.y = 440;
+	drawCommandBoxSize2_1.x = 410;
+	drawCommandBoxSize2_1.y = 100;
+
+	//現在選択中一覧
+	drawCommandBoxPosition2_2.x = 550;
+	drawCommandBoxPosition2_2.y = 440;
+	drawCommandBoxSize2_2.x = 610;
+	drawCommandBoxSize2_2.y = 270;
+
+	//各ターン中
+	drawCommandBoxPosition2_3.x = 120;
+	drawCommandBoxPosition2_3.y = 440;
+	drawCommandBoxSize2_3.x = 410;
+	drawCommandBoxSize2_3.y = 270;
 
 	// 選択状態
 	m_select = 0;
@@ -72,7 +99,11 @@ void Battle::Initialize(SceneManager* sceneManager)
 	m_monsterSelect = 0;
 	m_attackSelect = 0;
 
+	// パーティ人数分の選択技を確保
+	m_selectedAttack.resize(m_party->GetMonsterCount());
 
+	// 全員「未選択」にする
+	std::fill(m_selectedAttack.begin(), m_selectedAttack.end(), -1);
 
 	// 戦闘状態
 	m_state = BattleState::Command;
@@ -106,25 +137,21 @@ void Battle::Initialize(SceneManager* sceneManager)
 	m_enemyDeadMotion = false;
 	m_enemyDeadOffsetY = 0;
 
-
-
+	//メッセージ
+	m_displayMessageEnemyAttackDamage.resize(MAX_PARTY);
+	for (int i = 0;i < MAX_PARTY;i++)
+	{
+		m_displayMessageEnemyAttackDamage[i].clear();
+	}
 	// コンボ状態
 	state = USED_NONE;
-
-
-
-	// 選択した技
-	m_selectedAttack.resize(m_party->GetMonsterCount(), -1);
-
-
 
 	// 味方HPを保存
 	for (int i = 0; i < m_party->GetMonsterCount(); i++)
 	{
 		Monster* monster = m_party->GetMonster(i);
 
-		m_monsterhp[i] =
-			monster->GetCurrentHitPoint();
+		m_monsterhp[i] =monster->GetCurrentHitPoint();
 	}
 
 
@@ -149,8 +176,6 @@ void Battle::Finalize()
 
 
 // Update
-
-
 void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, GameOver& gameOver, Map& map, PlayerManager& player)
 {
 
@@ -195,27 +220,28 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 
 			if (m_state == BattleState::Command && m_IsActive)
 			{
-				// 右
-				if (CheckHitKey(KEY_INPUT_RIGHT))
-				{
-					m_select++;
 
-					if (m_select >= COMMAND_NUM)
-					{
-						m_select = 0;
-					}
-
-					m_receponsTimer = 0;
-				}
-
-				// 左
-				if (CheckHitKey(KEY_INPUT_LEFT))
+				// 上
+				if (CheckHitKey(KEY_INPUT_UP))
 				{
 					m_select--;
 
 					if (m_select < 0)
 					{
 						m_select = COMMAND_NUM - 1;
+					}
+
+					m_receponsTimer = 0;
+				}
+
+				// 下
+				if (CheckHitKey(KEY_INPUT_DOWN))
+				{
+					m_select++;
+
+					if (m_select >= COMMAND_NUM)
+					{
+						m_select = 0;
 					}
 
 					m_receponsTimer = 0;
@@ -254,10 +280,10 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 
 
 					case 2:
-						// スカウト
+						// 応援
 						m_windowWidth = 0;
 						m_windowWidthFront = 0;
-						m_state = BattleState::Scout;
+						m_state = BattleState::Suppot;
 
 						break;
 
@@ -280,8 +306,6 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 
 
 				// 戻る処理
-
-
 				if (!m_IsActive && m_state == BattleState::AttackSelect && CheckHitKey(KEY_INPUT_BACK) && m_monsterSelect == 0)
 				{
 					m_state = BattleState::Command;
@@ -322,8 +346,8 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 		break;
 
 
-	case BattleState::Scout:
-		UpdateScout();
+	case BattleState::Suppot:
+		UpdateSuppot();
 		break;
 
 
@@ -455,8 +479,8 @@ void Battle::Render(GameOver& gameOver, Map& map)
 		break;
 
 
-	case BattleState::Scout:
-		RenderScout();
+	case BattleState::Suppot:
+		RenderSuppot();
 		break;
 
 
@@ -613,11 +637,11 @@ void Battle::RenderCommand()
 	{
 		return;
 	}
-	for (int i = 0;i < 4;i++)
-	{
-		drawCommandBoxPosition1.x = 40 + 300 * i;
-		m_image->DrawCommandbox1(drawCommandBoxPosition1, drawCommandBoxSize1);
-	}
+
+	m_image->DrawCommandbox1(drawCommandBoxPosition1, drawCommandBoxSize1);
+
+	m_image->DrawCommandbox1(drawCommandBoxPosition1_1, drawCommandBoxSize1_1);
+
 	//DrawBox(40, 530, 320, 690, GetColor(0, 0, 0), TRUE);
 
 	//DrawBox(340, 530, 630, 690, GetColor(0, 0, 0), TRUE);
@@ -627,24 +651,78 @@ void Battle::RenderCommand()
 	//DrawBox(950, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
 
 
-	SetFontSize(50);
+	SetFontSize(30);
 
 
 	for (int i = 0; i < COMMAND_NUM; i++)
 	{
-		DrawString(100 + i * 300, 580, m_command[i], GetColor(255, 255, 255));
+		DrawString(100, 520+40*i, m_command[i], GetColor(255, 255, 255));
 	}
 
 
 	// カーソル
-	DrawString(70 + m_select * 300, 580, L"▶", GetColor(255, 255, 0));
+	DrawString(70, 520+40*m_select, L"▶", GetColor(255, 255, 0));
+}
+
+void Battle::RenderCurrentCommand()
+{
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_2, drawCommandBoxSize2_2);
+	// パーティの行動予定
+	DrawString(590, 480, L"行動予定", GetColor(255, 255, 255));
+
+	for (int i = 0; i < m_party->GetMonsterCount(); i++)
+	{
+		Monster* monster = m_party->GetMonster(i);
+
+		if (monster == nullptr)
+		{
+			continue;
+		}
+
+		std::wstring name = monster->GetName();
+
+		// 2列 × 2行
+		int column = i % 2;
+		int row = i / 2;
+
+		int x = 620 + column * 250;
+		int y = 530 + row * 80;
+
+		// 現在選択中の仲間
+		int nameColor = GetColor(255, 255, 255);
+
+		if (i == m_monsterSelect)
+		{
+			nameColor = GetColor(255, 255, 0);
+
+			DrawString(x - 25, y, L"▶", GetColor(255, 255, 0));
+		}
+
+		// 仲間の名前
+		DrawString(x, y, name.c_str(), nameColor);
+
+		// 選択した技
+		int attackIndex = m_selectedAttack[i];
+
+		if (attackIndex >= 0)
+		{
+			auto& attacks = monster->GetAttacks();
+
+			if (attackIndex < static_cast<int>(attacks.size()))
+			{
+				DrawString(x, y + 35, attacks[attackIndex].name, GetColor(255, 255, 0));
+			}
+		}
+		else
+		{
+			DrawString(x, y + 35, L"未選択", GetColor(150, 150, 150));
+		}
+	}
 }
 
 
 
 // Attack Select
-
-
 void Battle::UpdateAttackSelect()
 {
 	if (m_party == nullptr)
@@ -693,8 +771,6 @@ void Battle::UpdateAttackSelect()
 
 
 		// 2体目以降なら1体前へ戻る
-
-
 		do
 		{
 			m_monsterSelect--;
@@ -733,8 +809,6 @@ void Battle::UpdateAttackSelect()
 
 
 	// HP0の仲間を自動で飛ばす
-
-
 	while (m_monsterSelect < m_party->GetMonsterCount() && m_monsterhp[m_monsterSelect] <= 0)
 	{
 		m_monsterSelect++;
@@ -743,8 +817,6 @@ void Battle::UpdateAttackSelect()
 
 
 	// 全員選択済み
-
-
 	if (m_monsterSelect >= m_party->GetMonsterCount())
 	{
 		m_displayIndex = 0;
@@ -862,76 +934,51 @@ void Battle::RenderAttackSelect()
 	{
 		return;
 	}
-	// ウィンドウの中心
-	int centerY = 600;
 
-
-	// 上下に広がるためのY座標
-	int topY = centerY - m_windowHeight / 2;
-
-
-	Vector2 windowPosition;
-
-	windowPosition.x = 20;
-	windowPosition.y = topY;
-
-
-	Vector2 windowSize;
-
-	windowSize.x = 1240;
-	windowSize.y = m_windowHeight;
-
-	m_image->DrawCommandbox2(drawCommandBoxPosition2, drawCommandBoxSize2);
-	//DrawBox(40, 530, 320 + m_windowWidth, 690, GetColor(0, 0, 0), TRUE);
-
-
-	for (int m = 0;m < m_party->GetMonsterCount();m++)
+	m_image->DrawCommandbox1(drawCommandBoxPosition2, drawCommandBoxSize2);
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_1, drawCommandBoxSize2_1);
+	RenderCurrentCommand();
+	// 現在行動選択中の仲間
+	if (m_monsterSelect >= m_party->GetMonsterCount())
 	{
-		Monster* monster = m_party->GetMonster(m);
+		return;
+	}
 
-		std::wstring name = monster->GetName();
+	Monster* monster = m_party->GetMonster(m_monsterSelect);
 
-		auto& attacks = monster->GetAttacks();
+	if (monster == nullptr)
+	{
+		return;
+	}
 
-		int x = 60 + m * 300;
+	std::wstring name = monster->GetName();
+	auto& attacks = monster->GetAttacks();
 
+	// 仲間の名前
+	DrawString(160,450,name.c_str(),GetColor(0, 0, 255));
 
-		// 仲間画面中は技を描画しない
-		if (m_isJoinWindow)
+	// HP
+	DrawFormatString(300,500,GetColor(0, 255, 255),L"HP : %d / %d",	m_monsterhp[m_monsterSelect],monster->GetMaxHitPoint());
+	
+
+	// 技一覧
+	for (int i = 0; i < attacks.size(); i++)
+	{
+		int color = GetColor(255, 255, 255);
+
+		// 選択済み
+		if (m_selectedAttack[m_monsterSelect] == i)
 		{
-			return;
+			color = GetColor(255, 255, 0);
 		}
 
+		// 技名
+		DrawString(250,580 + i * 40,attacks[i].name,color);
 
-
-		// 技一覧
-
-
-		for (int i = 0;i < attacks.size();i++)
+		// 現在のカーソル
+		if (i == m_attackSelect)
 		{
-			int color = GetColor(255, 255, 255);
-
-
-			// 選択済み
-			if (m_selectedAttack[m] == i)
-			{
-				color = GetColor(255, 255, 0);
-			}
-
-
-			// モンスター名
-			DrawString(x, 500, name.c_str(), GetColor(0, 0, 255));
-
-
-			// 技名
-			DrawString(x, 550 + i * 40, attacks[i].name, color);
-
-
-			// 現在のカーソル
-			if (m == m_monsterSelect && i == m_attackSelect)
-			{
-				DrawString(x - 25, 550 + i * 40, L"▶", GetColor(255, 255, 0));
-			}
+			DrawString(250-25,580 + i * 40,L"▶",GetColor(255, 255, 0));
 		}
 	}
 }
@@ -939,8 +986,6 @@ void Battle::RenderAttackSelect()
 
 
 // Attack Action
-
-
 void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 {
 
@@ -962,8 +1007,6 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 
 	// コンボ処理
-
-
 	if (m_comboPending)
 	{
 		m_displaytextTimer++;
@@ -995,8 +1038,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 			m_displaytextTimer = 0;
 
-			m_state =
-				BattleState::EnemyDead;
+			m_state =BattleState::EnemyDead;
 
 			return;
 		}
@@ -1012,8 +1054,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 		std::fill(m_selectedAttack.begin(), m_selectedAttack.end(), -1);
 
-		m_state =
-			BattleState::EnemyTurn;
+		m_state =BattleState::EnemyTurn;
 
 		m_displaytextTimer = 0;
 
@@ -1023,8 +1064,6 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 
 	// コンボ条件確認
-
-
 	bool hasFire = false;
 	bool hasWater = false;
 	bool hasGrass = false;
@@ -1073,18 +1112,20 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 	bool floorCombo = hasWater && hasSoil;
 
 	// HP0 または未選択の仲間を飛ばす
-
-
 	while (m_displayIndex < m_party->GetMonsterCount() && (m_monsterhp[m_displayIndex] <= 0 || m_selectedAttack[m_displayIndex] < 0))
 	{
 		m_displayIndex++;
 	}
 
-
+	// 全員の行動が終了した
+	if (m_displayIndex >= m_party->GetMonsterCount())
+	{
+		m_comboPending = true;
+		m_displaytextTimer = 0;
+		return;
+	}
 
 	// 次のモンスターへ
-
-
 	if (m_displaytextTimer >= 60)
 	{
 		m_displaytextTimer = 0;
@@ -1116,7 +1157,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 		int index = m_selectedAttack[m_displayIndex];
 
 
-		// 念のため範囲チェック
+		// 範囲チェック
 		if (index < 0 || index >= (int)attacks.size())
 		{
 			m_displayIndex++;
@@ -1230,21 +1271,30 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 
 		// 通常攻撃処理
-		if (
-			m_characteRistics != Monster::CharacteRistics::Defense && !isComboMember)
+		if (m_characteRistics != Monster::CharacteRistics::Defense && !isComboMember)
 		{
 			Enemy* target = GetSelectedTargetEnemy();
 
 
 			if (target != nullptr)
 			{
-				target->Damage(static_cast<int>(attacks[index].power * magnification));
+				// 攻撃前のHP
+				int beforeHp = target->GetHp();
+
+				// ダメージ計算
+				int damage = static_cast<int>(attacks[index].power * magnification);
+
+				// 攻撃
+				target->Damage(damage);
+
+				int actualDamage = beforeHp - target->GetHp();
+
+				m_displayMessageDamage =std::wstring(target->GetName())+ L"に"+ std::to_wstring(actualDamage)+ L"ダメージ！";
 			}
 
 
 
 			// 単体属性効果
-
 			switch (m_characteRistics)
 			{
 			case Monster::CharacteRistics::Normal:
@@ -1296,8 +1346,6 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 
 		// 攻撃メッセージ
-
-
 		if (!isComboMember)
 		{
 			m_displayMessage = monster->GetName() + L"の" + attacks[index].name + L"！";
@@ -1307,8 +1355,6 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 
 	// 攻撃表示中
-
-
 	if (m_displaytextTimer < 60)
 	{
 		return;
@@ -1317,15 +1363,12 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 
 	// 敵死亡判定
-
-
 	if (m_selectedTargetEnemyIndex >= 0 && m_selectedTargetEnemyIndex < static_cast<int>(m_enemies.size()))
 	{
 		Enemy* target = m_enemies[m_selectedTargetEnemyIndex];
 
 
-		if (target != nullptr &&
-			target->GetHp() <= 0)
+		if (target != nullptr &&target->GetHp() <= 0)
 		{
 			m_deadEnemy = target;
 			m_deadEnemyName = target->GetName();
@@ -1335,8 +1378,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 			m_displaytextTimer = 0;
 
-			m_state =
-				BattleState::EnemyDead;
+			m_state =BattleState::EnemyDead;
 
 			return;
 		}
@@ -1351,20 +1393,46 @@ void Battle::RenderAttackAction()
 		return;
 	}
 
-
 	DrawBox(40, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
+	DrawString(150, 480, m_displayMessage.c_str(), GetColor(255, 255, 255));
+	DrawString(150, 530, m_displayMessageDamage.c_str(), GetColor(255, 255, 255));
 
-
-	DrawString(50, 550, m_displayMessage.c_str(), GetColor(255, 255, 255));
+	RenderCurrentCommand();
 }
 
 
 
 // Tool
-
-
 void Battle::UpdateTool()
 {
+	if (m_state != BattleState::Tool)
+	{
+		return;
+	}
+	//決定
+	if (m_receponsTimer > 25 && CheckHitKey(KEY_INPUT_RETURN))
+	{
+		m_receponsTimer = 0;
+		m_state = BattleState::EnemyTurn;
+	}
+	// 戻る
+	if (m_receponsTimer > 25 && CheckHitKey(KEY_INPUT_BACK))
+	{
+		m_receponsTimer = 0;
+
+		m_state = BattleState::Command;
+
+		m_IsActive = true;
+		m_Window = false;
+
+		m_windowWidth = 0;
+		m_windowWidthFront = 0;
+
+		m_select = 1; // 「道具」にカーソルを残す
+
+		return;
+	}
 }
 
 
@@ -1384,68 +1452,108 @@ void Battle::RenderTool()
 	DrawBox(340 - m_windowWidthFront, 530, 630 + m_windowWidth, 690, GetColor(0, 0, 0), TRUE);
 }
 
-
-
-// Scout
-
-
-void Battle::UpdateScout()
+//Suppot
+void Battle::UpdateSuppot()
 {
+	if (m_state != BattleState::Suppot)
+	{
+		return;
+	}
+
+	//決定
+	if (m_receponsTimer > 25 && CheckHitKey(KEY_INPUT_RETURN))
+	{
+		m_receponsTimer = 0;
+		m_state = BattleState::EnemyTurn;
+	}
+	// 戻る
+	if (m_receponsTimer > 25 && CheckHitKey(KEY_INPUT_BACK))
+	{
+		m_receponsTimer = 0;
+
+		m_state = BattleState::Command;
+
+		m_IsActive = true;
+		m_Window = false;
+
+		m_windowWidth = 0;
+		m_windowWidthFront = 0;
+
+		m_select = 2; // 「おうえん」にカーソルを残す
+
+		return;
+	}
 }
 
-
-void Battle::RenderScout()
+void Battle::RenderSuppot()
 {
-	if (m_windowWidthFront > 610)
-	{
-		m_windowWidthFront = 610;
-	}
-
-	if (m_windowWidth > 310)
-	{
-		m_windowWidth = 310;
-	}
-
-
 	DrawBox(650 - m_windowWidthFront, 530, 930 + m_windowWidth, 690, GetColor(0, 0, 0), TRUE);
 
 
-	DrawString(40, 580, L"スカウト", GetColor(255, 255, 255));
+	DrawString(40, 580, L"応援", GetColor(255, 255, 255));
 }
+
+
 
 
 
 // Run
-
-
 void Battle::UpdateRun()
 {
-	// フィールドへ戻す
-	m_player->m_position = m_player->m_currentposition;
+	m_displaytextTimer++;
 
+	if (m_displaytextTimer == 1)
+	{
+		int rand = GetRand(1);
 
-	m_isEnemyRequested = true;
-	m_isFieldRequested = true;
+		if (rand == 0)
+		{
+			// 逃走成功
+			m_isRunSuccess = true;
+			m_displayMessage = L"にげだした!";
+		}
+		else
+		{
+			// 逃走失敗
+			m_isRunSuccess = false;
+			m_displayMessage = L"にげられなかった...";
+		}
+	}
 
-	m_state =
-		BattleState::Command;
+	if (m_displaytextTimer > 60)
+	{
+		if (m_isRunSuccess)
+		{
+			m_player->m_position = m_player->m_currentposition;
+
+			m_isEnemyRequested = true;
+			m_isFieldRequested = true;
+
+			m_state = BattleState::Command;
+		}
+		else
+		{
+			m_state = BattleState::EnemyTurn;
+		}
+
+		m_displaytextTimer = 0;
+	}
 }
 
 
 void Battle::RenderRun()
 {
-	DrawBox(950 - m_windowWidthFront, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
+	DrawString(150, 480, m_displayMessage.c_str(), GetColor(255, 255, 255));
+
 }
 
 
 
 // Enemy Turn
-
-
 void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 {
 	Enemy* enemy = GetTargetEnemy();
-
 
 	if (enemy == nullptr)
 	{
@@ -1453,32 +1561,126 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 		return;
 	}
 
-
 	m_displaytextTimer++;
 
 
-
-	// 敵攻撃メッセージ
-
-
-	if (m_displaytextTimer <= 60)
+	// 1回だけ攻撃方法を決める
+	if (m_displaytextTimer == 1)
 	{
-		m_displayMessage = std::wstring(enemy->GetName()) + L"の攻撃!!";
+		// 0 = 単体攻撃
+		// 1 = 全体攻撃
+		m_enemyAttackType = GetRand(1);
+
+		// 単体攻撃の場合、攻撃対象を決める
+		if (m_enemyAttackType == 0)
+		{
+			std::vector<int> aliveMembers;
+
+			for (int i = 0; i < m_party->GetMonsterCount(); i++)
+			{
+				if (m_monsterhp[i] > 0)
+				{
+					aliveMembers.push_back(i);
+				}
+			}
+
+			if (!aliveMembers.empty())
+			{
+				int randomIndex = GetRand(static_cast<int>(aliveMembers.size()) - 1);
+
+				m_enemyTargetIndex = aliveMembers[randomIndex];
+			}
+			else
+			{
+				EndTurn();
+				return;
+			}
+		}
 	}
 
 
+	// 敵攻撃メッセージ
+	if (m_displaytextTimer <= 60)
+	{
+		m_displayMessage =std::wstring(enemy->GetName()) + L"の攻撃!!";
+	}
+
+
+	// 単体攻撃
+	else if (m_enemyAttackType == 0 &&m_displaytextTimer <= 120)
+	{
+		Monster* target =m_party->GetMonster(m_enemyTargetIndex);
+
+		if (target == nullptr)
+		{
+			EndTurn();
+			return;
+		}
+
+
+		m_displayMessage =target->GetName() + L"に攻撃！";///////後に技名にする
+
+
+		// 120フレーム目にダメージ
+		if (m_displaytextTimer == 120)
+		{
+			int damage = enemy->GetPower();
+
+
+			// 防御中なら半減
+			if (m_requestDefense[m_enemyTargetIndex])
+			{
+				damage /= 2;
+			}
+
+
+			int beforeHp =target->GetCurrentHitPoint();
+
+
+			target->Damage(damage);
+
+
+			int actualDamage =beforeHp - target->GetCurrentHitPoint();
+
+
+			m_monsterhp[m_enemyTargetIndex] =target->GetCurrentHitPoint();
+
+
+			if (m_monsterhp[m_enemyTargetIndex] < 0)
+			{
+				m_monsterhp[m_enemyTargetIndex] = 0;
+			}
+
+
+			m_displayMessageEnemyAttackDamage[m_enemyTargetIndex] =target->GetName()+ L"に"+ std::to_wstring(actualDamage)+ L"ダメージ";
+		}
+	}
+
 
 	// 全体攻撃
-	else if (m_displaytextTimer <= 120)
+	else if (m_enemyAttackType == 1 &&m_displaytextTimer <= 120)
 	{
-		m_displayMessage = L"全体に";
+		m_displayMessage = L"全体攻撃";///////後に技名にする
 
 
+		// 120フレーム目にダメージ
 		if (m_displaytextTimer == 120)
 		{
 			for (int i = 0;i < m_party->GetMonsterCount();i++)
 			{
-				Monster* monster = m_party->GetMonster(i);
+				Monster* monster =m_party->GetMonster(i);
+
+				if (monster == nullptr)
+				{
+					continue;
+				}
+
+
+				// 死亡している仲間には攻撃しない
+				if (m_monsterhp[i] <= 0)
+				{
+					continue;
+				}
 
 
 				int damage = enemy->GetPower();
@@ -1491,21 +1693,33 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 				}
 
 
+				int beforeHp =monster->GetCurrentHitPoint();
+
+
 				monster->Damage(damage);
 
 
-				m_monsterhp[i] = monster->GetCurrentHitPoint();
+				int actualDamage =beforeHp - monster->GetCurrentHitPoint();
+
+
+				m_monsterhp[i] =monster->GetCurrentHitPoint();
 
 
 				if (m_monsterhp[i] < 0)
 				{
 					m_monsterhp[i] = 0;
 				}
+
+				m_displayMessageEnemyAttackDamage[i] =monster->GetName()+ L"に"+ std::to_wstring(actualDamage)+ L"ダメージ";
 			}
-
-
-			EndTurn();
 		}
+	}
+
+
+	// ダメージ表示
+	if (m_displaytextTimer >= 180)
+	{
+		EndTurn();
 	}
 }
 
@@ -1513,10 +1727,13 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 void Battle::RenderEnemyTurn()
 {
 	DrawBox(40, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
 
-
-	DrawString(60, 550, m_displayMessage.c_str(), GetColor(255, 255, 255));
-
+	DrawString(150, 480, m_displayMessage.c_str(), GetColor(255, 255, 255));
+	for (int i=0;i < m_party->GetMonsterCount();i++)
+	{
+		DrawString(150, 530+i*50, m_displayMessageEnemyAttackDamage[i].c_str(), GetColor(255, 255, 255));
+	}
 
 	DrawString(20, 500, L"EnemyTURN", GetColor(32, 132, 43), TRUE);
 }
@@ -1524,17 +1741,11 @@ void Battle::RenderEnemyTurn()
 
 
 // Enemy Dead
-
-
 void Battle::UpdateEnemyDead()
 {
 	m_displaytextTimer++;
 
-
-
 	// 0～29フレーム：やられモーション
-
-
 	if (m_displaytextTimer < 30)
 	{
 		m_displayMessage.clear();
@@ -1544,21 +1755,13 @@ void Battle::UpdateEnemyDead()
 		return;
 	}
 
-
-
 	// 30フレーム目
-
-
 	if (m_displaytextTimer == 30)
 	{
 		m_displayMessage = m_deadEnemyName + L"を倒した!";
 	}
 
-
-
 	// 90フレーム経過
-
-
 	if (m_displaytextTimer >= 90)
 	{
 		m_enemyDeadMotion = false;
@@ -1568,11 +1771,7 @@ void Battle::UpdateEnemyDead()
 
 		m_displaytextTimer = 0;
 
-
-
 		// 全員倒した
-
-
 		if (AreAllEnemiesDead())
 		{
 			m_isEnemyRequested = true;
@@ -1580,11 +1779,7 @@ void Battle::UpdateEnemyDead()
 			return;
 		}
 
-
-
 		// 生きている敵をターゲットにする
-
-
 		m_targetEnemyIndex = -1;
 
 
@@ -1603,10 +1798,7 @@ void Battle::UpdateEnemyDead()
 
 
 		// 戦闘続行
-
-
-		m_state =
-			BattleState::Command;
+		m_state =BattleState::Command;
 
 
 		m_IsActive = true;
@@ -1638,9 +1830,7 @@ void Battle::RenderEnemyDead()
 
 
 
-// Annihilation
-
-
+// Annihilation全滅
 void Battle::UpdateAnnihilation(GameOver& gameOver, InputManager& inputManager)
 {
 	gameOver.Update(inputManager);
@@ -1654,8 +1844,6 @@ void Battle::RenderAnnihilation(GameOver& gameOver)
 
 
 // Turn End
-
-
 void Battle::EndTurn()
 {
 	m_state = BattleState::Command;
@@ -1671,21 +1859,13 @@ void Battle::EndTurn()
 
 	m_select = 0;
 
-
-
 	// 防御状態リセット
-
-
 	for (int i = 0; i < MAX_PARTY; i++)
 	{
 		m_requestDefense[i] = false;
 	}
 
-
-
 	// 選択技リセット
-
-
 	std::fill(m_selectedAttack.begin(), m_selectedAttack.end(), -1);
 
 
@@ -1693,19 +1873,24 @@ void Battle::EndTurn()
 	m_attackSelect = 0;
 	m_displayIndex = 0;
 
-
+	//ダメージ表記リセット
+	for (int i = 0;i < MAX_PARTY;i++)
+	{
+		m_displayMessageEnemyAttackDamage[i].clear();
+	}
 
 	// 次ターンのターゲット
-
-
 	m_selectedTargetEnemyIndex = m_targetEnemyIndex;
+}
+
+void Battle::ResetRunSuccess()
+{
+	m_isRunSuccess = false;
 }
 
 
 
 // Target
-
-
 void Battle::SetTargetEnemyIndex(int index)
 {
 	m_targetEnemyIndex = GetValidTargetIndex(index);
@@ -1797,8 +1982,6 @@ int Battle::GetValidTargetIndex(int index) const
 
 
 	// 範囲調整
-
-
 	if (index < 0)
 	{
 		index = 0;
@@ -1813,8 +1996,6 @@ int Battle::GetValidTargetIndex(int index) const
 
 
 	// 指定位置が生存していればそのまま
-
-
 	if (m_enemies[index] != nullptr && m_enemies[index]->GetHp() > 0)
 	{
 		return index;
@@ -1823,8 +2004,6 @@ int Battle::GetValidTargetIndex(int index) const
 
 
 	// 死亡していた場合、右方向に検索
-
-
 	for (int i = 1; i <= count; i++)
 	{
 		int searchIndex = (index + i) % count;
@@ -1843,8 +2022,6 @@ int Battle::GetValidTargetIndex(int index) const
 
 
 // Enemy Management
-
-
 bool Battle::AreAllEnemiesDead() const
 {
 	if (m_enemies.empty())
@@ -1879,8 +2056,6 @@ void Battle::RemoveEnemy(Enemy* enemy)
 
 
 	// 削除対象検索
-
-
 	for (int i = 0;i < static_cast<int>(m_enemies.size());i++)
 	{
 		if (m_enemies[i] == enemy)
@@ -1899,15 +2074,9 @@ void Battle::RemoveEnemy(Enemy* enemy)
 
 
 	// 敵削除
-
-
 	m_enemies.erase(m_enemies.begin() + removeIndex);
 
-
-
 	// 敵がいなくなった
-
-
 	if (m_enemies.empty())
 	{
 		m_targetEnemyIndex = -1;
@@ -1916,11 +2085,7 @@ void Battle::RemoveEnemy(Enemy* enemy)
 		return;
 	}
 
-
-
 	// 実ターゲット調整
-
-
 	if (m_targetEnemyIndex > removeIndex)
 	{
 		m_targetEnemyIndex--;
@@ -1930,11 +2095,7 @@ void Battle::RemoveEnemy(Enemy* enemy)
 		m_targetEnemyIndex = -1;
 	}
 
-
-
 	// 選択中ターゲット調整
-
-
 	if (m_selectedTargetEnemyIndex > removeIndex)
 	{
 		m_selectedTargetEnemyIndex--;
@@ -1947,8 +2108,6 @@ void Battle::RemoveEnemy(Enemy* enemy)
 
 
 	// 実ターゲット再設定
-
-
 	if (m_targetEnemyIndex == -1)
 	{
 		SetTargetEnemyIndex(0);
@@ -1957,8 +2116,6 @@ void Battle::RemoveEnemy(Enemy* enemy)
 
 
 	// 選択ターゲット再設定
-
-
 	if (m_selectedTargetEnemyIndex == -1)
 	{
 		m_selectedTargetEnemyIndex = m_targetEnemyIndex;
@@ -1977,8 +2134,6 @@ void Battle::SetEnemies(const std::vector<Enemy*>& enemies)
 
 
 	// 中央の敵を優先
-
-
 	if (m_enemies.size() > 1 && m_enemies[1] != nullptr && m_enemies[1]->GetHp() > 0)
 	{
 		m_targetEnemyIndex = 1;
@@ -2008,25 +2163,25 @@ void Battle::SetEnemies(const std::vector<Enemy*>& enemies)
 // Setter
 void Battle::SetImage(ImageManager* image)
 {
-m_image = image;
+	m_image = image;
 }
 
 
 void Battle::SetPlayer(PlayerManager* player)
 {
-m_player = player;
+	m_player = player;
 }
 
 
 void Battle::SetParty(Party* party)
 {
-m_party = party;
+	m_party = party;
 }
 
 
 void Battle::SetJoinWindow(bool flag)
 {
-m_isJoinWindow = flag;
+	m_isJoinWindow = flag;
 }
 
 
@@ -2036,19 +2191,23 @@ m_isJoinWindow = flag;
 
 bool Battle::IsFieldRequested()
 {
-return m_isFieldRequested;
+	return m_isFieldRequested;
 }
 
 
 bool Battle::IsEnemyRequested()
 {
-return m_isEnemyRequested;
+	return m_isEnemyRequested;
 }
 
+bool Battle::IsRunSuccess() const
+{
+	return m_isRunSuccess;
+}
 
 bool Battle::GetAnnihilation()
 {
-return m_annihilation;
+	return m_annihilation;
 }
 
 void Battle::DamageAllEnemies(int damage)
@@ -2179,8 +2338,6 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 
 	// 土 + 火
 	// 火山化
-
-
 	if ((state & USED_SOIL) && (state & USED_FIRE))
 	{
 		map.VolcazationBreak(player);
@@ -2205,8 +2362,6 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 
 
 	// 風
-
-
 	if (state & USED_WIND)
 	{
 		map.WindBreak(player);
@@ -2215,8 +2370,6 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 
 
 	// 雷
-
-
 	if (state & USED_THUNDER)
 	{
 		map.ThunderBreak(player);
@@ -2225,8 +2378,6 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 
 
 	// 次ターン用にリセット
-
-
 	state = USED_NONE;
 }
 
@@ -2235,43 +2386,36 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 // Attack Order
 
 
-const std::vector<Battle::UsedAttackInfo>&Battle::GetUsedAttackOrder() const
+const std::vector<Battle::UsedAttackInfo>& Battle::GetUsedAttackOrder() const
 {
-return m_usedAttackOrder;
+	return m_usedAttackOrder;
 }
 
 
 void Battle::ClearUsedAttackOrder()
 {
-m_usedAttackOrder.clear();
+	m_usedAttackOrder.clear();
 }
-
 
 
 // Combo Member
-
-
-bool Battle::IsComboMember(Monster::CharacteRistics type,bool steamcombo,bool floorcombo)
+bool Battle::IsComboMember(Monster::CharacteRistics type, bool steamcombo, bool floorcombo)
 {
 
-// 火 + 水
-
-
-if (steamcombo &&(type ==Monster::CharacteRistics::Fire ||type ==Monster::CharacteRistics::Water))
-{
-return true;
-}
+	// 火 + 水
+	if (steamcombo && (type == Monster::CharacteRistics::Fire || type == Monster::CharacteRistics::Water))
+	{
+		return true;
+	}
 
 
 
-// 水 + 土
+	// 水 + 土
+	if (floorcombo && (type == Monster::CharacteRistics::Water || type == Monster::CharacteRistics::Soil))
+	{
+		return true;
+	}
 
 
-if (floorcombo &&(type ==Monster::CharacteRistics::Water ||type ==Monster::CharacteRistics::Soil))
-{
-return true;
-}
-
-
-return false;
+	return false;
 }

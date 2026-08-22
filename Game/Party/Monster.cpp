@@ -74,6 +74,11 @@ std::wstring Monster::GetName() const
     return m_name;
 }
 
+int Monster::GetMaxHitPoint() const
+{
+    return m_maxHitPoint;
+}
+
 int Monster::GetCurrentHitPoint() const
 {
     return m_currentHitPoint;

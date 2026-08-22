@@ -44,7 +44,7 @@ private:
 		AttackSelect,	// 技選択
 		AttackAction,	// 攻撃演出
 		Tool,
-		Scout,
+		Suppot,
 		Run,
 		EnemyTurn,
 		EnemyDead,
@@ -74,12 +74,12 @@ private:
 
 
 	// 敵関連
-
-
 	std::vector<Enemy*> m_enemies;
 
-	int m_targetEnemyIndex = -1;
-	int m_selectedTargetEnemyIndex = -1;
+	int m_targetEnemyIndex			= -1;
+	int m_selectedTargetEnemyIndex	= -1;
+	int m_enemyAttackType			=  0;
+	int m_enemyTargetIndex			=  0;
 
 	Enemy* m_deadEnemy = nullptr;
 	std::wstring m_deadEnemyName;
@@ -91,8 +91,16 @@ private:
 	Vector2 drawBgSize;
 	Vector2 drawCommandBoxPosition1;
 	Vector2 drawCommandBoxSize1;	
+	Vector2 drawCommandBoxPosition1_1;
+	Vector2 drawCommandBoxSize1_1;
 	Vector2 drawCommandBoxPosition2;
 	Vector2 drawCommandBoxSize2;
+	Vector2 drawCommandBoxPosition2_1;
+	Vector2 drawCommandBoxSize2_1;
+	Vector2 drawCommandBoxPosition2_2;
+	Vector2 drawCommandBoxSize2_2;
+	Vector2 drawCommandBoxPosition2_3;
+	Vector2 drawCommandBoxSize2_3;
 
 	bool m_playAttackEffect = false;
 	int m_attackEffectTimer = 0;
@@ -121,15 +129,16 @@ private:
 
 	Monster::CharacteRistics m_characteRistics;
 
-	bool m_comboPending = false;
-	bool m_annihilation = false;
+	bool m_isRunSuccess		= false;
+	bool m_comboPending		= false;
+	bool m_annihilation		= false;
 
-	bool m_IsActive = false;
-	bool m_Window = false;
-	bool m_isJoinWindow = false;
+	bool m_IsActive			= false;
+	bool m_Window			= false;
+	bool m_isJoinWindow		= false;
 	bool m_isFieldRequested = false;
 	bool m_isEnemyRequested = false;
-	bool m_isRun = false;
+	bool m_isRun			= false;
 
 
 
@@ -151,17 +160,17 @@ private:
 
 	// メッセージ
 	std::wstring m_displayMessage;
+	std::wstring m_displayMessageDamage;
+	std::vector<std::wstring>m_displayMessageEnemyAttackDamage;
 
 
 
 	// コマンド
-
-
 	const wchar_t* m_command[COMMAND_NUM]
 	{
 		L"指揮する",
 		L"もちもの",
-		L"  さそう",
+		L"おうえん",
 		L"にげだす"
 	};
 
@@ -184,94 +193,66 @@ public:
 
 
 	// コマンド選択
-
-
 	void RenderCommand();									// コマンド選択画面の描画
-
+	void RenderCurrentCommand();
 
 
 	// 攻撃選択
-
-
 	void UpdateAttackSelect();								// 攻撃選択の更新
 	void RenderAttackSelect();								// 攻撃選択画面の描画
 
 
 
 	// 攻撃実行
-
-
-	void UpdateAttackAction(
-		Map& map,
-		PlayerManager& player
-	);														// 攻撃処理の更新
+	void UpdateAttackAction(Map& map,PlayerManager& player);// 攻撃処理の更新
 
 	void RenderAttackAction();								// 攻撃演出の描画
 
 
 
 	// 道具
-
-
 	void UpdateTool();										// 道具選択の更新
 	void RenderTool();										// 道具画面の描画
 
 
 
-	// スカウト
-
-
-	void UpdateScout();										// スカウト処理の更新
-	void RenderScout();										// スカウト画面の描画
+	// 応援
+	void UpdateSuppot();										// 応援処理の更新
+	void RenderSuppot();										// 応援画面の描画
 
 
 
 	// 逃走
-
-
 	void UpdateRun();										// 逃走処理の更新
 	void RenderRun();										// 逃走画面の描画
 
 
 
 	// 敵ターン
-
-
 	void UpdateEnemyTurn(SceneManager* sceneManager);		// 敵ターンの更新
 	void RenderEnemyTurn();									// 敵ターンの描画
 
 
 
 	// 敵死亡
-
-
 	void UpdateEnemyDead();									// 敵死亡演出の更新
 	void RenderEnemyDead();									// 敵死亡演出の描画
 
 
 
 	// 全滅
-
-
-	void UpdateAnnihilation(
-		GameOver& gameOver,
-		InputManager& inputManager
-	);														// 全滅処理の更新
+	void UpdateAnnihilation(GameOver& gameOver,InputManager& inputManager);	// 全滅処理の更新
 
 	void RenderAnnihilation(GameOver& gameOver);				// 全滅画面の描画
 
 
 
 	// ターン処理
-
-
 	void EndTurn();											// ターン終了処理
-
+	void ResetRunSuccess();									//にげる状態リセット
 
 
 	// 敵ターゲット
-
-
 	void SetTargetEnemyIndex(int index);						// 攻撃対象を設定
 	int GetTargetEnemyIndex() const;							// 攻撃対象の番号を取得
 
@@ -289,8 +270,6 @@ public:
 
 
 	// 各種設定
-
-
 	void SetImage(ImageManager* image);						// ImageManagerを設定
 	void SetPlayer(PlayerManager* player);					// PlayerManagerを設定
 	void SetParty(Party* party);								// Partyを設定
@@ -300,17 +279,14 @@ public:
 
 
 	// 状態取得
-
-
 	bool IsFieldRequested();								// フィールド遷移要求を取得
 	bool GetAnnihilation();									// 全滅状態を取得
 	bool IsEnemyRequested();								// 敵削除要求を取得
-	bool IsRun();											// 逃走状態を取得
+	bool IsRunSuccess() const;								// 逃走状態を取得
 
 
 
 	// 属性・連携
-
 	void DamageAllEnemies(int damage);//全体ダメージ時関数
 
 	void UesElementalAttack(Map& map,PlayerManager& player);														// 属性連携攻撃を実行
@@ -320,8 +296,6 @@ public:
 
 
 	// 攻撃履歴
-
-
 	const std::vector<UsedAttackInfo>&GetUsedAttackOrder() const;								// 攻撃履歴を取得
 
 	void ClearUsedAttackOrder();								// 攻撃履歴をクリア
