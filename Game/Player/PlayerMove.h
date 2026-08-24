@@ -25,6 +25,7 @@ private:
 	int m_chipsize;
 
 	bool m_hitTreasure;
+	bool m_hitNextFloor;
 public:
 
 public:
@@ -32,8 +33,8 @@ public:
 	~PlayerMove();
 
 	void Initialize(Map*map,PlayerManager& palayermanager);
-	void Update(FieldScene* field,Map*map, PlayerManager* playermanager);
-	void Render(FieldScene* field, Map*map, PlayerManager* playermanager);
+	void Update(FieldScene* field,Map*map, PlayerManager* playermanager,Accessory*accessory);
+	void Render(FieldScene* field, Map*map, PlayerManager* playermanager,Accessory*accessory);
 	void Finalize();
 };
 

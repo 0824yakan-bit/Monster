@@ -38,5 +38,18 @@ public:
 	void DrawDesrt(Vector2 position, Vector2 size);
 	void DrawVolcano(Vector2 position, Vector2 size);
 	void DrawCastle(Vector2 position, Vector2 size);
+
+	void DrawCommandbox1(Vector2 position, Vector2 size);
+	void DrawCommandbox2(Vector2 position, Vector2 size);
+
+	void DrawFire(Vector2 position, Vector2 size);
+	void DrawWater(Vector2 position, Vector2 size);
+	void DrawGrass(Vector2 position, Vector2 size);
+	void DrawSoil(Vector2 position, Vector2 size);
+	void DrawWind(Vector2 position, Vector2 size);
+	void DrawThunder(Vector2 position, Vector2 size);
+
+
+
 };
 

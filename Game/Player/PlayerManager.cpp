@@ -29,25 +29,23 @@ void PlayerManager::Initialize(Map*map)
 	m_oldposition.x = 0;
 	m_oldposition.y = 0;
 
-	m_size.x = map->m_chipSize*2;
+	m_size.x = map->m_chipSize*2;//＊２はプレイヤーのサイズ拡大率
 	m_size.y = map->m_chipSize*2;
 
-	 m_position.x = 5*m_size.x;
-	 m_position.y = 5*m_size.y;
+	m_position.x = 10*m_size.x;
+	m_position.y = 6*m_size.y;
 	m_playerMove.Initialize(map,*this);
 }
 
-void PlayerManager::Update(FieldScene* field, Map*map)
+void PlayerManager::Update(FieldScene* field, Map*map,Accessory*accessory)
 {
-	m_playerMove.Update(field, map,this);
 
-	
+	m_playerMove.Update(field, map,this,accessory);
 
 }
 
-void PlayerManager::Render(FieldScene* field,Map* map)
+void PlayerManager::Render(FieldScene* field,Map* map, Accessory* accessory)
 {
-	m_playerMove.Render(field,map,this);
 	switch(m_direction)
 	{
 	case Direction::Up:
@@ -63,12 +61,14 @@ void PlayerManager::Render(FieldScene* field,Map* map)
 		m_image->DrawPlayer4(m_position, m_size);
 		break;
 	}
+	m_playerMove.Render(field,map,this,accessory);
 	
 
 }
 
 void PlayerManager::Finalize()
 {
+
 	m_playerMove.Finalize();
 
 }

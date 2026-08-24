@@ -80,7 +80,6 @@ void Wolf::Finalize()
 void Wolf::OnHit(PlayerManager&playermanager)
 {
 
-	printfDx(L"WolfHit!!");
 }
 
 void Wolf::RenderBattle()

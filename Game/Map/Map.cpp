@@ -4,18 +4,22 @@
 
 #include"Game/InputManager/InputManager.h"
 #include"Game/Player/PlayerManager.h"
+#include"Game/Enemy/BossManager.h"
 #include"Game/Screen.h"
 #include<fstream>
 #include<sstream>
 #include<cassert>
-Map::Map()
-	:m_basemap		{ }
+Map::Map(Accessory& accessory,BossManager& bossManager)
+	:m_accessory	{ accessory }
+	,m_bossManager	{ bossManager}
+	,m_basemap		{ }
 	,m_workmap		{ }
 	,m_fog			{false}
 	,m_ghChip		{ }
 	,m_chipSize		{ }
 	,m_currentMap	{ }
 	,m_stageNo		{0}
+	,m_isbossAreaOpen{false}
 	,m_breakLevel	{0}
 	,m_transition	{ }
 	,m_objectmap	{ }
@@ -41,6 +45,7 @@ void Map::Initialize(const wchar_t* fileName)
 
 	m_moveDir = MoveDir::None;
 	m_stageNo = 0;
+	m_isbossAreaOpen = false;
 	m_breakLevel = 0;
 
 
@@ -72,68 +77,114 @@ void Map::Initialize(const wchar_t* fileName)
 }
 void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 {
+	//デバッグ用キー
+	if (CheckHitKey(KEY_INPUT_Q))m_level = 0;
+	if (CheckHitKey(KEY_INPUT_W))m_level = 1;
+	if (CheckHitKey(KEY_INPUT_E))m_level = 2;
+	if (CheckHitKey(KEY_INPUT_R))m_level = 3;
+	if (CheckHitKey(KEY_INPUT_T))m_level = 4;
+
+	if (CheckHitKey(KEY_INPUT_Y))m_bossManager.DefeatBoss(0);//boss1撃破
+	if (CheckHitKey(KEY_INPUT_U))m_bossManager.DefeatBoss(1);//boss2撃破
+	if (CheckHitKey(KEY_INPUT_I))m_bossManager.DefeatBoss(2);//boss3撃破////一回でも戦闘しないと移動してはいけない
+
+	if (CheckHitKey(KEY_INPUT_1))m_currentMap = 0;//ステージ１に移動
+	if (CheckHitKey(KEY_INPUT_2))m_currentMap = 1;//ステージ２に移動
+	if (CheckHitKey(KEY_INPUT_3))m_currentMap = 2;//ステージ３に移動
+	if (CheckHitKey(KEY_INPUT_4))m_currentMap = 3;//ステージ４に移動
+	if (CheckHitKey(KEY_INPUT_5))m_currentMap = 4;//ステージ５に移動
+	if (CheckHitKey(KEY_INPUT_6))m_currentMap = 5;//ステージ６に移動
+	if (CheckHitKey(KEY_INPUT_7))m_currentMap = 6;//ステージ７に移動
+	if (CheckHitKey(KEY_INPUT_8))m_currentMap = 7;//ステージ８に移動
+	if (CheckHitKey(KEY_INPUT_9))m_currentMap = 8;//ステージ９に移動
+	if (CheckHitKey(KEY_INPUT_0))m_currentMap = 9;//ステージ１０に移動
+	//デバッグ用キー　終了
+
+	m_fogdensity = m_level * 150;
+	if (m_currentMap == 9)m_fogdensity = 0;
 	int startMap = GetStageStartMap();
 	int endMap = GetStageEndMap();
 
 	int playerW = playerManager.m_size.x;
 	int playerH = playerManager.m_size.y;
 
-	// 右端
-	if (!m_isTransition &&playerManager.m_position.x + playerW >= Screen::RIGHT)
+	if (m_bossManager.IsAllBossDefeated())
 	{
-		m_moveDir = MoveDir::Right;
+		// 9番マップへの道を開く
+		OpenBossArea();
 
-		int local = m_currentMap - startMap;
-
-		if (local >= 8)
-			m_nextmap = m_currentMap - 8; // 8→0, 9→1
-		else
-			m_nextmap = m_currentMap + 2;
-
-		m_transition = 0;
-		m_isTransition = true;
 	}
-	//左端から
-	if (!m_isTransition && playerManager.m_position.x <= Screen::LEFT)
+
+	if (m_currentMap != 9)//9の画面端は移動不可
 	{
-		m_moveDir = MoveDir::Left;
+		// 右端
+		if (!m_isTransition && playerManager.m_position.x + playerW >= Screen::RIGHT)
+		{
+			m_moveDir = MoveDir::Right;
 
-		int local = m_currentMap - startMap;
+			int local = m_currentMap - startMap;
 
-		if (local < 2)
-			m_nextmap = m_currentMap + 8; // 0→8, 1→9
-		else
-			m_nextmap = m_currentMap - 2;
+			if (local >= 8)
+				m_nextmap = m_currentMap - 8; // 8→0, 9→1
+			else
+				m_nextmap = m_currentMap + 2;
+			// 9番マップには通常移動できない
+			if (m_nextmap == 9)
+				m_nextmap = 0;
 
-		m_transition = 0;
-		m_isTransition = true;
-	}
-	//上から
-	if (!m_isTransition && playerManager.m_position.y <= Screen::TOP)
-	{
-		m_moveDir = MoveDir::Up;
+			m_transition = 0;
+			m_isTransition = true;
+		}
+		//左端から
+		if (!m_isTransition && playerManager.m_position.x <= Screen::LEFT)
+		{
+			m_moveDir = MoveDir::Left;
 
-		if (m_currentMap <= startMap)
-			m_nextmap = endMap;
-		else
-			m_nextmap = m_currentMap - 1;
+			int local = m_currentMap - startMap;
 
-		m_transition = 0;
-		m_isTransition = true;
-	}
-	// 下端
-	if (!m_isTransition &&
-		playerManager.m_position.y + playerH>= Screen::BOTTOM)
-	{
-		m_moveDir = MoveDir::Down;
+			if (local < 2)
+				m_nextmap = m_currentMap + 8; // 0→8, 1→9
+			else
+				m_nextmap = m_currentMap - 2;
+			// 9番マップには通常移動できない
+			if (m_nextmap == 9)
+				m_nextmap = 8;
 
-		if (m_currentMap >= endMap)
-			m_nextmap = startMap;
-		else
-			m_nextmap = m_currentMap + 1;
+			m_transition = 0;
+			m_isTransition = true;
+		}
+		//上から
+		if (!m_isTransition && playerManager.m_position.y <= Screen::TOP)
+		{
+			m_moveDir = MoveDir::Up;
 
-		m_transition = 0;
-		m_isTransition = true;
+			if (m_currentMap <= startMap)
+				m_nextmap = endMap;
+			else
+				m_nextmap = m_currentMap - 1;
+			// 9番マップには通常移動できない
+			if (m_nextmap == 9)
+				m_nextmap = 8;
+
+			m_transition = 0;
+			m_isTransition = true;
+		}
+		// 下端
+		if (!m_isTransition &&playerManager.m_position.y + playerH >= Screen::BOTTOM)
+		{
+			m_moveDir = MoveDir::Down;
+
+			if (m_currentMap >= endMap)
+				m_nextmap = startMap;
+			else
+				m_nextmap = m_currentMap + 1;
+			// 9番マップには通常移動できない
+			if (m_nextmap == 9)
+				m_nextmap = 0;
+
+			m_transition = 0;
+			m_isTransition = true;
+		}
 	}
 	if (m_isTransition)
 	{
@@ -191,7 +242,6 @@ void Map::Render()
 	{
 		DrawCurrentMap(0, 0);
 	}
-	DrawFormatString(10, 130, GetColor(255, 255, 255), L"現在マップ%d", m_currentMap);
 }
 void Map::DrawCurrentMap(int offsetX, int offsetY)
 {
@@ -212,10 +262,10 @@ void Map::DrawCurrentMap(int offsetX, int offsetY)
 		///霧描画
 			if (m_fog[m_currentMap][y][x])
 			{
-				//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 200);
-			//DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, m_fogdensity);
+				DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
 				//DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
-				//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}
 	}
@@ -241,10 +291,10 @@ void Map::DrawNextMap(int offsetX, int offsetY)
 		///霧描画
 			if (m_fog[m_nextmap][y][x])
 			{
-				//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 100);
-			//DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
+				SetDrawBlendMode(DX_BLENDMODE_ALPHA, m_fogdensity);
+				DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
 				//DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
-				//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}
 	}
@@ -306,27 +356,40 @@ void Map::LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][
 
 bool Map::IsWallRect(int px, int py, int width, int height) const
 {
-	int left = px / m_chipSize;
-	int right = (px + width - 1) / m_chipSize;
-	int top = py / m_chipSize;
-	int bottom = (py + height - 1) / m_chipSize;
+	int left	= px / m_chipSize;
+	int right	= (px + width - 1) / m_chipSize;
+	int top		= py / m_chipSize;
+	int bottom	= (py + height - 1) / m_chipSize;
 
-	return GetTileType(left, top) == TileType::Wall ||
-		GetTileType(right, top) == TileType::Wall ||
-		GetTileType(left, bottom) == TileType::Wall ||
-		GetTileType(right, bottom) == TileType::Wall;
+	return	GetTileType(left, top)		== TileType::Wall ||
+			GetTileType(right, top)		== TileType::Wall ||
+			GetTileType(left, bottom)	== TileType::Wall ||
+			GetTileType(right, bottom)	== TileType::Wall;
 }
 bool Map::IsTreasureRect(int px, int py, int width, int height) const
 {
-	int left = px / m_chipSize;
-	int right = (px + width - 1) / m_chipSize;
-	int top = py / m_chipSize;
-	int bottom = (py + height - 1) / m_chipSize;
+	int left	= px / m_chipSize;
+	int right	= (px + width - 1) / m_chipSize;
+	int top		= py / m_chipSize;
+	int bottom	= (py + height - 1) / m_chipSize;
 
-	return GetTileType(left, top) == TileType::Treasure ||
-		GetTileType(right, top) == TileType::Treasure ||
-		GetTileType(left, bottom) == TileType::Treasure ||
-		GetTileType(right, bottom) == TileType::Treasure;
+	return	GetTileType	(left, top)		== TileType::Treasure ||
+			GetTileType	(right, top)	== TileType::Treasure ||
+			GetTileType	(left, bottom)	== TileType::Treasure ||
+			GetTileType	(right, bottom)	== TileType::Treasure;
+}
+
+bool Map::IsNextFloorRect(int px, int py, int width, int height) const
+{
+	int left	= px / m_chipSize;
+	int right	= (px + width - 1) / m_chipSize;
+	int top		= py / m_chipSize;
+	int bottom	= (py + height - 1) / m_chipSize;
+
+	return	GetTileType(left, top)		== TileType::NextFloor ||
+			GetTileType(right, top)		== TileType::NextFloor ||
+			GetTileType(left, bottom)	== TileType::NextFloor ||
+			GetTileType(right, bottom)	== TileType::NextFloor;
 }
 
 TileType Map::GetTileType(int x, int y) const
@@ -371,6 +434,28 @@ void Map::ChangeStage(int stageNo)
 {
 	m_stageNo = stageNo;
 	m_currentMap = GetStageStartMap();
+}
+
+void Map::OpenBossArea()
+{
+	if (!m_isbossAreaOpen)//マップチップを変更したか
+	{
+		m_objectmap	[8][Y_TOP][X_LEFT]		= 288;
+		m_objectmap	[8][Y_BOTTOM][X_RIGHT]	= 288;
+		m_objectmap	[8][Y_TOP][X_RIGHT]		= 288;
+		m_objectmap	[8][Y_BOTTOM][X_LEFT]	= 288;
+
+		m_basemap	[8][Y_TOP][X_LEFT]		= TileType::NextFloor;
+		m_basemap	[8][Y_BOTTOM][X_RIGHT]	= TileType::NextFloor;
+		m_basemap	[8][Y_TOP][X_RIGHT]		= TileType::NextFloor;
+		m_basemap	[8][Y_BOTTOM][X_LEFT]	= TileType::NextFloor;
+
+		m_isbossAreaOpen = true;//変更済みにする
+	}
+}
+void Map::EnterBossArea()
+{
+	m_currentMap = 9;
 }
 
 int Map::GetBreakLevel()const
@@ -436,8 +521,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::UsedTreasure(PlayerManager& player)
 		{
-			printfDx(L"UsedTreasure called");
-
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -450,7 +533,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::NormalBreak(PlayerManager& player)
 		{
-			printfDx(L"NormalBleak called");
+			Accessory::UpgradeAccessory nomal = m_accessory.GetAccessory(Accessory::ElementType::NOMAL);
 
 			Vector2 pos = player.GetPosition();
 
@@ -463,8 +546,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::FireBreak(PlayerManager& player)
 		{
-			printfDx(L"FireBreak called\n");
-
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -476,7 +557,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WaterBreak(PlayerManager& player)
 		{
-			printfDx(L"WaterBreak called");
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -487,7 +567,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::GrassBreak(PlayerManager& player)
 		{
-			printfDx(L"GrassBreak called");
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -499,7 +578,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::SoilBreak(PlayerManager& player)
 		{
-			printfDx(L"SoilBreak called");
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -510,8 +588,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WindBreak(PlayerManager& player)
 		{
-			printfDx(L"WindBreak called");
-
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;

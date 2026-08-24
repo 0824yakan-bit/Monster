@@ -140,6 +140,7 @@
   <ItemGroup>
     <!-- プリコンパイル済みヘッダー -->
     <ClCompile Include="Game\Battle\Battle.cpp" />
+    <ClCompile Include="Game\Enemy\BossManager.cpp" />
     <ClCompile Include="Game\Enemy\Dragon.cpp" />
     <ClCompile Include="Game\Enemy\Enemy.cpp" />
     <ClCompile Include="Game\Enemy\EnemyManager.cpp" />
@@ -152,6 +153,7 @@
     <ClCompile Include="Game\Map\Map.cpp" />
     <ClCompile Include="Game\Maths\Collisionall.cpp" />
     <ClCompile Include="Game\Maths\Vector2.cpp" />
+    <ClCompile Include="Game\Party\Accessory.cpp" />
     <ClCompile Include="Game\Party\Monster.cpp" />
     <ClCompile Include="Game\Party\Party.cpp" />
     <ClCompile Include="Game\Player\PlayerManager.cpp" />
@@ -166,6 +168,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClInclude Include="Game\Battle\Battle.h" />
+    <ClInclude Include="Game\Enemy\BossManager.h" />
     <ClInclude Include="Game\Enemy\Dragon.h" />
     <ClInclude Include="Game\Enemy\Enemy.h" />
     <ClInclude Include="Game\Enemy\EnemyManager.h" />
@@ -178,6 +181,7 @@
     <ClInclude Include="Game\Map\Map.h" />
     <ClInclude Include="Game\Maths\Collisionall.h" />
     <ClInclude Include="Game\Maths\Vector2.h" />
+    <ClInclude Include="Game\Party\Accessory.h" />
     <ClInclude Include="Game\Party\Monster.h" />
     <ClInclude Include="Game\Party\Party.h" />
     <ClInclude Include="Game\Player\PlayerManager.h" />
@@ -205,8 +209,11 @@
     <!-- 埋め込みリソース -->
     <ClInclude Include="EmbeddedResources\Resource.h" />
     <Image Include="Resources\Textures\back.png" />
+    <Image Include="Resources\Textures\commandbox1.png" />
+    <Image Include="Resources\Textures\commandbox2.png" />
     <Image Include="Resources\Textures\dragon.png" />
     <Image Include="Resources\Textures\fairy.png" />
+    <Image Include="Resources\Textures\fire.png" />
     <Image Include="Resources\Textures\front.png" />
     <Image Include="Resources\Textures\golem.png" />
     <Image Include="Resources\Textures\left.png" />
@@ -214,6 +221,8 @@
     <Image Include="Resources\Textures\N.png" />
     <Image Include="Resources\Textures\right.png" />
     <Image Include="Resources\Textures\river.png" />
+    <Image Include="Resources\Textures\water.png" />
+    <Image Include="Resources\Textures\wind.png" />
     <Image Include="Resources\Textures\wolf.png" />
     <Image Include="Resources\Textures\slime.png" />
     <Image Include="Resources\Textures\ボス部屋.png" />

@@ -16,6 +16,8 @@ struct EnemyData
     int enemyType;
     int x;
     int y;
+    bool isBoss;
+    int bossNo;
 };
 class EnemyManager
 {
@@ -41,9 +43,13 @@ public:
 
     void RemoveEnemy(Enemy* enemy);
 
-    void CreateSlime(int x, int y, Map& map);
-    void CreateWolf(int x, int y, Map& map);
-    void CreateDragon(int x, int y, Map& map);
-    void CreateGolem(int x, int y, Map& map);
-    void CreateFairy(int x, int y, Map& map);
+    void CreateRandomEnemy(Map& map, int x, int y);
+    Enemy* CreateBattleEnemy(Map& map, Enemy::EnemyType type);
+
+
+    void CreateSlime (int x, int y, Map& map,bool isBoss,int bossNo);
+    void CreateWolf  (int x, int y, Map& map,bool isBoss,int bossNo);
+    void CreateDragon(int x, int y, Map& map,bool isBoss,int bossNo);
+    void CreateGolem (int x, int y, Map& map,bool isBoss,int bossNo);
+    void CreateFairy (int x, int y, Map& map,bool isBoss,int bossNo);
 };

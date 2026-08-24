@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include"Game/Maths/Vector2.h"
 #include"Game/ImageManager/ImageManager.h"
+#include "Game/Party/Monster.h"
 
 class Map;
 class PlayerManager;
@@ -47,13 +48,27 @@ public:
 
     int moveTimer;
     int moveCounter;
-
+private:
+    bool m_isBattleEnemy = false;
+    bool m_isBoss = false;
+    int m_bossNo = -1;
 public:
     void Damage(int power);//パーティのpower
     int GetPower()const;
     int GetHp() const;
     const wchar_t* GetName() const;
     void SetImage(ImageManager* image);
+    Vector2 GetPosition();
+
+    void SetBattleEnemy(bool battleEnemy);
+
+    bool IsBattleEnemy() const;
+
+    void SetBoss(int bossNo);
+    bool IsBoss() const;
+    int GetBossNo()const;
+    // 敵を仲間の種類に変換
+    Monster::Type GetMonsterType() const;
 
 public:
     Enemy();

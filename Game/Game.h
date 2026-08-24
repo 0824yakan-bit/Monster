@@ -23,6 +23,9 @@
 #include"Game/Scene/SceneManager.h"
 #include"Game/Battle/Battle.h"
 #include"Game/Party/Party.h"
+#include"Game/Party/Accessory.h"
+#include"Game/Enemy/BossManager.h"
+
 
 // クラスの宣言 ===============================================================
 
@@ -48,6 +51,8 @@ private:
 	SceneManager m_sceneManager;
 	Battle m_battle;
 	Party m_party;
+	Accessory m_accessory;
+	BossManager m_bossManager;
 
 
 	//

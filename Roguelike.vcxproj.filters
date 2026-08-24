@@ -183,6 +183,12 @@
     <ClCompile Include="Game\Scene\GameOver.cpp">
       <Filter>Game\Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Party\Accessory.cpp">
+      <Filter>Game\Party</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Enemy\BossManager.cpp">
+      <Filter>Game\Enemy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Player\PlayerManager.h">
@@ -257,6 +263,12 @@
     <ClInclude Include="Game\Scene\GameOver.h">
       <Filter>Game\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Game\Party\Accessory.h">
+      <Filter>Game\Party</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Enemy\BossManager.h">
+      <Filter>Game\Enemy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -320,6 +332,21 @@
       <Filter>Resources\Textures</Filter>
     </Image>
     <Image Include="Resources\Textures\river.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\commandbox1.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\commandbox2.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\wind.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\water.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\fire.png">
       <Filter>Resources\Textures</Filter>
     </Image>
   </ItemGroup>

@@ -18,7 +18,6 @@ void GameOver::Update(InputManager&inputManager)
 {
     if (inputManager.IsTrigger(KEY_INPUT_RETURN))
     {
-        printfDx(L"push enter");
         m_isTitleRequest = true;
     }
 }

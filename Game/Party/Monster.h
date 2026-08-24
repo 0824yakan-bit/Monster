@@ -29,33 +29,45 @@ public:
 
         Defense//防御
     };
-    CharacteRistics characteRistics;
 
     struct Attack
     {
         const wchar_t* name;
         int power;
-        CharacteRistics ristics;
+        CharacteRistics element;
     };
 
 private:
-    Type m_type;
-    std::wstring m_name;
-    int m_maxHitPoint;
-    int m_currentHitPoint;
-    int m_level;
-    std::vector<Attack> m_attacks;
 
+    std::wstring m_name;
+
+    Type m_type;
+
+    CharacteRistics characteRistics;
+
+    int m_maxHitPoint;
+
+    int m_currentHitPoint;
+
+    int m_level;
+
+    std::vector<Attack> m_attacks;
 public:
+
+    Monster(Type type);
+
+
+    const std::vector<Attack>& GetAttacks() const;
+
+    Type GetType() const;
+
     std::wstring GetName() const;
+
+    int GetMaxHitPoint() const;
+
     int GetCurrentHitPoint() const;
+
     void Damage(int value);
 
 
-public:
-    Monster(Type type);
-
-    const std::vector<Attack>& GetAttacks()const;
-
-    Type GetType() const;
 };
