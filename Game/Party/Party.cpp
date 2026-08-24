@@ -13,9 +13,7 @@ void Party::RemoveMonster(int index)
 		return;
 	}
 
-	m_monsters.erase(
-		m_monsters.begin() + index
-	);
+	m_monsters.erase(m_monsters.begin() + index);
 }
 
 Monster* Party::GetMonster(int index)

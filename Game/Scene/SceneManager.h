@@ -49,7 +49,7 @@ public:
 	int m_monsterCurrentDamge[MAX_PARTY];
 
 public:
-	SceneManager();
+	SceneManager(BossManager&bossManager);
 	~SceneManager();
 
 	void Initialize(InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party,ImageManager&image);

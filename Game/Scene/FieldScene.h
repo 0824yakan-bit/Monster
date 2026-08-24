@@ -11,6 +11,7 @@ class InputManager;
 class PlayerManager;
 class Enemy;
 class EnemyManager;
+class BossManager;
 class Map;
 class Battle;
 class FieldScene
@@ -30,7 +31,7 @@ private:
 	bool m_isBattleRequested;//バトルシーン遷移
 	int m_breakLevel;//地形破壊回数
 	ImageManager* m_image=nullptr;
-	
+	BossManager& m_bossManager;
 	Enemy* m_hitEnemy;
 
 	Vector2 Mposition;
@@ -41,16 +42,29 @@ private:
 	bool m_isMapActive;//その階層のマップ一覧ｏｒ全階層マップ
 	bool m_isMenuActive;//メニュー表示
 	int m_menuListSelect;//選択中のメニュー
+	Vector2 drawMenuBoxPosition;
+	Vector2 drawMenuBoxSize;
+
+	Vector2 drawMenuBoxPosition_1;
+	Vector2 drawMenuBoxSize_1;
+
 	enum class MenuList
 	{
-		Empty,//何もなし
 		CooperativeMove,//連携技使用
 		PartyCheck,//現在のパーティ確認
 		ToolCheck,//所持中のもちもの
 		OperationInstructions,//操作説明
+		Empty,//何もなし
 
 	};
 	MenuList m_menuList;
+	const wchar_t*m_menuText[static_cast<int>(MenuList::Empty)]
+	{
+		L"技",
+		L"仲間",
+		L"所持品",
+		L"操作指南",
+	};
 ////技一覧
 	bool m_isCooperatDetailActive;//詳細表示
 	int m_CooperatDetailSelect;//選択中
@@ -88,12 +102,12 @@ public:
 
 	std::vector<int> result;
 public:
-	FieldScene();
+	FieldScene(BossManager&bossManager);
 	~FieldScene();
 
 	void Initialize(InputManager& inputmanager,PlayerManager&playerManager, Map& map);
-	void Update(InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Battle&battle,Accessory&accessory);
-	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map, Accessory& accessory);
+	void Update(InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Battle&battle,Accessory&accessory, Party& party);
+	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map, Accessory& accessory, Party& party);
 	void Finalize();
 
 
@@ -103,7 +117,7 @@ public:
 	void UpdateOperationInstructions();
 
 	void RenderCooperativeMove();
-	void RenderPartyCheck();
+	void RenderPartyCheck(Party& party);
 	void RenderToolCheck();
 	void RenderOperationInstructions();
 
@@ -117,6 +131,7 @@ public:
 	void LearnSkill(CooperatList skill);
 	bool HasSkill(CooperatList skill) const;
 
+	void LastBossDefeat();//ラスボスが倒されたとき
 
 	void UpdateTreasureOpen(InputManager&inputManager,PlayerManager&playerManager,Map&map,Accessory&accessory);//宝箱に触れているとき
 	void RenderTreasureOpen(Accessory& accessory);

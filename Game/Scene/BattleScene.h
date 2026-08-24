@@ -13,6 +13,9 @@ class BattleScene
 private:
 	Vector2 drawBgPosition;
 	Vector2 drawBgSize;
+	Vector2 drawCommandBoxPosition;
+	Vector2 drawCommandBoxSize;
+
 
 	enum class TeamJoin
 	{
@@ -48,7 +51,7 @@ private:
 	int m_runEnemyBonus;
 	bool m_battleWin;
 public:
-	BattleScene();
+	BattleScene(BossManager&bossManager);
 	~BattleScene();
 
 	void Initialize(InputManager& inputmanager,SceneManager&sceneManager,Map&map,Party&party);

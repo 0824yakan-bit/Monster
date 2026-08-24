@@ -60,7 +60,6 @@ void Golem::Finalize()
 
 void Golem::OnHit(PlayerManager& playermanager)
 {
-	printfDx(L"GolemHit!!");
 }
 
 void Golem::RenderBattle()

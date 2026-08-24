@@ -18,8 +18,6 @@
 
 
 //補助関数
-
-
 static FieldScene::CooperatList ToCooperatList(Monster::CharacteRistics type)
 {
 	switch (type)
@@ -52,23 +50,25 @@ static FieldScene::CooperatList ToCooperatList(Monster::CharacteRistics type)
 //コンストラクタ/デストラクタ
 
 
-BattleScene::BattleScene()
-:m_teamjoin{}
-,m_receponsTimer(0)
-,m_joinSelect(0)
-,m_isJoinRequested(false)
-,m_image(nullptr)
-,m_battle(new Battle())
-,m_player(nullptr)
-,m_enemy(nullptr)
-,m_enemyName(L"")
-,m_scenemanager(nullptr)
-,m_isReplaceSelect(false)
-,m_battleWin(false)
-,m_battleEnemies{}
-,m_pendingMonster(nullptr)
-,m_isFieldRequested(false)
-,m_isTitleRequested(false)
+BattleScene::BattleScene(BossManager&bossManager)
+: m_teamjoin		{}
+, m_receponsTimer	{ 0 }
+, m_joinSelect		{ 0 }
+, m_isJoinRequested	{ false }
+, m_image			{ nullptr }
+, m_battle			{ new Battle(bossManager) }
+, m_player			{ nullptr }
+, m_enemy			{ nullptr }
+, m_enemyName		{ L"" }
+, m_scenemanager	{ nullptr }
+, m_isReplaceSelect	{ false }
+, m_battleWin		{ false }
+,m_battleEnemies	{}
+, m_pendingMonster	{ nullptr }
+, m_isFieldRequested{ false }
+, m_isTitleRequested{ false }
+,m_enemyManager		{}
+,m_runEnemyBonus	{}
 {
 }
 
@@ -79,8 +79,6 @@ BattleScene::~BattleScene()
 
 
 //初期化
-
-
 void BattleScene::Initialize(InputManager& inputmanager, SceneManager& sceneManager, Map& map, Party& party)
 {
 	//BattleへPartyを設定
@@ -92,9 +90,14 @@ void BattleScene::Initialize(InputManager& inputmanager, SceneManager& sceneMana
 	//背景サイズ
 	drawBgPosition.x = 0;
 	drawBgPosition.y = 0;
-
 	drawBgSize.x = 1280;
 	drawBgSize.y = 720;
+
+	//仲間にするかボックス
+	drawCommandBoxPosition.x = 120;
+	drawCommandBoxPosition.y = 440;
+	drawCommandBoxSize.x = 410;
+	drawCommandBoxSize.y = 270;
 
 	//状態リセット
 	m_isJoinRequested = false;
@@ -111,12 +114,11 @@ void BattleScene::Initialize(InputManager& inputmanager, SceneManager& sceneMana
 	//[0]追加敵
 	//[1]エンカウント敵
 	//[2]追加敵
-
-
 	m_battleEnemies.clear();
 
 	//追加敵を生成
 	CreateBattleEnemies(map);
+	m_runEnemyBonus = 0;
 
 	//エンカウント敵を中央へ追加
 	if (m_enemy != nullptr)
@@ -144,8 +146,6 @@ void BattleScene::Initialize(InputManager& inputmanager, SceneManager& sceneMana
 
 
 //更新
-
-
 void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager, FieldScene& fieldScene, GameOver& gameOver, EnemyManager& enemyManager, Map& map, Party& party, PlayerManager& player)
 {
 	inputManager.Update();
@@ -186,7 +186,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 					return;
 				}
 				//交換するモンスターが持っている技属性を保存
-
 				std::vector<FieldScene::CooperatList>learnedSkills;
 
 				if (m_pendingMonster != nullptr)
@@ -217,7 +216,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 
 				//状態リセット
-
 				m_isReplaceSelect = false;
 				m_isFieldRequested = true;
 				m_receponsTimer = 0;
@@ -228,7 +226,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 	}
 
 	//戦闘終了後の仲間加入処理
-
 	if (m_battle->IsEnemyRequested() && m_battle->AreAllEnemiesDead())
 	{
 		if (!m_isJoinRequested && !m_isReplaceSelect)
@@ -245,7 +242,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 
 	//通常のBattle更新
-
 	if (!m_isJoinRequested && !m_isReplaceSelect)
 	{
 		m_battle->Update(inputManager, &sceneManager, gameOver, map, player);
@@ -266,13 +262,8 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 		// 逃走成功なら次の戦闘の敵を+1
 		if (m_battle->IsRunSuccess())
 		{
-			m_runEnemyBonus++;
-
-			// 最大+2まで
-			if (m_runEnemyBonus > 2)
-			{
-				m_runEnemyBonus = 2;
-			}
+			// 次の戦闘だけ敵を1体増やす
+			m_runEnemyBonus = 1;
 
 			m_battle->ResetRunSuccess();
 		}
@@ -298,8 +289,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 		{
 
 			//左右選択
-
-
 			if (CheckHitKey(KEY_INPUT_LEFT))
 			{
 				m_joinSelect = 0;
@@ -366,10 +355,7 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 						//モンスターの技属性を習得
 						for (const auto& atk : learnedMonster->GetAttacks())
 						{
-							printfDx(L"Learn%d\n", (int)atk.ristics);
-
-							fieldScene.LearnSkill(ToCooperatList(atk.ristics)
-							);
+							fieldScene.LearnSkill(ToCooperatList(atk.ristics));
 						}
 
 						//敵削除
@@ -398,7 +384,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 
 				//仲間にしない
-
 				else
 				{
 					m_battle->RemoveEnemy(targetEnemy);
@@ -414,54 +399,6 @@ void BattleScene::Update(InputManager& inputManager, SceneManager& sceneManager,
 
 				return;
 			}
-		}
-	}
-
-
-
-	//デバッグ用
-	//Dキー：パーティ情報確認
-	if (CheckHitKey(KEY_INPUT_D))
-	{
-		if (party.GetMonsterCount() > 0)
-		{
-			for (int i = 0;i < party.GetMonsterCount();i++)
-			{
-				Monster* monster = party.GetMonster(i);
-
-				const wchar_t* name = L"";
-
-				switch (monster->GetType())
-				{
-				case Monster::Type::Slime:
-					name = L"Slime";
-					break;
-
-				case Monster::Type::Wolf:
-					name = L"Wolf";
-					break;
-
-				case Monster::Type::Dragon:
-					name = L"Dragon";
-					break;
-				}
-
-				auto& attacks = monster->GetAttacks();
-
-				for (int j = 0;j < static_cast<int>(attacks.size());j++)
-				{
-					//print fDx(
-					//L"技%d:%s威力=%d\n",
-					//j,
-					//attacks[j].name,
-					//attacks[j].power
-					//);
-				}
-			}
-		}
-		else
-		{
-			printfDx(L"仲間はいません\n");
 		}
 	}
 }
@@ -486,7 +423,6 @@ void BattleScene::Render(GameOver& gameOver, Party& party, Map& map)
 
 
 	//背景
-
 	switch (map.GetCurrentMap())
 	{
 	case 0:
@@ -537,10 +473,9 @@ void BattleScene::Render(GameOver& gameOver, Party& party, Map& map)
 	//現在の攻撃対象カーソル
 	Enemy* target = m_battle->GetTargetEnemy();
 
-	if (target != nullptr &&
-		target->GetHp() > 0)
+	if (target != nullptr &&target->GetHp() > 0)
 	{
-		int cursorX = static_cast<int>(target->renderPosition.x);
+		int cursorX = static_cast<int>(target->renderPosition.x)+50;
 
 		int cursorY = static_cast<int>(target->renderPosition.y) - 40;
 
@@ -562,24 +497,24 @@ void BattleScene::Render(GameOver& gameOver, Party& party, Map& map)
 	{
 		m_enemyName = m_enemy->GetName();
 
-		DrawBox(40, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
-
+		m_image->DrawCommandbox1(drawCommandBoxPosition, drawCommandBoxSize);
+		m_battle->RenderCurrentHp();
 		if (m_enemy != nullptr)
 		{
 			m_enemy->RenderBattle();
 
 			m_enemyName = m_enemy->GetName();
 
-			DrawFormatString(60, 550, GetColor(255, 255, 255), L"%lsを仲間にしますか？", m_enemyName);
+			DrawFormatString(180, 480, GetColor(255, 255, 255), L"%lsを\n仲間にしますか？", m_enemyName);
 		}
 
-		DrawString(520, 610, L"はい", GetColor(255, 255, 255), TRUE);
+		DrawString(200, 610, L"はい", GetColor(255, 255, 255), TRUE);
 
-		DrawString(720, 610, L"いいえ", GetColor(255, 255, 255), TRUE);
+		DrawString(300, 610, L"いいえ", GetColor(255, 255, 255), TRUE);
 
 		int cursorX = (m_joinSelect == 0)
-			? 470
-			: 670;
+			? 180
+			: 280;
 
 		DrawString(cursorX, 610, L"▶", GetColor(255, 255, 0), TRUE);
 	}
@@ -592,9 +527,6 @@ void BattleScene::Render(GameOver& gameOver, Party& party, Map& map)
 		DrawBox(0, 0, 1280, 1280, GetColor(255, 255, 255), TRUE);
 
 		DrawString(500, 400, L"交換する仲間を選んでください", GetColor(0, 0, 0));
-
-		printfDx(L"交換する仲間を選んでください\n");
-
 
 		for (int i = 0;i < party.GetMonsterCount();i++)
 		{
@@ -633,8 +565,6 @@ void BattleScene::Finalize()
 
 
 //状態取得
-
-
 bool BattleScene::IsFieldRequested()const
 {
 	return m_isFieldRequested;
@@ -712,8 +642,6 @@ void BattleScene::CreateBattleEnemies(Map& map)
 
 
 //Battleへ敵を設定
-
-
 void BattleScene::SetBattleEnemies()
 {
 	m_battle->SetEnemies(m_battleEnemies);
@@ -722,8 +650,6 @@ void BattleScene::SetBattleEnemies()
 
 
 //戦闘中の敵位置設定
-
-
 void BattleScene::SetBattleEnemyPositions()
 {
 	if (m_battleEnemies.empty())
@@ -731,10 +657,10 @@ void BattleScene::SetBattleEnemyPositions()
 		return;
 	}
 
-	const float y = 100.0f;
+	const int y = 100;
 
-	const float width = 200.0f;
-	const float height = 200.0f;
+	const int width = 200;
+	const int height = 200;
 
 	//敵の数
 	int enemyCount = 0;
@@ -753,27 +679,25 @@ void BattleScene::SetBattleEnemyPositions()
 	}
 
 	//敵の数によって配置を変更
-
-	std::vector<float >positions;
+	std::vector<int>positions;
 
 	if (enemyCount == 1)
 	{
 		//1体：中央
-		positions = { 540.0f };
+		positions = { 540};
 	}
 	else if (enemyCount == 2)
 	{
 		//2体：左右均等
-		positions = { 300.0f,780.0f };
+		positions = { 300,780 };
 	}
 	else
 	{
 		//3体：左・中央・右を均等配置
-		positions = { 120.0f,540.0f,960.0f };
+		positions = { 120,540,960};
 	}
 
 	//敵を配置
-
 	int positionIndex = 0;
 
 	for (Enemy* enemy : m_battleEnemies)
@@ -794,8 +718,6 @@ void BattleScene::SetBattleEnemyPositions()
 		enemy->renderSize.x = width;
 		enemy->renderSize.y = height;
 
-		printfDx(L"BattlePosition%d:X=%fY=%f\n", positionIndex, enemy->renderPosition.x, enemy->renderPosition.y);
-
 		positionIndex++;
 	}
 
@@ -804,8 +726,6 @@ void BattleScene::SetBattleEnemyPositions()
 
 
 //ターゲット取得
-
-
 Enemy* BattleScene::GetTargetEnemy()const
 {
 	if (m_battle == nullptr)
@@ -819,8 +739,6 @@ Enemy* BattleScene::GetTargetEnemy()const
 
 
 //Setter
-
-
 void BattleScene::SetImage(ImageManager* image)
 {
 	m_image = image;

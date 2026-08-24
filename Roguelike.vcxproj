@@ -213,6 +213,7 @@
     <Image Include="Resources\Textures\commandbox2.png" />
     <Image Include="Resources\Textures\dragon.png" />
     <Image Include="Resources\Textures\fairy.png" />
+    <Image Include="Resources\Textures\fire.png" />
     <Image Include="Resources\Textures\front.png" />
     <Image Include="Resources\Textures\golem.png" />
     <Image Include="Resources\Textures\left.png" />
@@ -220,6 +221,8 @@
     <Image Include="Resources\Textures\N.png" />
     <Image Include="Resources\Textures\right.png" />
     <Image Include="Resources\Textures\river.png" />
+    <Image Include="Resources\Textures\water.png" />
+    <Image Include="Resources\Textures\wind.png" />
     <Image Include="Resources\Textures\wolf.png" />
     <Image Include="Resources\Textures\slime.png" />
     <Image Include="Resources\Textures\ボス部屋.png" />

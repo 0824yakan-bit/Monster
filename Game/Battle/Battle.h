@@ -11,6 +11,7 @@ class GameOver;
 class PlayerMove;
 class Party;
 class Enemy;
+class BossManager;
 
 class Battle
 {
@@ -74,6 +75,7 @@ private:
 
 
 	// 敵関連
+	BossManager& m_bossManager;
 	std::vector<Enemy*> m_enemies;
 
 	int m_targetEnemyIndex			= -1;
@@ -101,6 +103,8 @@ private:
 	Vector2 drawCommandBoxSize2_2;
 	Vector2 drawCommandBoxPosition2_3;
 	Vector2 drawCommandBoxSize2_3;
+	Vector2 drawEffectPosition;
+	Vector2 drawEffectSize;
 
 	bool m_playAttackEffect = false;
 	int m_attackEffectTimer = 0;
@@ -168,10 +172,10 @@ private:
 	// コマンド
 	const wchar_t* m_command[COMMAND_NUM]
 	{
-		L"指揮する",
-		L"もちもの",
-		L"おうえん",
-		L"にげだす"
+		L"指示する",
+		L"所持品",
+		L"応援する",
+		L"逃げ出す"
 	};
 
 
@@ -179,9 +183,7 @@ public:
 
 
 	// 基本処理
-
-
-	Battle();												// コンストラクタ
+	Battle(BossManager&bossManager);												// コンストラクタ
 	~Battle();												// デストラクタ
 
 	void Initialize(SceneManager* sceneManager);			// 戦闘の初期化
@@ -197,6 +199,7 @@ public:
 	void RenderCurrentCommand();
 
 
+
 	// 攻撃選択
 	void UpdateAttackSelect();								// 攻撃選択の更新
 	void RenderAttackSelect();								// 攻撃選択画面の描画
@@ -205,7 +208,6 @@ public:
 
 	// 攻撃実行
 	void UpdateAttackAction(Map& map,PlayerManager& player);// 攻撃処理の更新
-
 	void RenderAttackAction();								// 攻撃演出の描画
 
 
@@ -231,7 +233,7 @@ public:
 	// 敵ターン
 	void UpdateEnemyTurn(SceneManager* sceneManager);		// 敵ターンの更新
 	void RenderEnemyTurn();									// 敵ターンの描画
-
+	void RenderCurrentHp();
 
 
 	// 敵死亡
@@ -261,7 +263,7 @@ public:
 
 	int GetValidTargetIndex(int index) const;					// 有効な敵番号を取得
 
-	void SetEnemies(const std::vector<Enemy*>& enemies);														// 戦闘中の敵を設定
+	void SetEnemies(const std::vector<Enemy*>& enemies);		// 戦闘中の敵を設定
 
 	void RemoveEnemy(Enemy* enemy);							// 敵を戦闘リストから削除
 

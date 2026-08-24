@@ -49,6 +49,8 @@ public:
     int moveCounter;
 private:
     bool m_isBattleEnemy = false;
+    bool m_isBoss = false;
+    int m_bossNo = -1;
 public:
     void Damage(int power);//パーティのpower
     int GetPower()const;
@@ -61,6 +63,9 @@ public:
 
     bool IsBattleEnemy() const;
 
+    void SetBoss(int bossNo);
+    bool IsBoss() const;
+    int GetBossNo()const;
 
 public:
     Enemy();

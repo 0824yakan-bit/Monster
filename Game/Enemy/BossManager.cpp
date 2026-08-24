@@ -7,6 +7,12 @@ BossManager::BossManager()
 
 void BossManager::DefeatBoss(int bossNo)
 {
+    printfDx(L"%d", bossNo);
+    if (bossNo == 4)
+    {
+        //LastBossDefeat();
+
+    }
     if (bossNo < 0 || bossNo >= 3)
         return;
 

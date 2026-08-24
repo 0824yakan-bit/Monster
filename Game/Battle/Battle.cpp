@@ -4,14 +4,16 @@
 
 #include "Game/Scene/SceneManager.h"
 #include "Game/Party/Party.h"
+#include"Game/Enemy/BossManager.h"
 
 
 
 // Constructor / Destructor
 
 
-Battle::Battle()
-: m_receponsTimer	{}
+Battle::Battle(BossManager&bossManager)
+:m_bossManager		{bossManager}
+, m_receponsTimer	{}
 , m_displaytextTimer{}
 , m_Window			{}
 , m_windowWidth		{}
@@ -54,16 +56,16 @@ void Battle::Initialize(SceneManager* sceneManager)
 	drawBgSize.y = 500;
 
 	//コマンドボックス
-	drawCommandBoxPosition1.x =40;
-	drawCommandBoxPosition1.y =500;
-	drawCommandBoxSize1.x = 250;
-	drawCommandBoxSize1.y = 190;
+	drawCommandBoxPosition1.x =120;
+	drawCommandBoxPosition1.y =440;
+	drawCommandBoxSize1.x = 410;
+	drawCommandBoxSize1.y = 270;
 
 	//敵情報
-	drawCommandBoxPosition1_1.x = 300;
-	drawCommandBoxPosition1_1.y = 500;
-	drawCommandBoxSize1_1.x = 900;
-	drawCommandBoxSize1_1.y = 190;
+	drawCommandBoxPosition1_1.x = 550;
+	drawCommandBoxPosition1_1.y = 440;
+	drawCommandBoxSize1_1.x = 610;
+	drawCommandBoxSize1_1.y = 270;
 
 	//各キャラコマンド一覧
 	drawCommandBoxPosition2.x = 120;
@@ -88,6 +90,12 @@ void Battle::Initialize(SceneManager* sceneManager)
 	drawCommandBoxPosition2_3.y = 440;
 	drawCommandBoxSize2_3.x = 410;
 	drawCommandBoxSize2_3.y = 270;
+
+	//攻撃エフェクト
+	drawEffectPosition.x = 0;
+	drawEffectPosition.y = 0;
+	drawEffectSize.x = 1280;
+	drawEffectSize.y = 1280;
 
 	// 選択状態
 	m_select = 0;
@@ -180,8 +188,6 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 {
 
 	// 全滅判定
-
-
 	m_annihilation = true;
 
 	for (int i = 0; i < m_party->GetMonsterCount(); i++)
@@ -208,16 +214,12 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 	{
 
 		// 入力受付タイマー
-
-
 		m_receponsTimer++;
 
 		if (m_receponsTimer > 15)
 		{
 
 			// コマンド選択中の入力
-
-
 			if (m_state == BattleState::Command && m_IsActive)
 			{
 
@@ -290,8 +292,9 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 
 					case 3:
 						// 逃げる
+						m_displaytextTimer = 0;
+						m_displayMessage.clear();
 						m_state = BattleState::Run;
-
 						break;
 
 
@@ -374,8 +377,6 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 
 
 	// 攻撃エフェクト更新
-
-
 	if (m_playAttackEffect)
 	{
 		m_attackEffectTimer++;
@@ -392,20 +393,20 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 void Battle::Render(GameOver& gameOver, Map& map)
 {
 
-	// 戦闘画面のベース
-	SetDrawBlendMode(DX_BLENDMODE_ALPHA, 50);
+	//// 戦闘画面のベース
+	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 50);
 
-	// 戦闘画面
-	DrawBox(10, 10, 1270, 500, GetColor(255, 255, 255), TRUE);
+	//// 戦闘画面
+	//DrawBox(10, 10, 1270, 500, GetColor(255, 255, 255), TRUE);
 
-	// 敵配置
-	DrawBox(50, 50, 1230, 460, GetColor(255, 0, 0), FALSE);
+	//// 敵配置
+	//DrawBox(50, 50, 1230, 460, GetColor(255, 0, 0), FALSE);
 
-	// コマンド選択位置
-	DrawBox(20, 520, 1260, 700, GetColor(255, 255, 255), TRUE);
+	//// コマンド選択位置
+	//DrawBox(20, 520, 1260, 700, GetColor(255, 255, 255), TRUE);
 
 
-	SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
 
 
@@ -445,16 +446,6 @@ void Battle::Render(GameOver& gameOver, Map& map)
 	//	m_image->DrawForest(drawBgPosition, drawBgSize);
 	//	break;
 	//}
-
-
-
-	// パーティHP表示
-	for (int i = 0; i < MAX_PARTY; i++)
-	{
-		DrawFormatString(30 + (i * 200), 30, GetColor(0, 0, 0), L"%d", m_monsterhp[i]);
-	}
-
-
 
 	// State Render
 	switch (m_state)
@@ -566,32 +557,33 @@ void Battle::Render(GameOver& gameOver, Map& map)
 		switch (m_effectElement)
 		{
 		case Monster::CharacteRistics::Fire:
-			DrawBox(0, 0, 1280, 720, GetColor(255, 80, 0), TRUE);
+			m_image->DrawFire(drawEffectPosition, drawEffectSize);
 			break;
 
 
 		case Monster::CharacteRistics::Water:
-			DrawBox(0, 0, 1280, 720, GetColor(0, 120, 255), TRUE);
+			m_image->DrawWater(drawEffectPosition, drawEffectSize);
 			break;
 
 
 		case Monster::CharacteRistics::Grass:
-			DrawBox(0, 0, 1280, 720, GetColor(0, 200, 0), TRUE);
+			m_image->DrawGrass(drawEffectPosition, drawEffectSize);
 			break;
 
 
 		case Monster::CharacteRistics::Soil:
-			DrawBox(0, 0, 1280, 720, GetColor(139, 69, 19), TRUE);
+			m_image->DrawSoil(drawEffectPosition, drawEffectSize);
+
 			break;
 
 
 		case Monster::CharacteRistics::Wind:
-			DrawBox(0, 0, 1280, 720, GetColor(180, 180, 180), TRUE);
+			m_image->DrawWind(drawEffectPosition, drawEffectSize);
 			break;
 
 
 		case Monster::CharacteRistics::Thunder:
-			DrawBox(0, 0, 1280, 720, GetColor(255, 255, 0), TRUE);
+			m_image->DrawThunder(drawEffectPosition, drawEffectSize);
 			break;
 
 
@@ -602,30 +594,6 @@ void Battle::Render(GameOver& gameOver, Map& map)
 
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
-
-
-	// ターゲット敵HP
-	if (enemy != nullptr)
-	{
-		DrawFormatString(500, 120, GetColor(0, 255, 255), L"HP : %d", enemy->GetHp());
-	}
-	else
-	{
-		DrawString(500, 120, L"HP : ---", GetColor(128, 128, 128));
-	}
-
-
-
-	// 使用済み属性表示
-	DrawFormatString(20, 300, GetColor(0, 0, 0), L"N:%d F:%d Wa:%d G:%d S:%d T:%d Wi:%d",
-		(state & USED_NORMAL) ? 1 : 0,
-		(state & USED_FIRE) ? 1 : 0,
-		(state & USED_WATER) ? 1 : 0,
-		(state & USED_GRASS) ? 1 : 0,
-		(state & USED_SOIL) ? 1 : 0,
-		(state & USED_THUNDER) ? 1 : 0,
-		(state & USED_WIND) ? 1 : 0
-	);
 }
 
 
@@ -651,24 +619,144 @@ void Battle::RenderCommand()
 	//DrawBox(950, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
 
 
-	SetFontSize(30);
-
+	SetFontSize(40);
 
 	for (int i = 0; i < COMMAND_NUM; i++)
 	{
-		DrawString(100, 520+40*i, m_command[i], GetColor(255, 255, 255));
+		DrawString(250, 480 + 50 * i, m_command[i], GetColor(255, 255, 255));
 	}
 
 
 	// カーソル
-	DrawString(70, 520+40*m_select, L"▶", GetColor(255, 255, 0));
+	DrawString(220, 480 + 50 * m_select, L"▶", GetColor(255, 255, 0));
+	SetFontSize(30);
+	// 敵情報
+	DrawString(620,490,L"敵データ",GetColor(255, 255, 255));
+
+
+	// 最大3体
+	for (int i = 0; i < 3; i++)
+	{
+		// 敵が存在しない
+		if (i >= static_cast<int>(m_enemies.size()))
+		{
+			continue;
+		}
+
+		Enemy* enemy = m_enemies[i];
+
+		if (enemy == nullptr)
+		{
+			continue;
+		}
+
+
+		int x = 620 + i * 170;
+		int y = 550;
+
+
+		// 敵の名前
+		int nameColor = GetColor(255, 255, 255);
+
+		// 現在ターゲット中なら黄色
+		if (i == m_targetEnemyIndex)
+		{
+			nameColor = GetColor(255, 255, 0);
+
+			DrawString(x - 25, y, L"▶", GetColor(255, 255, 0));
+		}
+
+
+		DrawString(x, y, enemy->GetName(), nameColor);
+
+
+		// HP
+		if (enemy->GetHp() > 0)
+		{
+			DrawFormatString(x, y + 45, GetColor(255, 100, 100), L"HP : %d", enemy->GetHp());
+		}
+		else
+		{
+			DrawString(x, y + 45, L"HP : 0", GetColor(100, 100, 100));
+		}
+	}
 }
 
 void Battle::RenderCurrentCommand()
 {
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_2,drawCommandBoxSize2_2);
+
+	DrawString(590, 480, L"行動指示", GetColor(255, 255, 255));
+
+	for (int i = 0; i < m_party->GetMonsterCount(); i++)
+	{
+		Monster* monster = m_party->GetMonster(i);
+
+		if (monster == nullptr)
+		{
+			continue;
+		}
+
+		std::wstring name = monster->GetName();
+
+		int column = i % 2;
+		int row = i / 2;
+
+		int x = 620 + column * 250;
+		int y = 530 + row * 80;
+
+		// 死亡しているか
+		bool isDead = (m_monsterhp[i] <= 0);
+
+		// 現在選択中の仲間
+		int nameColor = GetColor(255, 255, 255);
+
+		if (isDead)
+		{
+			// 死亡中
+			nameColor = GetColor(128, 128, 128);
+		}
+		else if (i == m_monsterSelect)
+		{
+			nameColor = GetColor(255, 255, 0);
+
+			DrawString(x - 25,y,L"▶",GetColor(255, 255, 0));
+		}
+
+		// 仲間の名前
+		DrawString(x,y,name.c_str(),nameColor);
+
+		// 死亡中なら「死亡中」と表示
+		if (isDead)
+		{
+			DrawString(x,y + 35,L"戦闘不能",GetColor(128, 128, 128));
+
+			continue;
+		}
+
+		// 選択した技
+		int attackIndex = m_selectedAttack[i];
+
+		if (attackIndex >= 0)
+		{
+			auto& attacks = monster->GetAttacks();
+
+			if (attackIndex < static_cast<int>(attacks.size()))
+			{
+				DrawString(x,y + 35,attacks[attackIndex].name,GetColor(255, 255, 0));
+			}
+		}
+		else
+		{
+			DrawString(x,y + 35,L"待機中",GetColor(150, 150, 150));
+		}
+	}
+}
+
+void Battle::RenderCurrentHp()
+{
 	m_image->DrawCommandbox1(drawCommandBoxPosition2_2, drawCommandBoxSize2_2);
-	// パーティの行動予定
-	DrawString(590, 480, L"行動予定", GetColor(255, 255, 255));
+
 
 	for (int i = 0; i < m_party->GetMonsterCount(); i++)
 	{
@@ -688,38 +776,14 @@ void Battle::RenderCurrentCommand()
 		int x = 620 + column * 250;
 		int y = 530 + row * 80;
 
-		// 現在選択中の仲間
-		int nameColor = GetColor(255, 255, 255);
-
-		if (i == m_monsterSelect)
-		{
-			nameColor = GetColor(255, 255, 0);
-
-			DrawString(x - 25, y, L"▶", GetColor(255, 255, 0));
-		}
-
 		// 仲間の名前
-		DrawString(x, y, name.c_str(), nameColor);
+		DrawString(x, y, name.c_str(), GetColor(255, 255, 255));
 
-		// 選択した技
-		int attackIndex = m_selectedAttack[i];
 
-		if (attackIndex >= 0)
-		{
-			auto& attacks = monster->GetAttacks();
-
-			if (attackIndex < static_cast<int>(attacks.size()))
-			{
-				DrawString(x, y + 35, attacks[attackIndex].name, GetColor(255, 255, 0));
-			}
-		}
-		else
-		{
-			DrawString(x, y + 35, L"未選択", GetColor(150, 150, 150));
-		}
+		// 体力
+		DrawFormatString(x, y + 35, GetColor(255, 255, 0), L"HP : %d / %d", m_monsterhp[i], monster->GetMaxHitPoint());
 	}
 }
-
 
 
 // Attack Select
@@ -842,8 +906,6 @@ void Battle::UpdateAttackSelect()
 			m_targetEnemyIndex = GetValidTargetIndex(m_targetEnemyIndex - 1);
 
 			m_receponsTimer = 0;
-
-			printfDx(L"LEFT -> Cursor[%d]\n", m_targetEnemyIndex);
 		}
 
 
@@ -854,8 +916,6 @@ void Battle::UpdateAttackSelect()
 			m_targetEnemyIndex = GetValidTargetIndex(m_targetEnemyIndex + 1);
 
 			m_receponsTimer = 0;
-
-			printfDx(L"RIGHT -> Cursor[%d]\n", m_targetEnemyIndex);
 		}
 
 
@@ -911,9 +971,6 @@ void Battle::UpdateAttackSelect()
 			m_selectedAttack[m_monsterSelect] = m_attackSelect;
 
 
-			printfDx(L"SELECT Enemy[%d] : %ls HP=%d\n", targetIndex, m_enemies[targetIndex]->GetName(), m_enemies[targetIndex]->GetHp());
-
-
 			// 次のモンスターへ
 			m_monsterSelect++;
 
@@ -935,8 +992,7 @@ void Battle::RenderAttackSelect()
 		return;
 	}
 
-	m_image->DrawCommandbox1(drawCommandBoxPosition2, drawCommandBoxSize2);
-	m_image->DrawCommandbox1(drawCommandBoxPosition2_1, drawCommandBoxSize2_1);
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
 	RenderCurrentCommand();
 	// 現在行動選択中の仲間
 	if (m_monsterSelect >= m_party->GetMonsterCount())
@@ -955,10 +1011,10 @@ void Battle::RenderAttackSelect()
 	auto& attacks = monster->GetAttacks();
 
 	// 仲間の名前
-	DrawString(160,450,name.c_str(),GetColor(0, 0, 255));
+	DrawString(160,470,name.c_str(),GetColor(0, 0, 255));
 
 	// HP
-	DrawFormatString(300,500,GetColor(0, 255, 255),L"HP : %d / %d",	m_monsterhp[m_monsterSelect],monster->GetMaxHitPoint());
+	DrawFormatString(300,520,GetColor(0, 255, 255),L"HP : %d / %d",	m_monsterhp[m_monsterSelect],monster->GetMaxHitPoint());
 	
 
 	// 技一覧
@@ -1149,6 +1205,9 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 	// 攻撃開始
 	if (m_displaytextTimer == 1)
 	{
+		m_displayMessage.clear();
+		m_displayMessageDamage.clear();
+
 		Monster* monster = m_party->GetMonster(m_displayIndex);
 
 
@@ -1178,10 +1237,6 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 		m_playAttackEffect = true;
 		m_attackEffectTimer = 0;
-
-
-		printfDx(L"Attack=%ls Type=%d", attacks[index].name, (int)m_characteRistics);
-
 
 
 		// 発動順を保存
@@ -1340,7 +1395,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 		{
 
 			// コンボ準備
-			m_displayMessage = monster->GetName() + L"は連携の準備をしている！";
+			m_displayMessage = monster->GetName() + L"\nは連携の構えをしている！";
 		}
 
 
@@ -1393,7 +1448,6 @@ void Battle::RenderAttackAction()
 		return;
 	}
 
-	DrawBox(40, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
 	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
 	DrawString(150, 480, m_displayMessage.c_str(), GetColor(255, 255, 255));
 	DrawString(150, 530, m_displayMessageDamage.c_str(), GetColor(255, 255, 255));
@@ -1487,9 +1541,7 @@ void Battle::UpdateSuppot()
 
 void Battle::RenderSuppot()
 {
-	DrawBox(650 - m_windowWidthFront, 530, 930 + m_windowWidth, 690, GetColor(0, 0, 0), TRUE);
-
-
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
 	DrawString(40, 580, L"応援", GetColor(255, 255, 255));
 }
 
@@ -1726,16 +1778,15 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 
 void Battle::RenderEnemyTurn()
 {
-	DrawBox(40, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
 	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
+	RenderCurrentHp();
+
 
 	DrawString(150, 480, m_displayMessage.c_str(), GetColor(255, 255, 255));
 	for (int i=0;i < m_party->GetMonsterCount();i++)
 	{
 		DrawString(150, 530+i*50, m_displayMessageEnemyAttackDamage[i].c_str(), GetColor(255, 255, 255));
 	}
-
-	DrawString(20, 500, L"EnemyTURN", GetColor(32, 132, 43), TRUE);
 }
 
 
@@ -1767,7 +1818,6 @@ void Battle::UpdateEnemyDead()
 		m_enemyDeadMotion = false;
 		m_enemyDeadOffsetY = 0;
 
-		m_deadEnemy = nullptr;
 
 		m_displaytextTimer = 0;
 
@@ -1775,9 +1825,10 @@ void Battle::UpdateEnemyDead()
 		if (AreAllEnemiesDead())
 		{
 			m_isEnemyRequested = true;
-
+			m_bossManager.DefeatBoss(m_deadEnemy->GetBossNo());
 			return;
 		}
+		m_deadEnemy = nullptr;
 
 		// 生きている敵をターゲットにする
 		m_targetEnemyIndex = -1;
@@ -1822,10 +1873,10 @@ void Battle::UpdateEnemyDead()
 
 void Battle::RenderEnemyDead()
 {
-	DrawBox(40, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
+	RenderCurrentHp();
 
-
-	DrawString(60, 550, m_displayMessage.c_str(), GetColor(255, 255, 255));
+	DrawString(180, 480, m_displayMessage.c_str(), GetColor(255, 255, 255));
 }
 
 
@@ -2154,8 +2205,6 @@ void Battle::SetEnemies(const std::vector<Enemy*>& enemies)
 	// 初期ターゲットを確定ターゲットにもする
 	m_selectedTargetEnemyIndex = m_targetEnemyIndex;
 
-
-	printfDx(L"SetEnemies : target=%d selected=%d\n", m_targetEnemyIndex, m_selectedTargetEnemyIndex);
 }
 
 
@@ -2240,13 +2289,6 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		EndTurn();
 		return;
 	}
-
-
-	printfDx(L"ComboCheck F=%d Wa=%d state=%d", (state & USED_FIRE) != 0, (state & USED_WATER) != 0, state);
-
-
-	printfDx(L"ComboCheck Wa=%d S=%d state=%d", (state & USED_WATER) != 0, (state & USED_SOIL) != 0, state);
-
 
 
 	// 火 + 水

@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Game/Enemy/Fairy.h"
 
 #include"Game/Enemy/EnemyManager.h"
@@ -59,7 +59,6 @@ void Fairy::Finalize()
 
 void Fairy::OnHit(PlayerManager& playermanager)
 {
-	printfDx(L"FairyHit!!");
 }
 
 void Fairy::RenderBattle()

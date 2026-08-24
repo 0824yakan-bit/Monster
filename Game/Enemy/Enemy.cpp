@@ -56,3 +56,19 @@ bool Enemy::IsBattleEnemy() const
 {
     return m_isBattleEnemy;
 }
+
+void Enemy::SetBoss(int bossNo)
+{
+    m_isBoss = true;
+    m_bossNo = bossNo;
+}
+
+bool Enemy::IsBoss() const
+{
+    return m_isBoss;
+}
+
+int Enemy::GetBossNo() const
+{
+    return m_bossNo;
+}

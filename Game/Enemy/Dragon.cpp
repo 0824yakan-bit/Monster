@@ -60,7 +60,6 @@ void Dragon::Finalize()
 
 void Dragon::OnHit(PlayerManager& playermanager)
 {
-	printfDx(L"DragonHit!!");
 }
 
 void Dragon::RenderBattle()

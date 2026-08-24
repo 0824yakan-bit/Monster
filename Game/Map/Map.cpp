@@ -86,7 +86,7 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 
 	if (CheckHitKey(KEY_INPUT_Y))m_bossManager.DefeatBoss(0);//boss1撃破
 	if (CheckHitKey(KEY_INPUT_U))m_bossManager.DefeatBoss(1);//boss2撃破
-	if (CheckHitKey(KEY_INPUT_I))m_bossManager.DefeatBoss(2);//boss3撃破
+	if (CheckHitKey(KEY_INPUT_I))m_bossManager.DefeatBoss(2);//boss3撃破////一回でも戦闘しないと移動してはいけない
 
 	if (CheckHitKey(KEY_INPUT_1))m_currentMap = 0;//ステージ１に移動
 	if (CheckHitKey(KEY_INPUT_2))m_currentMap = 1;//ステージ２に移動
@@ -242,7 +242,6 @@ void Map::Render()
 	{
 		DrawCurrentMap(0, 0);
 	}
-	DrawFormatString(10, 130, GetColor(255, 255, 255), L"現在マップ%d", m_currentMap);
 }
 void Map::DrawCurrentMap(int offsetX, int offsetY)
 {
@@ -522,8 +521,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::UsedTreasure(PlayerManager& player)
 		{
-			printfDx(L"UsedTreasure called");
-
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -536,8 +533,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::NormalBreak(PlayerManager& player)
 		{
-			printfDx(L"NormalBleak called");
-
 			Accessory::UpgradeAccessory nomal = m_accessory.GetAccessory(Accessory::ElementType::NOMAL);
 
 			Vector2 pos = player.GetPosition();
@@ -551,8 +546,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::FireBreak(PlayerManager& player)
 		{
-			printfDx(L"FireBreak called\n");
-
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -564,7 +557,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WaterBreak(PlayerManager& player)
 		{
-			printfDx(L"WaterBreak called");
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -575,7 +567,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::GrassBreak(PlayerManager& player)
 		{
-			printfDx(L"GrassBreak called");
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -587,7 +578,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::SoilBreak(PlayerManager& player)
 		{
-			printfDx(L"SoilBreak called");
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -598,8 +588,6 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WindBreak(PlayerManager& player)
 		{
-			printfDx(L"WindBreak called");
-
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;

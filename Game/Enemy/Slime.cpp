@@ -94,7 +94,6 @@ void Slime::Finalize()
 
 void Slime::OnHit(PlayerManager&playermanager)
 {
-	printfDx(L"SlimeHit!!");
 }
 
 void Slime::RenderBattle()

@@ -68,8 +68,8 @@ void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager,Ac
 	if (m_hitNextFloor)
 	{
 		map->EnterBossArea();
-		playermanager->m_position.x = 10 * playermanager->m_size.x;
-		playermanager->m_position.y = 10 * playermanager->m_size.y;
+		playermanager->m_position.x = 10 * m_chipsize;
+		playermanager->m_position.y = 10 * m_chipsize;
 		return;
 	}
 
@@ -132,31 +132,6 @@ void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager,Ac
 
 void PlayerMove::Render(FieldScene* field, Map*map, PlayerManager* playermanager, Accessory* accessory)
 {
-	//DrawBox(playermanager->m_position.x, playermanager->m_position.y, playermanager->m_position.x+32, playermanager->m_position.y+32, GetColor(255, 255, 255), TRUE);
- 
-
-	
-
-	const wchar_t* name = L"";
-
-	switch (type)
-	{
-	case TileType::Floor:
-		name = L"Floor";
-		break;
-
-	case TileType::Wall:
-		name = L"Wall";
-		break;
-
-	case TileType::Object:
-		name = L"Object";
-		break;
-	}
-	DrawFormatString(10, 50, GetColor(255, 255, 255), L"Map(%d,%d) : %s", m_mapX, m_mapY, name);//現在のタイルの種類
-	int tileNo = map->GetTileNo(m_mapX, m_mapY);
-
-	DrawFormatString(10, 30, GetColor(255, 255, 0), L"TileNo : %d", tileNo);//チップナンバー
 	if (m_hitTreasure)
 	{
 		field->RenderTreasureOpen(*accessory);

@@ -3,10 +3,12 @@
 
 #include"Game/InputManager/InputManager.h"
 
-SceneManager::SceneManager()
+SceneManager::SceneManager(BossManager&bossManager)
     :m_nextSceneID{}
     ,m_currentSceneID{}
     ,m_monsterCurrentDamge{}
+    ,m_battleScene{bossManager}
+    ,m_fieldScene{bossManager}
 {
 }
 
@@ -106,7 +108,7 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
 
     case SceneID::Field:
    
-        m_fieldScene.Update(inputmanager,playerManager,enemyManager,map,battle,accessory);
+        m_fieldScene.Update(inputmanager,playerManager,enemyManager,map,battle,accessory,party);
 
         if (m_fieldScene.IsBattleRequested())
         {
@@ -121,7 +123,6 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
     case SceneID::Battle:
 
         m_battleScene.Update(inputmanager,sceneManager,m_fieldScene,m_gameOver,enemyManager,map,party,playerManager);
-        //printfDx(L"FieldRequested!!\n");
         if (m_battleScene.IsFieldRequested())
         {
             m_fieldScene.SetAttackEffects(m_battleScene.GetUsedAttackOrder());
@@ -146,7 +147,7 @@ void SceneManager::RenderCurrentScene(PlayerManager& playerManager, EnemyManager
     switch (m_currentSceneID)
     {
     case SceneID::Title:   m_titleScene.Render();  break;
-    case SceneID::Field:    m_fieldScene.Render(playerManager,enemyManager,map,accessory);   break;
+    case SceneID::Field:    m_fieldScene.Render(playerManager,enemyManager,map,accessory,party);   break;
     case SceneID::Battle:   m_battleScene.Render(m_gameOver,party,map);   break;
 
 

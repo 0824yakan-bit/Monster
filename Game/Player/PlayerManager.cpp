@@ -32,8 +32,8 @@ void PlayerManager::Initialize(Map*map)
 	m_size.x = map->m_chipSize*2;//＊２はプレイヤーのサイズ拡大率
 	m_size.y = map->m_chipSize*2;
 
-	m_position.x = 5*m_size.x;
-	m_position.y = 5*m_size.y;
+	m_position.x = 10*m_size.x;
+	m_position.y = 6*m_size.y;
 	m_playerMove.Initialize(map,*this);
 }
 

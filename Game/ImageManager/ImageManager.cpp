@@ -28,6 +28,14 @@ void ImageManager::LoadTextures()
 
 	textures.push_back({ L"commandbox1",LoadGraph(L"Resources/Textures/commandbox1.png") });
 	textures.push_back({ L"commandbox2",LoadGraph(L"Resources/Textures/commandbox2.png") });
+	
+	textures.push_back({ L"fire",LoadGraph(L"Resources/Textures/fire.png") });
+	textures.push_back({ L"water",LoadGraph(L"Resources/Textures/water.png") });
+	textures.push_back({ L"water",LoadGraph(L"Resources/Textures/grass.png") });
+	textures.push_back({ L"water",LoadGraph(L"Resources/Textures/soil.png") });
+	textures.push_back({ L"wind",LoadGraph(L"Resources/Textures/wind.png") });
+	textures.push_back({ L"water",LoadGraph(L"Resources/Textures/thunder.png") });
+
 
 
 }
@@ -172,6 +180,45 @@ void ImageManager::DrawCommandbox1(Vector2 position, Vector2 size)
 void ImageManager::DrawCommandbox2(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"commandbox2");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+//バトルシーンエフェクト画像
+void ImageManager::DrawFire(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"fire");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawWater(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"water");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawGrass(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"grass");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawSoil(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"soil");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawWind(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"wind");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+void ImageManager::DrawThunder(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"thunder");
 
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }

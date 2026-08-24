@@ -18,25 +18,65 @@ EnemyManager::~EnemyManager()
 
 namespace
 {
-    const std::vector<EnemyData>enemyData =
+    const std::vector<EnemyData> enemyData =
     {
-        //map0
-        {0,1,20,8},
+        // map0
+        {0, 0,  5,  5, false, -1},
+        {0, 1, 10,  8, false, -1},
+        {0, 4, 20,  8, false, -1},
 
-        //map1
-        {1,0,5,5},
-        {1,1,12,10},
-        {1,2,20,15},
+        // map1
+        {1, 0,  5,  5, false, -1},
+        {1, 1, 12, 10, false, -1},
+        {1, 4, 18,  6, false, -1},
+        {1, 2, 20, 15, true,  0}, // ボス1
 
-        //map2
-        {2,0,15,20},
-        {2,3,10,10},
+        // map2
+        {2, 0, 15, 20, false, -1},
+        {2, 3, 10, 10, false, -1},
+        {2, 1,  5, 15, false, -1},
+        {2, 4, 20,  5, false, -1},
 
-        //map3
-        {3,1,1,10},
+        // map3
+        {3, 1,  1, 10, false, -1},
+        {3, 0,  8,  5, false, -1},
+        {3, 3, 15, 12, false, -1},
+        {3, 4, 22,  8, false, -1},
 
-        //map4
-        {4,4,15,15},
+        // map4
+        {4, 0,  5,  5, false, -1},
+        {4, 1, 10, 20, false, -1},
+        {4, 3, 20,  8, false, -1},
+        {4, 4, 15, 15, true,  1}, // ボス2
+
+        // map5
+        {5, 0,  5,  5, false, -1},
+        {5, 1, 12, 10, false, -1},
+        {5, 2, 20, 15, false, -1},
+        {5, 4,  8, 20, false, -1},
+
+        // map6
+        {6, 3,  5,  5, false, -1},
+        {6, 1, 15,  8, false, -1},
+        {6, 2, 20, 18, false, -1},
+        {6, 4, 10, 20, false, -1},
+
+        // map7
+        {7, 0,  5,  5, false, -1},
+        {7, 1, 10, 10, false, -1},
+        {7, 2, 20,  5, false, -1},
+        {7, 3,  5, 20, false, -1},
+        {7, 4, 15, 15, true,  2}, // ボス3
+
+        // map8
+        {8, 0,  5,  5, false, -1},
+        {8, 1, 10, 10, false, -1},
+        {8, 2, 20,  5, false, -1},
+        {8, 3,  5, 20, false, -1},
+        {8, 4, 20, 20, false, -1},
+
+        // map9 ボス専用マップ
+        {9,2,5,5,true,3}//ボス4
     };
 }
 
@@ -55,23 +95,23 @@ void EnemyManager::Initialize(Map& map)
         switch (data.enemyType)
         {
         case 0:
-            CreateSlime(data.x, data.y, map);
+            CreateSlime(data.x, data.y, map,data.isBoss,data.bossNo);
             break;
 
         case 1:
-            CreateWolf(data.x, data.y, map);
+            CreateWolf(data.x, data.y, map, data.isBoss, data.bossNo);
             break;
 
         case 2:
-            CreateDragon(data.x, data.y, map);
+            CreateDragon(data.x, data.y, map, data.isBoss, data.bossNo);
             break;
 
         case 3:
-            CreateGolem(data.x, data.y, map);
+            CreateGolem(data.x, data.y, map, data.isBoss, data.bossNo);
             break;
 
         case 4:
-            CreateFairy(data.x, data.y, map);
+            CreateFairy(data.x, data.y, map, data.isBoss, data.bossNo);
             break;
         }
     }
@@ -158,50 +198,48 @@ void EnemyManager::CreateRandomEnemy(Map& map, int x, int y)
     switch (type)
     {
     case 0:
-        CreateSlime(x, y, map);
+        CreateSlime(x, y, map,false,-1);
         break;
 
     case 1:
-        CreateWolf(x, y, map);
+        CreateWolf(x, y, map, false, -1);
         break;
 
     case 2:
-        CreateDragon(x, y, map);
+        CreateDragon(x, y, map, false, -1);
         break;
 
     case 3:
-        CreateGolem(x, y, map);
+        CreateGolem(x, y, map, false, -1);
         break;
 
     case 4:
-        CreateFairy(x, y, map);
+        CreateFairy(x, y, map, false, -1);
         break;
     }
 }
-Enemy* EnemyManager::CreateBattleEnemy(
-    Map& map,
-    Enemy::EnemyType type)
+Enemy* EnemyManager::CreateBattleEnemy(Map& map,Enemy::EnemyType type)
 {
     switch (type)
     {
     case Enemy::EnemyType::Slime:
-        CreateSlime(0, 0, map);
+        CreateSlime(0, 0, map,false,-1);
         break;
 
     case Enemy::EnemyType::Wolf:
-        CreateWolf(0, 0, map);
+        CreateWolf(0, 0, map, false, -1);
         break;
 
     case Enemy::EnemyType::Dragon:
-        CreateDragon(0, 0, map);
+        CreateDragon(0, 0, map, false, -1);
         break;
 
     case Enemy::EnemyType::Golem:
-        CreateGolem(0, 0, map);
+        CreateGolem(0, 0, map, false, -1);
         break;
 
     case Enemy::EnemyType::Fairy:
-        CreateFairy(0, 0, map);
+        CreateFairy(0, 0, map, false, -1);
         break;
 
     default:
@@ -215,34 +253,40 @@ Enemy* EnemyManager::CreateBattleEnemy(
 
     Enemy* enemy = m_enemies.back().get();
 
-    // ★ Battle専用敵であることを設定
+    //Battle専用敵であることを設定
     enemy->SetBattleEnemy(true);
 
     return enemy;
 }
-void EnemyManager::CreateSlime(int x, int y, Map& map)
+void EnemyManager::CreateSlime(int x, int y, Map& map, bool isBoss, int bossNo)
 {
     auto slime = std::make_unique<Slime>();
 
     slime->SetImage(m_image);
 
     slime->Initialize(map, x, y);
-
+    if (isBoss)
+    {
+        slime->SetBoss(bossNo);
+    }
     m_enemies.push_back(std::move(slime));
 }
 
-void EnemyManager::CreateWolf(int x, int y, Map& map)
+void EnemyManager::CreateWolf(int x, int y, Map& map, bool isBoss, int bossNo)
 {
     auto wolf = std::make_unique<Wolf>();
 
     wolf->SetImage(m_image);
 
     wolf->Initialize(map, x, y);
-
+    if (isBoss)
+    {
+        wolf->SetBoss(bossNo);
+    }
     m_enemies.push_back(std::move(wolf));
 }
 
-void EnemyManager::CreateDragon(int x, int y, Map& map)
+void EnemyManager::CreateDragon(int x, int y, Map& map, bool isBoss, int bossNo)
 {
     auto dragon = std::make_unique<Dragon>();
 
@@ -250,27 +294,39 @@ void EnemyManager::CreateDragon(int x, int y, Map& map)
 
     dragon->Initialize(map, x, y);
 
+    if (isBoss)
+    {
+        dragon->SetBoss(bossNo);
+    }
+
+
     m_enemies.push_back(std::move(dragon));
 }
 
-void EnemyManager::CreateGolem(int x, int y, Map& map)
+void EnemyManager::CreateGolem(int x, int y, Map& map, bool isBoss, int bossNo)
 {
     auto golem = std::make_unique<Golem>();
 
     golem->SetImage(m_image);
 
     golem->Initialize(map, x, y);
-
+    if (isBoss)
+    {
+        golem->SetBoss(bossNo);
+    }
     m_enemies.push_back(std::move(golem));
 }
 
-void EnemyManager::CreateFairy(int x, int y, Map& map)
+void EnemyManager::CreateFairy(int x, int y, Map& map, bool isBoss, int bossNo)
 {
     auto fairy = std::make_unique<Fairy>();
 
     fairy->SetImage(m_image);
 
     fairy->Initialize(map, x, y);
-
+    if (isBoss)
+    {
+        fairy->SetBoss(bossNo);
+    }
     m_enemies.push_back(std::move(fairy));
 }
