@@ -113,6 +113,17 @@ private:
 
 
 	// パーティ関連
+	enum class JoinState
+	{
+		None,
+		Confirm,
+		Replace
+	};
+	JoinState m_joinState;
+
+	int m_replaceSelect;
+
+	Enemy* m_joinEnemy;
 	int m_monsterhp[MAX_PARTY];
 	bool m_requestDefense[MAX_PARTY];
 
@@ -253,6 +264,13 @@ public:
 	void EndTurn();											// ターン終了処理
 	void ResetRunSuccess();									//にげる状態リセット
 
+
+	//パーティ加入
+	void RequestJoinEnemy(Enemy* enemy);
+	void AddJoinEnemy();
+	void UpdateJoinReplace();
+	void ReplaceMonster();
+	void RenderJoinReplace();
 
 	// 敵ターゲット
 	void SetTargetEnemyIndex(int index);						// 攻撃対象を設定

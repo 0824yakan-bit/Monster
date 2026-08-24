@@ -1,6 +1,8 @@
 ﻿#pragma once
+
 #include "Game/Battle/Battle.h"
-#include"Game/Scene/FieldScene.h"
+#include "Game/Scene/FieldScene.h"
+
 class InputManager;
 class FieldScene;
 class SceneManager;
@@ -8,9 +10,11 @@ class PlayerManager;
 class Enemy;
 class EnemyManager;
 class Map;
+
 class BattleScene
 {
 private:
+
 	Vector2 drawBgPosition;
 	Vector2 drawBgSize;
 	Vector2 drawCommandBoxPosition;
@@ -19,9 +23,10 @@ private:
 
 	enum class TeamJoin
 	{
-		Join,//加入
-		Rejection,//拒否
+		Join,
+		Rejection,
 	};
+
 	TeamJoin m_teamjoin;
 
 	int m_receponsTimer;
@@ -38,11 +43,13 @@ private:
 	SceneManager* m_scenemanager;
 
 	bool m_isReplaceSelect;
+
 	// [0] 左
-	 // [1] エンカウント敵・中央
-	 // [2] 右
+	// [1] エンカウント敵・中央
+	// [2] 右
 	std::vector<Enemy*> m_battleEnemies;
 
+	// 仲間にするモンスター
 	std::unique_ptr<Monster> m_pendingMonster;
 
 	bool m_isFieldRequested;
@@ -50,20 +57,42 @@ private:
 
 	int m_runEnemyBonus;
 	bool m_battleWin;
+
 public:
-	BattleScene(BossManager&bossManager);
+
+	BattleScene(BossManager& bossManager);
 	~BattleScene();
 
-	void Initialize(InputManager& inputmanager,SceneManager&sceneManager,Map&map,Party&party);
-	void Update(InputManager& inputmanager,SceneManager&sceneManager,FieldScene&fieldScene, GameOver& gameOver,EnemyManager&enemyManager,Map&map,Party&party,PlayerManager&player);
-	void Render(GameOver& gameOver,Party&party,Map&map);
+	void Initialize(
+		InputManager& inputmanager,
+		SceneManager& sceneManager,
+		Map& map,
+		Party& party
+	);
+
+	void Update(
+		InputManager& inputmanager,
+		SceneManager& sceneManager,
+		FieldScene& fieldScene,
+		GameOver& gameOver,
+		EnemyManager& enemyManager,
+		Map& map,
+		Party& party,
+		PlayerManager& player
+	);
+
+	void Render(
+		GameOver& gameOver,
+		Party& party,
+		Map& map
+	);
+
 	void Finalize();
 
-	bool IsFieldRequested()const;
-	bool IsJoinRequested()const;
+	bool IsFieldRequested() const;
+	bool IsJoinRequested() const;
+	bool IsTitleRequested() const;
 
-
-	bool IsTitleRequested()const;
 	void ResetTitleRequest();
 
 	void SetImage(ImageManager* image);
@@ -81,5 +110,3 @@ public:
 	const std::vector<Battle::UsedAttackInfo>& GetUsedAttackOrder() const;
 	void ClearUsedAttackOrder();
 };
-
-

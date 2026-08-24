@@ -1,12 +1,15 @@
 ﻿#pragma once
-#include<iostream>
-#include<vector>
-#include<random>
-#include<set>
-#include<algorithm>
-#include<iterator>
-#include"Game/Battle/Battle.h"
-#include"Game/Maths/Vector2.h"
+
+#include <iostream>
+#include <vector>
+#include <random>
+#include <set>
+#include <algorithm>
+#include <iterator>
+
+#include "Game/Battle/Battle.h"
+#include "Game/Maths/Vector2.h"
+
 class InputManager;
 class PlayerManager;
 class Enemy;
@@ -14,135 +17,166 @@ class EnemyManager;
 class BossManager;
 class Map;
 class Battle;
+class Party;
+class Accessory;
+
 class FieldScene
 {
 public:
-	bool m_isTreasureOpen;
+    bool m_isTreasureOpen;
 
-	std::vector<Battle::UsedAttackInfo> m_attackEffects;
+    std::vector<Battle::UsedAttackInfo> m_attackEffects;
 
-	int m_effectIndex = 0;
-	int m_effectTimer = 0;
-	bool m_playEffect = false;
+    int m_effectIndex = 0;
+    int m_effectTimer = 0;
+    bool m_playEffect = false;
 
-	void SetAttackEffects(const std::vector<Battle::UsedAttackInfo>& effects);
+    void SetAttackEffects(const std::vector<Battle::UsedAttackInfo>& effects);
 
 private:
-	bool m_isBattleRequested;//バトルシーン遷移
-	int m_breakLevel;//地形破壊回数
-	ImageManager* m_image=nullptr;
-	BossManager& m_bossManager;
-	Enemy* m_hitEnemy;
+    bool m_isBattleRequested;
+    int m_breakLevel;
+    // 仲間加入待ち
+    std::unique_ptr<Monster> m_pendingJoinedMonster;
 
-	Vector2 Mposition;
-	Vector2 Nposition;
-	Vector2 size ;
+    // 仲間交換選択中
+    bool m_isMonsterReplaceSelect = false;
 
-////メニュー一覧
-	bool m_isMapActive;//その階層のマップ一覧ｏｒ全階層マップ
-	bool m_isMenuActive;//メニュー表示
-	int m_menuListSelect;//選択中のメニュー
-	Vector2 drawMenuBoxPosition;
-	Vector2 drawMenuBoxSize;
+    // 交換する現在のパーティメンバー
+    int m_replaceSelect = 0;
+    ImageManager* m_image = nullptr;
+    BossManager& m_bossManager;
+    Party* m_party;
+    Enemy* m_hitEnemy;
 
-	Vector2 drawMenuBoxPosition_1;
-	Vector2 drawMenuBoxSize_1;
+    Vector2 Mposition;
+    Vector2 Nposition;
+    Vector2 size;
 
-	enum class MenuList
-	{
-		CooperativeMove,//連携技使用
-		PartyCheck,//現在のパーティ確認
-		ToolCheck,//所持中のもちもの
-		OperationInstructions,//操作説明
-		Empty,//何もなし
+    // メニュー一覧
+    bool m_isMapActive;
+    bool m_isMenuActive;
 
-	};
-	MenuList m_menuList;
-	const wchar_t*m_menuText[static_cast<int>(MenuList::Empty)]
-	{
-		L"技",
-		L"仲間",
-		L"所持品",
-		L"操作指南",
-	};
-////技一覧
-	bool m_isCooperatDetailActive;//詳細表示
-	int m_CooperatDetailSelect;//選択中
+    int m_menuListSelect;
+
+    Vector2 drawMenuBoxPosition;
+    Vector2 drawMenuBoxSize;
+
+    Vector2 drawMenuBoxPosition_1;
+    Vector2 drawMenuBoxSize_1;
+
+    enum class MenuList
+    {
+        CooperativeMove,
+        PartyCheck,
+        ToolCheck,
+        OperationInstructions,
+        Empty,
+    };
+
+    MenuList m_menuList;
+
+    const wchar_t* m_menuText[static_cast<int>(MenuList::Empty)]
+    {
+        L"技",
+        L"仲間",
+        L"所持品",
+        L"操作指南",
+    };
+
+    // 技一覧
+    bool m_isCooperatDetailActive;
+    int m_CooperatDetailSelect;
+
 public:
-	enum class CooperatList//技一覧
-	{
-		Empty,
-		None,
-		Fire,
-		Water,
-		Grass,
-		Soil,
-		Wind,
-		Thunder,
-	};
-	CooperatList m_cooperatList;
+    enum class CooperatList
+    {
+        Empty,
+        None,
+        Fire,
+        Water,
+        Grass,
+        Soil,
+        Wind,
+        Thunder,
+    };
 
-	std::set<CooperatList> m_unlockedSkills;
-	std::vector<CooperatList> m_visibleSkills;
-///ブレイクレベル
-	
+    CooperatList m_cooperatList;
 
-///宝箱中身
-	enum class TreasureList
-	{
-		Empty,
-		None,
-		Fire,
-		Water,
-		Grass,
-		Soil,
-		Wind,
-		Thunder,
-	};
+    // 取得済みの技属性
+    std::set<CooperatList> m_unlockedSkills;
 
-	std::vector<int> result;
+    // 現在表示する技一覧
+    std::vector<CooperatList> m_visibleSkills;
+
+    // 宝箱中身
+    enum class TreasureList
+    {
+        Empty,
+        None,
+        Fire,
+        Water,
+        Grass,
+        Soil,
+        Wind,
+        Thunder,
+    };
+
+    std::vector<int> result;
+
 public:
-	FieldScene(BossManager&bossManager);
-	~FieldScene();
+    FieldScene(BossManager& bossManager,Party&party);
+    ~FieldScene();
 
-	void Initialize(InputManager& inputmanager,PlayerManager&playerManager, Map& map);
-	void Update(InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Battle&battle,Accessory&accessory, Party& party);
-	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map, Accessory& accessory, Party& party);
-	void Finalize();
+    void Initialize(InputManager& inputmanager,PlayerManager& playerManager,Map& map);
 
+    void Update(InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Battle& battle,Accessory& accessory,Party& party);
 
-	void UpdateCooperativeMove();
-	void UpdatePartyCheck();
-	void UpdateToolCheck();
-	void UpdateOperationInstructions();
+    void Render(PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Accessory& accessory,Party& party);
 
-	void RenderCooperativeMove();
-	void RenderPartyCheck(Party& party);
-	void RenderToolCheck();
-	void RenderOperationInstructions();
+    void Finalize();
 
+    void UpdateCooperativeMove();
+    void UpdatePartyCheck();
+    void UpdateToolCheck();
+    void UpdateOperationInstructions();
 
-	void Level1();
-	void Level2();
-	void Level3();
-	void Level4();
-	void Level5(EnemyManager&enemyManager, Map& map);
+    void RenderCooperativeMove();
+    void RenderPartyCheck(Party& party);
+    void RenderToolCheck();
+    void RenderOperationInstructions();
 
-	void LearnSkill(CooperatList skill);
-	bool HasSkill(CooperatList skill) const;
+    void Level1();
+    void Level2();
+    void Level3();
+    void Level4();
+    void Level5(
+        EnemyManager& enemyManager,
+        Map& map);
 
-	void LastBossDefeat();//ラスボスが倒されたとき
+    // 技属性を取得
+    void LearnSkill(CooperatList skill);
 
-	void UpdateTreasureOpen(InputManager&inputManager,PlayerManager&playerManager,Map&map,Accessory&accessory);//宝箱に触れているとき
-	void RenderTreasureOpen(Accessory& accessory);
+    // Monsterが持っている技属性を取得
+    void LearnMonsterSkills(const Monster& monster);
 
-	void SetImage(ImageManager* image);
+    bool HasSkill(CooperatList skill) const;
 
+    void LastBossDefeat();
 
-	bool IsBattleRequested() const;
+    void UpdateTreasureOpen(InputManager& inputManager,PlayerManager& playerManager,Map& map,Accessory& accessory);
 
-	Enemy* GetHitEnemy() const;
+    void RenderTreasureOpen(Accessory& accessory);
 
-	void ResetBattleRequest();
+    void SetImage(ImageManager* image);
+
+    bool IsBattleRequested() const;
+
+    Enemy* GetHitEnemy() const;
+
+    void ResetBattleRequest();
+
+    void ReceiveJoinedMonster(std::unique_ptr<Monster> monster);
+    void UpdateMonsterReplaceSelect(InputManager& inputManager);
+    void RenderMonsterReplaceSelect();
 };
-

@@ -30,9 +30,9 @@ Game::Game()
 	, m_map{m_accessory,m_bossManager}
 	, m_playerManager{}
 	, m_enemyManager{}
-	, m_sceneManager{m_bossManager}
-	, m_battle{m_bossManager}
 	, m_party{}
+	, m_sceneManager{m_bossManager,m_party}
+	, m_battle{m_bossManager}
 	, m_key{ 0 }
 	, m_oldKey{ 0 }
 	, m_oldMapNo{ 0 }

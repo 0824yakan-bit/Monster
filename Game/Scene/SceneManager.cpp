@@ -3,12 +3,12 @@
 
 #include"Game/InputManager/InputManager.h"
 
-SceneManager::SceneManager(BossManager&bossManager)
+SceneManager::SceneManager(BossManager&bossManager,Party&party)
     :m_nextSceneID{}
     ,m_currentSceneID{}
     ,m_monsterCurrentDamge{}
     ,m_battleScene{bossManager}
-    ,m_fieldScene{bossManager}
+    ,m_fieldScene{bossManager,party}
 {
 }
 

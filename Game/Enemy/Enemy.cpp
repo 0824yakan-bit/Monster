@@ -72,3 +72,26 @@ int Enemy::GetBossNo() const
 {
     return m_bossNo;
 }
+
+Monster::Type Enemy::GetMonsterType() const
+{
+    switch (type)
+    {
+    case EnemyType::Slime:
+        return Monster::Type::Slime;
+
+    case EnemyType::Wolf:
+        return Monster::Type::Wolf;
+
+    case EnemyType::Dragon:
+        return Monster::Type::Dragon;
+
+    case EnemyType::Golem:
+        return Monster::Type::Golem;
+
+    case EnemyType::Fairy:
+        return Monster::Type::Fairy;
+    }
+
+    return Monster::Type::Slime;
+}

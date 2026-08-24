@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include"Game/Maths/Vector2.h"
 #include"Game/ImageManager/ImageManager.h"
+#include "Game/Party/Monster.h"
 
 class Map;
 class PlayerManager;
@@ -66,6 +67,8 @@ public:
     void SetBoss(int bossNo);
     bool IsBoss() const;
     int GetBossNo()const;
+    // 敵を仲間の種類に変換
+    Monster::Type GetMonsterType() const;
 
 public:
     Enemy();

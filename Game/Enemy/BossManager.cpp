@@ -7,20 +7,21 @@ BossManager::BossManager()
 
 void BossManager::DefeatBoss(int bossNo)
 {
-    printfDx(L"%d", bossNo);
-    if (bossNo == 4)
+    if (bossNo < 0 || bossNo >= 4)
     {
-        //LastBossDefeat();
-
-    }
-    if (bossNo < 0 || bossNo >= 3)
         return;
+    }
 
     m_bossDefeated[bossNo] = true;
 }
 
 bool BossManager::IsBossDefeated(int bossNo) const
 {
+    if (bossNo < 0 || bossNo >= 4)
+    {
+        return false;
+    }
+
     return m_bossDefeated[bossNo];
 }
 

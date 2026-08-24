@@ -324,7 +324,14 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 			}
 		}
 	}
+	if (m_joinState == JoinState::Replace)
+	{
+		m_receponsTimer++;
 
+		UpdateJoinReplace();
+
+		return;
+	}
 
 
 	// State Update
@@ -634,7 +641,7 @@ void Battle::RenderCommand()
 	DrawString(620,490,L"敵データ",GetColor(255, 255, 255));
 
 
-	// 最大3体
+	// 敵は最大3体
 	for (int i = 0; i < 3; i++)
 	{
 		// 敵が存在しない
@@ -654,6 +661,7 @@ void Battle::RenderCommand()
 		int x = 620 + i * 170;
 		int y = 550;
 
+		printf("enemy[%d] = %p\n", i, enemy);
 
 		// 敵の名前
 		int nameColor = GetColor(255, 255, 255);
@@ -1136,7 +1144,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 		auto& attacks = m_party->GetMonster(i)->GetAttacks();
 
-		auto type = attacks[m_selectedAttack[i]].ristics;
+		auto type = attacks[m_selectedAttack[i]].element;
 
 
 		if (type == Monster::CharacteRistics::Fire)
@@ -1228,7 +1236,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 
 		// 属性取得
-		m_characteRistics = attacks[index].ristics;
+		m_characteRistics = attacks[index].element;
 
 
 
@@ -1939,8 +1947,254 @@ void Battle::ResetRunSuccess()
 	m_isRunSuccess = false;
 }
 
+void Battle::RequestJoinEnemy(Enemy* enemy)
+{
+	if (enemy == nullptr)
+	{
+		return;
+	}
+
+	m_joinEnemy = enemy;
+
+	// まだ4体未満ならそのまま加入
+	if (m_party->GetMonsterCount() < Party::MAX_PARTY)
+	{
+		AddJoinEnemy();
+
+		return;
+	}
+
+	// 4体なら入れ替え画面
+	m_replaceSelect = 0;
+
+	m_joinState = JoinState::Replace;
+}
+
+void Battle::AddJoinEnemy()
+{
+	if (m_joinEnemy == nullptr)
+	{
+		return;
+	}
+
+	Monster::Type type = m_joinEnemy->GetMonsterType();
+
+	auto monster = std::make_unique<Monster>(type);
+
+	m_party->AddMonster(std::move(monster));
+
+	m_joinEnemy = nullptr;
+
+	m_joinState = JoinState::None;
+}
+
+void Battle::UpdateJoinReplace()
+{
+	if (m_party == nullptr)
+	{
+		return;
+	}
+
+	if (m_joinEnemy == nullptr)
+	{
+		m_joinState = JoinState::None;
+		return;
+	}
 
 
+	// 上
+	if (m_receponsTimer > 15 && CheckHitKey(KEY_INPUT_UP))
+	{
+		m_replaceSelect--;
+
+		if (m_replaceSelect < 0)
+		{
+			m_replaceSelect = m_party->GetMonsterCount() - 1;
+		}
+
+		m_receponsTimer = 0;
+	}
+
+
+	// 下
+	if (m_receponsTimer > 15 && CheckHitKey(KEY_INPUT_DOWN))
+	{
+		m_replaceSelect++;
+
+		if (m_replaceSelect >= m_party->GetMonsterCount())
+		{
+			m_replaceSelect = 0;
+		}
+
+		m_receponsTimer = 0;
+	}
+
+
+	// 決定
+	if (m_receponsTimer > 15 && CheckHitKey(KEY_INPUT_RETURN))
+	{
+		m_receponsTimer = 0;
+
+		ReplaceMonster();
+
+		return;
+	}
+
+
+	// キャンセル
+	if (m_receponsTimer > 15 && CheckHitKey(KEY_INPUT_BACK))
+	{
+		m_receponsTimer = 0;
+
+		m_joinEnemy = nullptr;
+
+		m_joinState = JoinState::None;
+
+		return;
+	}
+}
+
+void Battle::ReplaceMonster()
+{
+	if (m_party == nullptr)
+	{
+		return;
+	}
+
+	if (m_joinEnemy == nullptr)
+	{
+		return;
+	}
+
+
+	// 外す仲間のindex
+	int removeIndex = m_replaceSelect;
+
+
+	// 範囲チェック
+	if (removeIndex < 0 ||
+		removeIndex >= m_party->GetMonsterCount())
+	{
+		return;
+	}
+
+
+	// 敵の種類を保存
+	Monster::Type joinType = m_joinEnemy->GetMonsterType();
+
+
+	// 先に現在の仲間を削除
+	m_party->RemoveMonster(removeIndex);
+
+
+	// 新しい仲間を作成
+	auto newMonster =
+		std::make_unique<Monster>(joinType);
+
+
+	// パーティに追加
+	m_party->AddMonster(std::move(newMonster));
+
+
+	// 後処理
+	m_joinEnemy = nullptr;
+
+	m_replaceSelect = 0;
+
+	m_joinState = JoinState::None;
+}
+
+void Battle::RenderJoinReplace()
+{
+	m_image->DrawCommandbox1(
+		drawCommandBoxPosition2_2,
+		drawCommandBoxSize2_2
+	);
+
+
+	DrawString(
+		590,
+		470,
+		L"仲間を入れ替える",
+		GetColor(255, 255, 255)
+	);
+
+
+	DrawString(
+		590,
+		510,
+		L"誰を外しますか？",
+		GetColor(255, 255, 255)
+	);
+
+
+	for (int i = 0; i < m_party->GetMonsterCount(); i++)
+	{
+		Monster* monster = m_party->GetMonster(i);
+
+		if (monster == nullptr)
+		{
+			continue;
+		}
+
+
+		int x = 620;
+		int y = 550 + i * 45;
+
+
+		int color = GetColor(255, 255, 255);
+
+
+		if (i == m_replaceSelect)
+		{
+			color = GetColor(255, 255, 0);
+
+			DrawString(
+				x - 30,
+				y,
+				L"▶",
+				GetColor(255, 255, 0)
+			);
+		}
+
+
+		DrawString(
+			x,
+			y,
+			monster->GetName().c_str(),
+			color
+		);
+
+
+		DrawFormatString(
+			x + 180,
+			y,
+			GetColor(255, 255, 255),
+			L"HP %d / %d",
+			monster->GetCurrentHitPoint(),
+			monster->GetMaxHitPoint()
+		);
+	}
+
+
+	// 加入するモンスター
+	if (m_joinEnemy != nullptr)
+	{
+		DrawString(
+			900,
+			510,
+			L"加入",
+			GetColor(100, 255, 100)
+		);
+
+		DrawString(
+			900,
+			550,
+			m_joinEnemy->GetName(),
+			GetColor(100, 255, 100)
+		);
+	}
+}
 // Target
 void Battle::SetTargetEnemyIndex(int index)
 {
