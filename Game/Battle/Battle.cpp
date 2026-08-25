@@ -42,11 +42,12 @@ Battle::~Battle()
 
 
 // Initialize / Finalize
-
-
 void Battle::Initialize(SceneManager* sceneManager)
 {
+	// 攻撃履歴
+	// 前回の戦闘で記録した攻撃履歴をクリア
 	m_usedAttackOrder.clear();
+
 
 	// 背景
 	drawBgPosition.x = 10;
@@ -55,125 +56,211 @@ void Battle::Initialize(SceneManager* sceneManager)
 	drawBgSize.x = 1260;
 	drawBgSize.y = 500;
 
-	//コマンドボックス
-	drawCommandBoxPosition1.x =120;
-	drawCommandBoxPosition1.y =440;
+
+	// コマンドボックス
+	// コマンド選択画面
+	drawCommandBoxPosition1.x = 120;
+	drawCommandBoxPosition1.y = 440;
+
 	drawCommandBoxSize1.x = 410;
 	drawCommandBoxSize1.y = 270;
 
-	//敵情報
+
+	// 敵情報
 	drawCommandBoxPosition1_1.x = 550;
 	drawCommandBoxPosition1_1.y = 440;
+
 	drawCommandBoxSize1_1.x = 610;
 	drawCommandBoxSize1_1.y = 270;
 
-	//各キャラコマンド一覧
+
+	// 各キャラクターのコマンド一覧
 	drawCommandBoxPosition2.x = 120;
 	drawCommandBoxPosition2.y = 550;
+
 	drawCommandBoxSize2.x = 410;
 	drawCommandBoxSize2.y = 160;
 
-	//NAME・HP
+
+	// キャラクター名・HP表示
 	drawCommandBoxPosition2_1.x = 120;
 	drawCommandBoxPosition2_1.y = 440;
+
 	drawCommandBoxSize2_1.x = 410;
 	drawCommandBoxSize2_1.y = 100;
 
-	//現在選択中一覧
+
+	// 現在選択中のコマンド一覧
 	drawCommandBoxPosition2_2.x = 550;
 	drawCommandBoxPosition2_2.y = 440;
+
 	drawCommandBoxSize2_2.x = 610;
 	drawCommandBoxSize2_2.y = 270;
 
-	//各ターン中
+
+	// ターン中の表示
 	drawCommandBoxPosition2_3.x = 120;
 	drawCommandBoxPosition2_3.y = 440;
+
 	drawCommandBoxSize2_3.x = 410;
 	drawCommandBoxSize2_3.y = 270;
 
-	//攻撃エフェクト
+
+	// 攻撃エフェクト
 	drawEffectPosition.x = 0;
 	drawEffectPosition.y = 0;
+
 	drawEffectSize.x = 1280;
 	drawEffectSize.y = 1280;
 
+
 	// 選択状態
+	// コマンド選択位置
 	m_select = 0;
 
+	// 敵ターゲット
 	m_targetEnemyIndex = -1;
 	m_selectedTargetEnemyIndex = -1;
 
+	// キャラクター・技の選択位置
 	m_displayIndex = 0;
 	m_monsterSelect = 0;
 	m_attackSelect = 0;
 
+
+	// 選択した技
 	// パーティ人数分の選択技を確保
 	m_selectedAttack.resize(m_party->GetMonsterCount());
 
 	// 全員「未選択」にする
-	std::fill(m_selectedAttack.begin(), m_selectedAttack.end(), -1);
+	std::fill(m_selectedAttack.begin(),m_selectedAttack.end(),-1);
+
 
 	// 戦闘状態
+	// 戦闘開始時はコマンド選択から開始
 	m_state = BattleState::Command;
 
+	// 属性状態をリセット
+	m_characteRistics = Monster::CharacteRistics::None;
+
+	// コマンド入力を有効にする
 	m_IsActive = true;
+
+	// 各ウィンドウを閉じる
 	m_Window = false;
 	m_isJoinWindow = false;
 
 
+	// 逃走状態
+	// 前回の逃走結果をリセット
+	m_isRunSuccess = false;
 
-	// ウィンドウ
+	// 逃走処理中ではない
+	m_isRun = false;
+
+
+	// 敵の行動状態
+	// 敵の攻撃タイプを初期化
+	m_enemyAttackType = 0;
+
+	// 敵の攻撃対象を初期化
+	m_enemyTargetIndex = 0;
+
+
+	// ウィンドウ・攻撃エフェクト
 	m_windowWidth = 0;
 	m_windowHeight = 0;
 	m_windowWidthFront = 0;
 
+	// 攻撃エフェクトを停止
+	m_playAttackEffect = false;
+
+	// エフェクト属性をリセット
+	m_effectElement = Monster::CharacteRistics::None;
 
 
 	// タイマー
+	// コマンド入力受付用タイマー
 	m_receponsTimer = 10;
+
+	// メッセージ表示用タイマー
 	m_displaytextTimer = 0;
 
+	// 攻撃エフェクト用タイマー
+	m_attackEffectTimer = 0;
 
 
-	// リクエスト
+	// シーン遷移リクエスト
+	// フィールドへの遷移要求をリセット
 	m_isFieldRequested = false;
+
+	// 次の敵への遷移要求をリセット
 	m_isEnemyRequested = false;
 
 
-
 	// 敵死亡演出
+	// 敵死亡演出を停止
 	m_enemyDeadMotion = false;
+
+	// 死亡演出の位置を初期化
 	m_enemyDeadOffsetY = 0;
 
-	//メッセージ
+	// 前回の死亡敵情報をクリア
+	m_deadEnemy = nullptr;
+	m_deadEnemyName.clear();
+
+
+	// 敵から受けたダメージ表示
+	// パーティ人数分のダメージメッセージを確保
 	m_displayMessageEnemyAttackDamage.resize(MAX_PARTY);
-	for (int i = 0;i < MAX_PARTY;i++)
+
+	// ダメージメッセージをすべてクリア
+	for (int i = 0; i < MAX_PARTY; i++)
 	{
 		m_displayMessageEnemyAttackDamage[i].clear();
 	}
-	// コンボ状態
+
+
+	// 連携攻撃・コンボ状態
+	// 使用した属性をリセット
 	state = USED_NONE;
 
-	// 味方HPを保存
+	// 連携攻撃待機状態を解除
+	m_comboPending = false;
+
+
+	// 味方HP
+	// 戦闘開始時の味方HPを保存
 	for (int i = 0; i < m_party->GetMonsterCount(); i++)
 	{
 		Monster* monster = m_party->GetMonster(i);
 
-		m_monsterhp[i] =monster->GetCurrentHitPoint();
+		m_monsterhp[i] = monster->GetCurrentHitPoint();
 	}
 
 
-
-	// 防御状態をリセット
+	// 防御状態
+	// 全員の防御状態を解除
 	for (int i = 0; i < MAX_PARTY; i++)
 	{
 		m_requestDefense[i] = false;
 	}
 
 
-
 	// 全滅状態
+	// 戦闘開始時は全滅していない
 	m_annihilation = false;
+
+
+	// 仲間加入
+	// 仲間加入処理を初期状態に戻す
+	m_joinState = JoinState::None;
+
+	// 入れ替え対象の選択位置を初期化
+	m_replaceSelect = 0;
+
+	// 加入予定の敵をクリア
+	m_joinEnemy = nullptr;
 }
 
 
@@ -1793,7 +1880,7 @@ void Battle::RenderEnemyTurn()
 	DrawString(150, 480, m_displayMessage.c_str(), GetColor(255, 255, 255));
 	for (int i=0;i < m_party->GetMonsterCount();i++)
 	{
-		DrawString(150, 530+i*50, m_displayMessageEnemyAttackDamage[i].c_str(), GetColor(255, 255, 255));
+		DrawString(150, 530+i*40, m_displayMessageEnemyAttackDamage[i].c_str(), GetColor(255, 255, 255));
 	}
 }
 
@@ -2106,26 +2193,13 @@ void Battle::ReplaceMonster()
 
 void Battle::RenderJoinReplace()
 {
-	m_image->DrawCommandbox1(
-		drawCommandBoxPosition2_2,
-		drawCommandBoxSize2_2
-	);
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_2,drawCommandBoxSize2_2);
 
 
-	DrawString(
-		590,
-		470,
-		L"仲間を入れ替える",
-		GetColor(255, 255, 255)
-	);
+	DrawString(590,470,L"仲間を入れ替える",GetColor(255, 255, 255));
 
 
-	DrawString(
-		590,
-		510,
-		L"誰を外しますか？",
-		GetColor(255, 255, 255)
-	);
+	DrawString(590,510,L"誰を外しますか？",GetColor(255, 255, 255));
 
 
 	for (int i = 0; i < m_party->GetMonsterCount(); i++)
@@ -2149,12 +2223,7 @@ void Battle::RenderJoinReplace()
 		{
 			color = GetColor(255, 255, 0);
 
-			DrawString(
-				x - 30,
-				y,
-				L"▶",
-				GetColor(255, 255, 0)
-			);
+			DrawString(x - 30,y,L"▶",GetColor(255, 255, 0));
 		}
 
 
@@ -2534,8 +2603,7 @@ void Battle::DamageAllEnemies(int damage)
 // Elemental Attack / Combo
 void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 {
-	Enemy* enemy =
-		GetSelectedTargetEnemy();
+	Enemy* enemy =GetSelectedTargetEnemy();
 
 
 	if (enemy == nullptr)
