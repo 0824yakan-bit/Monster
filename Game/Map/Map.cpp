@@ -15,6 +15,9 @@ Map::Map(Accessory& accessory,BossManager& bossManager)
 	,m_basemap		{ }
 	,m_workmap		{ }
 	,m_fog			{false}
+	,m_beforChange	{}
+	,m_afterChange	{}
+	,m_difference	{false}
 	,m_ghChip		{ }
 	,m_chipSize		{ }
 	,m_currentMap	{ }
@@ -61,8 +64,10 @@ void Map::Initialize(const wchar_t* fileName)
 		assert(gh != (-1) && "タイルマップをロードできませんでした");
 	}
 
-	LoadMapChip(L"Resources/CSV/map.csv", m_workmap);
-	LoadMapChip(L"Resources/CSV/object.csv",m_objectmap);
+	LoadMapChip(L"Resources/CSV/map.csv"	,m_workmap		);
+	LoadMapChip(L"Resources/CSV/object.csv"	,m_objectmap	);
+	LoadMapChip(L"Resources/CSV/object.csv"	,m_beforChange	);//変更前情報保存
+
 
 	for (int map = 0;map < MAP_NUM;++map)
 	{
@@ -70,7 +75,8 @@ void Map::Initialize(const wchar_t* fileName)
 		{
 			for (int x = 0;x < MAP_WIDTH;++x)
 			{
-				m_fog[map][y][x] = true;
+				m_fog[map][y][x] = true;//デフォルトで有効状態
+				m_difference[map][y][x] = false;//デフォルトで無効状態
 			}
 		}
 	}
@@ -87,6 +93,7 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 	if (CheckHitKey(KEY_INPUT_Y))m_bossManager.DefeatBoss(0);//boss1撃破
 	if (CheckHitKey(KEY_INPUT_U))m_bossManager.DefeatBoss(1);//boss2撃破
 	if (CheckHitKey(KEY_INPUT_I))m_bossManager.DefeatBoss(2);//boss3撃破////一回でも戦闘しないと移動してはいけない
+	if (CheckHitKey(KEY_INPUT_O))m_bossManager.DefeatBoss(3);//boss4撃破ラスボス
 
 	if (CheckHitKey(KEY_INPUT_1))m_currentMap = 0;//ステージ１に移動
 	if (CheckHitKey(KEY_INPUT_2))m_currentMap = 1;//ステージ２に移動
@@ -115,6 +122,16 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 
 	}
 
+	if (m_bossManager.IsBossDefeated(3))//ラスボス撃破後
+	{
+		if (m_difference[GAME_CLEAR_MAP][GAME_CLEAR_Y][GAME_CLEAR_X] == false)
+		{
+			printfDx(L"MapBreak");
+			MapBreak();
+		}
+
+		LastBossDefeated();
+	}
 	if (m_currentMap != 9)//9の画面端は移動不可
 	{
 		// 右端
@@ -354,6 +371,32 @@ void Map::LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][
 	ifs.close();
 }
 
+void Map::LastBossDefeated()
+{
+}
+
+void Map::MapBreak()
+{
+	for (int y = 0;y < MAP_HEIGHT;y++)
+	{
+		for (int x = 0;x < MAP_WIDTH;x++)
+		{
+			for (int map = 0;map <MAP_NUM ;map++)
+			{
+				if (m_objectmap[map][y][x] != m_beforChange[map][y][x])
+				{
+					m_difference[map][y][x] = true;
+					m_basemap	[map][y][x] = TileType::Fall;
+					m_objectmap	[map][y][x] = 291;
+				}
+			}
+		}
+	}
+	m_difference[GAME_CLEAR_MAP][GAME_CLEAR_Y][GAME_CLEAR_X] = true;
+	m_basemap	[GAME_CLEAR_MAP][GAME_CLEAR_Y][GAME_CLEAR_X] = TileType::GameClear;
+	m_objectmap	[GAME_CLEAR_MAP][GAME_CLEAR_Y][GAME_CLEAR_X] = 289;
+}
+
 bool Map::IsWallRect(int px, int py, int width, int height) const
 {
 	int left	= px / m_chipSize;
@@ -390,6 +433,19 @@ bool Map::IsNextFloorRect(int px, int py, int width, int height) const
 			GetTileType(right, top)		== TileType::NextFloor ||
 			GetTileType(left, bottom)	== TileType::NextFloor ||
 			GetTileType(right, bottom)	== TileType::NextFloor;
+}
+
+bool Map::IsFallRect(int px, int py, int width, int height) const
+{
+	int left = px / m_chipSize;
+	int right = (px + width - 1) / m_chipSize;
+	int top = py / m_chipSize;
+	int bottom = (py + height - 1) / m_chipSize;
+
+	return	GetTileType(left, top)		== TileType::Fall ||
+			GetTileType(right, top)		== TileType::Fall ||
+			GetTileType(left, bottom)	== TileType::Fall ||
+			GetTileType(right, bottom)	== TileType::Fall;
 }
 
 TileType Map::GetTileType(int x, int y) const
@@ -695,9 +751,3 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 		void Map::VolcazationBreak(PlayerManager& player)
 		{
 		}
-
-
-
-
-
-

@@ -6,6 +6,7 @@
 #include "Game/Enemy/Enemy.h"
 
 class Map;
+class FieldScene;
 class SceneManager;
 class GameOver;
 class PlayerMove;
@@ -71,7 +72,7 @@ private:
 	ImageManager* m_image = nullptr;
 	PlayerManager* m_player = nullptr;
 	Party* m_party = nullptr;
-
+	FieldScene* m_fieldScene=nullptr;
 
 
 	// 敵関連
@@ -290,6 +291,7 @@ public:
 
 
 	// 各種設定
+	void SetFieldScene(FieldScene* fieldScene);				// FieldSceneを設定
 	void SetImage(ImageManager* image);						// ImageManagerを設定
 	void SetPlayer(PlayerManager* player);					// PlayerManagerを設定
 	void SetParty(Party* party);								// Partyを設定

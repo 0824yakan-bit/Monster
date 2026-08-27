@@ -40,7 +40,7 @@ class Game
 // クラス定数の宣言 -------------------------------------------------
 public:
 	// システム関連
-	static constexpr const wchar_t* TITLE = L"Sample Game";   ///< ゲームタイトル
+	static constexpr const wchar_t* TITLE = L"No Roads";   ///< ゲームタイトル
 	//
 private:
 	ImageManager m_imageManager;

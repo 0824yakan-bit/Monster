@@ -2,6 +2,7 @@
 #include "Game/Enemy/BossManager.h"
 
 BossManager::BossManager()
+    :m_bossDefeated{false}
 {
 }
 

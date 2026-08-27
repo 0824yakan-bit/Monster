@@ -47,15 +47,11 @@ BattleScene::~BattleScene()
 
 // 初期化
 
-void BattleScene::Initialize(
-	InputManager& inputmanager,
-	SceneManager& sceneManager,
-	Map& map,
-	Party& party)
+void BattleScene::Initialize(InputManager& inputmanager,SceneManager& sceneManager,Map& map,Party& party)
 {
 	// BattleへPartyを設定
 	m_battle->SetParty(&party);
-
+	
 	// Battle初期化
 	m_battle->Initialize(&sceneManager);
 
@@ -885,6 +881,11 @@ Enemy* BattleScene::GetTargetEnemy() const
 
 
 // Setter
+
+void BattleScene::SetFieldScene(FieldScene* fieldScene)
+{
+	m_battle->SetFieldScene(fieldScene);
+}
 
 void BattleScene::SetImage(ImageManager* image)
 {

@@ -2445,8 +2445,6 @@ void Battle::RemoveEnemy(Enemy* enemy)
 		return;
 	}
 
-
-
 	// 敵削除
 	m_enemies.erase(m_enemies.begin() + removeIndex);
 
@@ -2479,15 +2477,11 @@ void Battle::RemoveEnemy(Enemy* enemy)
 		m_selectedTargetEnemyIndex = -1;
 	}
 
-
-
 	// 実ターゲット再設定
 	if (m_targetEnemyIndex == -1)
 	{
 		SetTargetEnemyIndex(0);
 	}
-
-
 
 	// 選択ターゲット再設定
 	if (m_selectedTargetEnemyIndex == -1)
@@ -2530,7 +2524,10 @@ void Battle::SetEnemies(const std::vector<Enemy*>& enemies)
 
 }
 
-
+void Battle::SetFieldScene(FieldScene* fieldScene)
+{
+	m_fieldScene = fieldScene;
+}
 
 // Setter
 void Battle::SetImage(ImageManager* image)
@@ -2538,29 +2535,22 @@ void Battle::SetImage(ImageManager* image)
 	m_image = image;
 }
 
-
 void Battle::SetPlayer(PlayerManager* player)
 {
 	m_player = player;
 }
-
 
 void Battle::SetParty(Party* party)
 {
 	m_party = party;
 }
 
-
 void Battle::SetJoinWindow(bool flag)
 {
 	m_isJoinWindow = flag;
 }
 
-
-
 // Request / State Getter
-
-
 bool Battle::IsFieldRequested()
 {
 	return m_isFieldRequested;
@@ -2603,153 +2593,73 @@ void Battle::DamageAllEnemies(int damage)
 // Elemental Attack / Combo
 void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 {
-	Enemy* enemy =GetSelectedTargetEnemy();
+	bool steamCombo =(state & USED_FIRE) &&(state & USED_WATER);
 
+	bool floorCombo =(state & USED_WATER) &&(state & USED_SOIL);
 
-	if (enemy == nullptr)
-	{
-		EndTurn();
-		return;
-	}
-
+	bool waterFlowCombo =(state & USED_WATER) &&(state & USED_WIND);
 
 	// 火 + 水
-	// 蒸気爆発
-	if ((state & USED_FIRE) && (state & USED_WATER))
+	if (steamCombo)
 	{
 		map.SteamExplosionBreak(player);
 
-		int comboDamage = 20;
+		DamageAllEnemies(20);
 
-		// 敵全体にダメージ
-		DamageAllEnemies(comboDamage);
-		m_displayMessage = L"蒸気爆発が発動した！";
+		m_displayMessage += L"\n蒸気爆発が発動した！";
 
 		UsedAttackInfo info;
-
-		info.element = Monster::CharacteRistics::Fire;
+		info.element =Monster::CharacteRistics::SteamExplpsion;
 		info.attackName = L"蒸気爆発！";
 
 		m_usedAttackOrder.push_back(info);
+
+		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::SteamExplpsion);
 	}
 
-
-
 	// 水 + 土
-	// 地面崩壊
-	if ((state & USED_WATER) && (state & USED_SOIL))
+	if (floorCombo)
 	{
 		map.FloorBreak(player);
 
-		int comboDamage = 20;
+		DamageAllEnemies(20);
 
-		// 敵全体にダメージ
-		DamageAllEnemies(comboDamage);
-
-		m_displayMessage = L"地面が崩壊した！";
+		m_displayMessage += L"\n地面が崩壊した！";
 
 		UsedAttackInfo info;
-
-		info.element = Monster::CharacteRistics::Water;
+		info.element =Monster::CharacteRistics::FloorBreak;
 		info.attackName = L"泥流生成！";
 
 		m_usedAttackOrder.push_back(info);
+
+		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::FloorBreak);
+
 	}
 
-
 	// 水 + 風
-	// 激流
-	if ((state & USED_WATER) && (state & USED_WIND))
+	if (waterFlowCombo)
 	{
 		map.WaterFlowsBreak(player);
 
-		int comboDamage = 20;
+		DamageAllEnemies(20);
 
-		// 敵全体にダメージ
-		DamageAllEnemies(comboDamage);
-
-		m_displayMessage = L"荒波が発生した！";
+		m_displayMessage += L"\n荒波が発生した！";
 
 		UsedAttackInfo info;
-
-		info.element = Monster::CharacteRistics::Water;
+		info.element =Monster::CharacteRistics::WaterFlows;
 		info.attackName = L"激流！";
 
-
 		m_usedAttackOrder.push_back(info);
+
+		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::WaterFlows);
+
 	}
 
-
-
-	// 草 + 水
-	// 成長
-	if ((state & USED_GRASS) && (state & USED_WATER))
-	{
-		map.GrowGrassBreak(player);
-
-
-		UsedAttackInfo info;
-
-		info.element = Monster::CharacteRistics::Grass;
-
-		info.attackName = L"草！";
-
-
-		m_usedAttackOrder.push_back(info);
-	}
-
-
-
-	// 土 + 火
-	// 火山化
-	if ((state & USED_SOIL) && (state & USED_FIRE))
-	{
-		map.VolcazationBreak(player);
-
-		int comboDamage = 20;
-
-		// 敵全体にダメージ
-		DamageAllEnemies(comboDamage);
-
-		m_displayMessage = L"溶岩が溢れ出す！";
-
-		UsedAttackInfo info;
-
-		info.element = Monster::CharacteRistics::Soil;
-
-		info.attackName = L"火山化！";
-
-
-		m_usedAttackOrder.push_back(info);
-	}
-
-
-
-	// 風
-	if (state & USED_WIND)
-	{
-		map.WindBreak(player);
-	}
-
-
-
-	// 雷
-	if (state & USED_THUNDER)
-	{
-		map.ThunderBreak(player);
-	}
-
-
-
-	// 次ターン用にリセット
+	// リセット
 	state = USED_NONE;
 }
 
-
-
 // Attack Order
-
-
 const std::vector<Battle::UsedAttackInfo>& Battle::GetUsedAttackOrder() const
 {
 	return m_usedAttackOrder;
@@ -2765,21 +2675,15 @@ void Battle::ClearUsedAttackOrder()
 // Combo Member
 bool Battle::IsComboMember(Monster::CharacteRistics type, bool steamcombo, bool floorcombo)
 {
-
 	// 火 + 水
 	if (steamcombo && (type == Monster::CharacteRistics::Fire || type == Monster::CharacteRistics::Water))
 	{
 		return true;
 	}
-
-
-
 	// 水 + 土
 	if (floorcombo && (type == Monster::CharacteRistics::Water || type == Monster::CharacteRistics::Soil))
 	{
 		return true;
 	}
-
-
 	return false;
 }

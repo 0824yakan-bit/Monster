@@ -7,7 +7,9 @@ enum class TileType
 	Object,//通り抜け可能な動作物体
 	Treasure,//宝箱
 	Lounge,//回復スポット
-	NextFloor
+	NextFloor,
+	Fall,//落ちる
+	GameClear,//ゲームクリア
 };
 class TileRole
 {

@@ -26,7 +26,11 @@ public:
         Soil,  //土属性
         Thunder,//雷属性
         Wind,  //風属性
-
+        SteamExplpsion,
+        FloorBreak,
+        WaterFlows,
+        GrawGrass,
+        Volcazation,
         Defense//防御
     };
 

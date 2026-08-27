@@ -91,9 +91,7 @@ void Accessory::Initialize()
 
 void Accessory::Upgrade(ElementType type)
 {
-    auto& accessory = m_accessory[
-        static_cast<int>(type)
-    ];
+    auto& accessory = m_accessory[static_cast<int>(type)];
 
     accessory.level++;
     accessory.damage++;

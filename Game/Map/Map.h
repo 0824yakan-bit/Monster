@@ -39,6 +39,8 @@ private:
 	// タイル情報
 	TileRole m_tileRole;
 
+
+
 	// ステージ情報
 	int m_stageNo = 0;					// 0 = ステージ1、1 = ステージ2 ...
 	static constexpr int MAPS_PER_STAGE = 10;
@@ -71,12 +73,21 @@ private:
 
 public:
 	// マップデータ
+	static constexpr int GAME_CLEAR_MAP = 0;
+	static constexpr int GAME_CLEAR_X = 2;
+	static constexpr int GAME_CLEAR_Y = 2;
+
 	static constexpr int MAP_NUM = 40;
 
 	TileType	m_basemap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 当たり判定用
-	int			m_workmap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 描画用
+	int			m_workmap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 地面描画用
 	int			m_objectmap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// オブジェクト描画用
 	bool		m_fog		[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 霧の有無
+
+	//ラスボス撃破時使用
+	int		m_beforChange	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//csv書き換え前
+	int		m_afterChange	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//csv書き換え後
+	bool	m_difference	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//変更されていた場所だけTRUE
 
 	int m_fogdensity;	// 霧濃度：薄い0 ～ 濃い400
 
@@ -97,12 +108,18 @@ public:
 	// マップデータ読み込み
 	void LoadMapChip(const wchar_t* fileName,int mapData[MAP_NUM][MAP_HEIGHT][MAP_WIDTH]);	// CSVからマップデータを読み込む
 
+	//ラスボス撃破後
+	void LastBossDefeated();//ラスボス撃破後常に呼ぶ
+	void MapBreak();//撃破後一回だけ呼ぶ
+
 	// 当たり判定
 	bool IsWallRect		(int px,int py,int width,int height) const;	// 壁との当たり判定
 
 	bool IsTreasureRect(int px, int py, int width, int height) const;	// 宝箱との当たり判定
 
 	bool IsNextFloorRect	(int px,int py,int width,int height) const;	// 階段との当たり判定
+
+	bool IsFallRect(int px, int py, int width, int height) const;	// 穴との当たり判定
 
 	TileType GetTileType	(int x, int y) const;	// 指定座標のタイル種類を取得
 	int		 GetTileNo		(int x, int y) const;	// 指定座標のオブジェクト番号を取得

@@ -99,6 +99,11 @@ public:
         Soil,
         Wind,
         Thunder,
+        SteamExplpsion,
+        FloorBreak,
+        WaterFlows,
+        GrawGrass,
+        Volcazation,
     };
 
     CooperatList m_cooperatList;
@@ -150,12 +155,11 @@ public:
     void Level2();
     void Level3();
     void Level4();
-    void Level5(
-        EnemyManager& enemyManager,
-        Map& map);
+    void Level5(EnemyManager& enemyManager,Map& map);
 
     // 技属性を取得
-    void LearnSkill(CooperatList skill);
+    void LearnCompositeSkill(CooperatList skill);
+
 
     // Monsterが持っている技属性を取得
     void LearnMonsterSkills(const Monster& monster);

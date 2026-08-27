@@ -63,29 +63,11 @@ public:
 	BattleScene(BossManager& bossManager);
 	~BattleScene();
 
-	void Initialize(
-		InputManager& inputmanager,
-		SceneManager& sceneManager,
-		Map& map,
-		Party& party
-	);
+	void Initialize(InputManager& inputmanager,SceneManager& sceneManager,Map& map,Party& party);
 
-	void Update(
-		InputManager& inputmanager,
-		SceneManager& sceneManager,
-		FieldScene& fieldScene,
-		GameOver& gameOver,
-		EnemyManager& enemyManager,
-		Map& map,
-		Party& party,
-		PlayerManager& player
-	);
+	void Update(InputManager& inputmanager,SceneManager& sceneManager,FieldScene& fieldScene,GameOver& gameOver,EnemyManager& enemyManager,Map& map,Party& party,PlayerManager& player);
 
-	void Render(
-		GameOver& gameOver,
-		Party& party,
-		Map& map
-	);
+	void Render(GameOver& gameOver,Party& party,Map& map);
 
 	void Finalize();
 
@@ -95,6 +77,7 @@ public:
 
 	void ResetTitleRequest();
 
+	void SetFieldScene(FieldScene* fieldScene);
 	void SetImage(ImageManager* image);
 	void SetPlayer(PlayerManager* player);
 	void SetEnemyManager(EnemyManager* enemyManager);

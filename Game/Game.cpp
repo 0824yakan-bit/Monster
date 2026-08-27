@@ -26,7 +26,7 @@
 Game::Game()
 	: m_inputManager{}
 	, m_accessory{}
-	,m_bossManager{}
+	, m_bossManager{}
 	, m_map{m_accessory,m_bossManager}
 	, m_playerManager{}
 	, m_enemyManager{}

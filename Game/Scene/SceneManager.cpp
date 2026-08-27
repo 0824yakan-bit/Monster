@@ -7,8 +7,8 @@ SceneManager::SceneManager(BossManager&bossManager,Party&party)
     :m_nextSceneID{}
     ,m_currentSceneID{}
     ,m_monsterCurrentDamge{}
-    ,m_battleScene{bossManager}
     ,m_fieldScene{bossManager,party}
+    ,m_battleScene{bossManager}
 {
 }
 
@@ -128,6 +128,7 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
             m_fieldScene.SetAttackEffects(m_battleScene.GetUsedAttackOrder());
 
             m_battleScene.ClearUsedAttackOrder();
+            m_battleScene.SetFieldScene(&m_fieldScene);
             m_battleScene.SetEnemy(nullptr);
 
             NextSceneID(SceneID::Field);
