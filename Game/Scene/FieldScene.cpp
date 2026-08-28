@@ -225,7 +225,7 @@ void FieldScene::Update(InputManager& inputManager, PlayerManager& playerManager
 
 
 		//メニューから技使用可能
-		switch (m_cooperatList)
+		switch (m_cooperatList)//連携技未追加
 		{
 		case CooperatList::None:
 			map.NormalBreak(playerManager);
@@ -310,7 +310,6 @@ void FieldScene::Update(InputManager& inputManager, PlayerManager& playerManager
 
 
 	//プレイヤー管理
-
 	if (!m_isMapActive && !m_isMenuActive)
 	{
 		playerManager.Update(this, &map, &accessory);
@@ -324,11 +323,9 @@ void FieldScene::Update(InputManager& inputManager, PlayerManager& playerManager
 
 
 	//エネミー管理
-
 	enemyManager.Update(map);
 
-	Enemy* enemy =
-		enemyManager.CheckHit(playerManager);
+	Enemy* enemy =enemyManager.CheckHit(playerManager);
 
 
 	if (!playerManager.m_invicible)
@@ -364,7 +361,6 @@ void FieldScene::Update(InputManager& inputManager, PlayerManager& playerManager
 
 
 	//ブレイクレベル管理
-
 	int m_level = m_breakLevel / 10;
 
 	switch (m_level)
@@ -392,7 +388,6 @@ void FieldScene::Update(InputManager& inputManager, PlayerManager& playerManager
 
 
 	//LastBoss状態管理
-
 	if (m_bossManager.IsAllBossDefeated())
 	{
 	}
@@ -422,14 +417,13 @@ void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager
 
 
 	//フィールド技エフェクト
-
 	if (m_playEffect && m_effectIndex < static_cast<int>(m_attackEffects.size()))
 	{
 		const auto& info = m_attackEffects[m_effectIndex];
 
 		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 20);
 
-		switch (info.element)
+		switch (info.element)////連携技未追加
 		{
 		case Monster::CharacteRistics::Fire:
 			DrawBox(0, 0, 1280, 720, GetColor(255, 80, 0), TRUE);
@@ -614,7 +608,6 @@ void FieldScene::RenderCooperativeMove()
 
 
 	//カーソル補正
-
 	if (m_CooperatDetailSelect < 0)
 	{
 		m_CooperatDetailSelect = static_cast<int>(m_visibleSkills.size()) - 1;
@@ -641,7 +634,7 @@ void FieldScene::RenderCooperativeMove()
 	int y = 150;
 
 
-	for (auto skill : m_visibleSkills)
+	for (auto skill : m_visibleSkills)////連携技未追加
 	{
 		const wchar_t* name = L"";
 
@@ -700,33 +693,26 @@ void FieldScene::RenderPartyCheck(Party& party)
 	m_image->DrawCommandbox1(drawMenuBoxPosition_1, drawMenuBoxSize_1);
 	SetFontSize(40);
 
-
 	DrawString(250, 80, L"仲間", GetColor(0, 0, 0), TRUE);
 
-
 	int y = 150;
-
 
 	for (int i = 0;i < party.GetMonsterCount();i++)
 	{
 		Monster* monster = party.GetMonster(i);
-
 
 		if (monster == nullptr)
 		{
 			continue;
 		}
 
-
 		//名前
 		DrawString(300, y, monster->GetName().c_str(), GetColor(0, 0, 0), TRUE);
-
 
 		//HP
 		DrawFormatString(600, y, GetColor(0, 0, 0), L"HP%d/%d", monster->GetCurrentHitPoint(), monster->GetMaxHitPoint());
 		y += 80;
 	}
-
 
 	SetFontSize(10);
 }
@@ -836,7 +822,7 @@ bool FieldScene::HasSkill(CooperatList skill)const
 
 void FieldScene::LastBossDefeat()
 {
-	printfDx(L"CollLastBossDefeat");
+	//printfDx(L"CollLastBossDefeat");
 }
 
 
@@ -905,7 +891,6 @@ void FieldScene::RenderTreasureOpen(Accessory& accessory)
 		for (int i = 0;i < static_cast<int>(result.size());i++)
 		{
 			DrawFormatString(150 + i * 400, 200, GetColor(0, 0, 0), L"%d%ls", i + 1, accessory.GetElementName(static_cast<Accessory::ElementType>(result[i])));
-
 
 			DrawFormatString(150 + i * 400, 250, GetColor(0, 0, 0), L"%d", accessory.GetAccessory(static_cast<Accessory::ElementType>(result[i])).level);
 		}
@@ -1069,7 +1054,7 @@ void FieldScene::RenderMonsterReplaceSelect()
 
 		if (i == m_replaceSelect)
 		{
-			DrawString(150, y, L"▶", GetColor(255, 0, 0), TRUE);
+			DrawString(150, y, L"▶", GetColor(255, 0, 0), TRUE);////
 		}
 
 		DrawString(200, y, monster->GetName().c_str(), GetColor(0, 0, 0), TRUE);

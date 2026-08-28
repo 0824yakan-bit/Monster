@@ -13,7 +13,7 @@ class Enemy
 public:
     ImageManager* m_image = nullptr;
 
-    enum class EnemyType
+    enum class EnemyType//エネミー追加ならここ//順番を変えたらEnemyManager::Initialize・CreateRandomEnemyも変更MonsterのTypeとBattleSceneの仲間加入にも追加
     {
         Slime,
         Wolf,

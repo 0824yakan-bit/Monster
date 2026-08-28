@@ -4,8 +4,8 @@
 #include"Game/ImageManager/ImageManager.h"
 
 PlayerManager::PlayerManager()
-	:map()
-	,m_playerMove()
+	:map{}
+	,m_playerMove{}
 	,m_position{0,0}
 	,m_size{0,0}
 	,m_invicible{false}

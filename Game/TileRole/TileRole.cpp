@@ -5,7 +5,7 @@ TileRole::TileRole()
 {
 }
 
-void TileRole::Initialize()
+void TileRole::Initialize()////タイル効果未追加
 {
     // 床
     for (int i = 0; i < 32; ++i)

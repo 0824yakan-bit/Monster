@@ -51,6 +51,11 @@ void Map::Initialize(const wchar_t* fileName)
 	m_isbossAreaOpen = false;
 	m_breakLevel = 0;
 
+	m_changeX = 0;
+	m_changeY = MAP_HEIGHT - 1;
+	m_changeMap = 9;
+
+	m_changeTimer = 0;
 
 	m_isTransition = false;
 	m_transition = 0;
@@ -373,6 +378,43 @@ void Map::LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][
 
 void Map::LastBossDefeated()
 {
+	m_changeTimer++;
+
+	if (m_changeTimer < CHANGE_INTERVAL)
+		return;
+
+	m_changeTimer = 0;
+
+	printfDx(L"map=%d x=%d y=%d\n",m_changeMap,m_changeX,m_changeY);
+
+	m_basemap[m_changeMap][m_changeY][m_changeX] = TileType::Fall;
+
+	// 見た目をFallにする
+	m_workmap[m_changeMap][m_changeY][m_changeX] = 0;
+
+	// オブジェクトを消す
+	m_objectmap[m_changeMap][m_changeY][m_changeX] = -1;
+
+	// 次のマス
+	m_changeX++;
+
+	if (m_changeX >= MAP_WIDTH)
+	{
+		m_changeX = 0;
+		m_changeY--;
+	}
+
+	// 次のマップ
+	if (m_changeY < 0)
+	{
+		m_changeY = MAP_HEIGHT - 1;
+		m_changeMap--;
+
+		if (m_changeMap < 0)
+		{
+			m_changeMap = 9;
+		}
+	}
 }
 
 void Map::MapBreak()

@@ -15,6 +15,11 @@ PlayerMove::PlayerMove()
 	,m_mapY			{}
 	,m_nextmapX		{}
 	,m_nextmapY		{}
+	,m_type			{}
+	,m_nexttile		{}
+	,m_hitTreasure	{}
+	,m_hitNextFloor	{}
+	,m_hitFall		{}
 {
 
 }
@@ -43,7 +48,7 @@ void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager,Ac
 
 	m_mapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
 	m_mapY = static_cast<int>(playermanager->m_position.y) / m_chipsize;
-	type = map->GetTileType(m_mapX, m_mapY);
+	m_type = map->GetTileType(m_mapX, m_mapY);
 	m_inputManager.Update();
 	m_movetimer--;
 
@@ -56,6 +61,18 @@ void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager,Ac
 	if (m_hitTreasure)
 	{
 		field->UpdateTreasureOpen(m_inputManager, *playermanager,*map,*accessory);
+		return;
+	}
+
+	m_hitFall = map->IsFallRect(
+		static_cast<int>(playermanager->m_position.x),
+		static_cast<int>(playermanager->m_position.y),
+		playermanager->m_size.x,
+		playermanager->m_size.y);
+
+	if (m_hitFall)
+	{
+		ReductionPlayer();
 		return;
 	}
 
@@ -103,7 +120,7 @@ void PlayerMove::Update(FieldScene* field,Map*map,PlayerManager*playermanager,Ac
 			m_nextmapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
 			m_nextmapY = static_cast<int>(playermanager->m_position.y) / m_chipsize;
 			
-			nexttile = map->GetTileType(m_nextmapX, m_nextmapY);
+			m_nexttile = map->GetTileType(m_nextmapX, m_nextmapY);
 				 // プレイヤーサイズ(2マス = 64x64)
 				 int playerW = playermanager->m_size.x;
 				 int playerH = playermanager->m_size.y;
@@ -141,4 +158,8 @@ void PlayerMove::Render(FieldScene* field, Map*map, PlayerManager* playermanager
 void PlayerMove::Finalize()
 {
 
+}
+
+void PlayerMove::ReductionPlayer()////落ちたときの処理未追加
+{
 }

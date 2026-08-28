@@ -20,6 +20,13 @@ namespace
 {
     const std::vector<EnemyData> enemyData =
     {
+        /*
+        Slime   = 0
+        Wolf    = 1
+        Dragon  = 2
+        Golem   
+        Fairy
+        */
         // map0
         {0, 0,  5,  5, false, -1},
         {0, 1, 10,  8, false, -1},

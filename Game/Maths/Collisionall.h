@@ -18,8 +18,4 @@ public:
         int w2, int h2);
 
     static bool HitCharacter(PlayerManager& player, Enemy* enemy);
-
-    //static bool HitShotEnemy(Shot& shot, Character& enemy);
-
-    //static bool HitShotPlayer(BossAction& bossaction, Character& player);
 };

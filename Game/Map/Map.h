@@ -59,6 +59,13 @@ private:
 	int m_breakLevel;	// 地形破壊回数(ブレイクカウント)
 	int m_level;		//ブレイクレベル
 
+	//段々崩れる
+	int m_changeX;
+	int m_changeY;
+	int m_changeMap;
+
+	int m_changeTimer;
+	static const int CHANGE_INTERVAL = 10;
 
 	// グラフィックハンドル
 	int m_ghChip[GH_MAX];
@@ -77,7 +84,7 @@ public:
 	static constexpr int GAME_CLEAR_X = 2;
 	static constexpr int GAME_CLEAR_Y = 2;
 
-	static constexpr int MAP_NUM = 40;
+	static constexpr int MAP_NUM = 10;
 
 	TileType	m_basemap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 当たり判定用
 	int			m_workmap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 地面描画用

@@ -10,8 +10,8 @@ class PlayerMove
 {
 private:
 	Vector2 m_maponposition;
-	TileType type;
-	TileType nexttile;
+	TileType m_type;
+	TileType m_nexttile;
 	InputManager m_inputManager;
 	TileRole m_tileRole;
 
@@ -25,6 +25,7 @@ private:
 	int m_chipsize;
 
 	bool m_hitTreasure;
+	bool m_hitFall;
 	bool m_hitNextFloor;
 public:
 
@@ -36,5 +37,7 @@ public:
 	void Update(FieldScene* field,Map*map, PlayerManager* playermanager,Accessory*accessory);
 	void Render(FieldScene* field, Map*map, PlayerManager* playermanager,Accessory*accessory);
 	void Finalize();
+
+	void ReductionPlayer();
 };
 
