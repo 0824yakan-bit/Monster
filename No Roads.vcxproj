@@ -141,12 +141,17 @@
     <!-- プリコンパイル済みヘッダー -->
     <ClCompile Include="Game\Battle\Battle.cpp" />
     <ClCompile Include="Game\Enemy\BossManager.cpp" />
+    <ClCompile Include="Game\Enemy\Daemon.cpp" />
     <ClCompile Include="Game\Enemy\Dragon.cpp" />
     <ClCompile Include="Game\Enemy\Enemy.cpp" />
     <ClCompile Include="Game\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Game\Enemy\Fairy.cpp" />
+    <ClCompile Include="Game\Enemy\Fox.cpp" />
     <ClCompile Include="Game\Enemy\Golem.cpp" />
+    <ClCompile Include="Game\Enemy\Mole.cpp" />
+    <ClCompile Include="Game\Enemy\Phoenix.cpp" />
     <ClCompile Include="Game\Enemy\Slime.cpp" />
+    <ClCompile Include="Game\Enemy\Turtle.cpp" />
     <ClCompile Include="Game\Enemy\Wolf.cpp" />
     <ClCompile Include="Game\ImageManager\ImageManager.cpp" />
     <ClCompile Include="Game\Inputmanager\InputManager.cpp" />
@@ -162,6 +167,7 @@
     <ClCompile Include="Game\Scene\FieldScene.cpp" />
     <ClCompile Include="Game\Scene\GameOver.cpp" />
     <ClCompile Include="Game\Scene\SceneManager.cpp" />
+    <ClCompile Include="Game\Scene\TextManager.cpp" />
     <ClCompile Include="Game\Scene\TitleScene.cpp" />
     <ClCompile Include="Game\TileRole\TileRole.cpp" />
     <ClCompile Include="pch.cpp">
@@ -169,12 +175,17 @@
     </ClCompile>
     <ClInclude Include="Game\Battle\Battle.h" />
     <ClInclude Include="Game\Enemy\BossManager.h" />
+    <ClInclude Include="Game\Enemy\Daemon.h" />
     <ClInclude Include="Game\Enemy\Dragon.h" />
     <ClInclude Include="Game\Enemy\Enemy.h" />
     <ClInclude Include="Game\Enemy\EnemyManager.h" />
     <ClInclude Include="Game\Enemy\Fairy.h" />
+    <ClInclude Include="Game\Enemy\Fox.h" />
     <ClInclude Include="Game\Enemy\Golem.h" />
+    <ClInclude Include="Game\Enemy\Mole.h" />
+    <ClInclude Include="Game\Enemy\Phoenix.h" />
     <ClInclude Include="Game\Enemy\Slime.h" />
+    <ClInclude Include="Game\Enemy\Turtle.h" />
     <ClInclude Include="Game\Enemy\Wolf.h" />
     <ClInclude Include="Game\ImageManager\ImageManager.h" />
     <ClInclude Include="Game\Inputmanager\InputManager.h" />
@@ -191,6 +202,7 @@
     <ClInclude Include="Game\Scene\GameOver.h" />
     <ClInclude Include="Game\Scene\Scene.h" />
     <ClInclude Include="Game\Scene\SceneManager.h" />
+    <ClInclude Include="Game\Scene\TextManager.h" />
     <ClInclude Include="Game\Scene\TitleScene.h" />
     <ClInclude Include="Game\TileRole\TileRole.h" />
     <ClInclude Include="pch.h" />
@@ -211,18 +223,23 @@
     <Image Include="Resources\Textures\back.png" />
     <Image Include="Resources\Textures\commandbox1.png" />
     <Image Include="Resources\Textures\commandbox2.png" />
+    <Image Include="Resources\Textures\deamon.png" />
     <Image Include="Resources\Textures\dragon.png" />
     <Image Include="Resources\Textures\fairy.png" />
     <Image Include="Resources\Textures\fire.png" />
+    <Image Include="Resources\Textures\fox.png" />
     <Image Include="Resources\Textures\front.png" />
     <Image Include="Resources\Textures\golem.png" />
     <Image Include="Resources\Textures\grass.png" />
+    <Image Include="Resources\Textures\growgrass.png" />
     <Image Include="Resources\Textures\left.png" />
     <Image Include="Resources\Textures\M.png" />
+    <Image Include="Resources\Textures\mole.png" />
     <Image Include="Resources\Textures\N.png" />
     <Image Include="Resources\Textures\right.png" />
     <Image Include="Resources\Textures\river.png" />
     <Image Include="Resources\Textures\soil.png" />
+    <Image Include="Resources\Textures\turtle.png" />
     <Image Include="Resources\Textures\water.png" />
     <Image Include="Resources\Textures\wind.png" />
     <Image Include="Resources\Textures\wolf.png" />

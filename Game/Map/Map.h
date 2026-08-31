@@ -22,10 +22,12 @@ public:
 
 	MoveDir m_moveDir;
 
-private:
+
+public:
 	// マップサイズ
 	static constexpr int MAP_WIDTH	= 40;
 	static constexpr int MAP_HEIGHT = 25;
+private:
 	static constexpr int GH_MAX		= 384;	// 24 * 16
 
 	// マップ移動
@@ -71,12 +73,14 @@ private:
 	int m_ghChip[GH_MAX];
 
 	// 地形破壊
+	bool PrepareBreakArea(int centerX, int centerY, int x, int y, int& tx, int& ty);
 	void BreakArea(
 		int centerX,int centerY,			//中心
 		int left,int right,					//左右
 		int top,int bottom,					//上下
 		int targetObject,int replaceObject,	//元チップ:変更後チップ
 		TileType replaceType,int dangerAdd);//チップの状態判定変更:ブレイクカウント追加	// 指定範囲の地形を破壊・変更
+	void BreakAreaByGroup(int centerX, int centerY, int left, int right, int top, int bottom, TileGroup group, int dangerAdd);
 
 public:
 	// マップデータ
@@ -121,12 +125,11 @@ public:
 
 	// 当たり判定
 	bool IsWallRect		(int px,int py,int width,int height) const;	// 壁との当たり判定
-
 	bool IsTreasureRect(int px, int py, int width, int height) const;	// 宝箱との当たり判定
-
 	bool IsNextFloorRect	(int px,int py,int width,int height) const;	// 階段との当たり判定
-
 	bool IsFallRect(int px, int py, int width, int height) const;	// 穴との当たり判定
+	bool IsSignboardRect(int px, int py, int width, int height) const;	// 看板との当たり判定
+	
 
 	TileType GetTileType	(int x, int y) const;	// 指定座標のタイル種類を取得
 	int		 GetTileNo		(int x, int y) const;	// 指定座標のオブジェクト番号を取得
@@ -166,7 +169,7 @@ public:
 	void GrassBreak			(PlayerManager& player);// 草属性の地形破壊
 	void SoilBreak			(PlayerManager& player);// 土属性の地形破壊
 	void WindBreak			(PlayerManager& player);// 風属性の地形破壊
-	void ThunderBreak		(PlayerManager& player);// 雷属性の地形破壊
+	void DarknessBreak		(PlayerManager& player);// 闇属性の地形破壊
 
 	// 複合属性
 	void SteamExplosionBreak(PlayerManager& player);// 火＋水

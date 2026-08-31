@@ -9,11 +9,16 @@ class Monster
 public:
     enum class Type
     {
-        Slime,
-        Wolf,
-        Dragon,
-        Golem,
-        Fairy
+        Slime,  //0
+        Wolf,   //1
+        Fairy,  //2
+        Turtle, //3
+        Mole,   //4
+        Fox,    //5
+        Golem,  //6
+        Phoenix,//7
+        Dragon, //8
+        Daemon, //9
     };
 
     enum class CharacteRistics
@@ -24,7 +29,7 @@ public:
         Water, //水属性
         Grass, //草属性
         Soil,  //土属性
-        Thunder,//雷属性
+        Darkness,//闇属性
         Wind,  //風属性
         SteamExplpsion,
         FloorBreak,

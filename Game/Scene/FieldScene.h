@@ -10,6 +10,7 @@
 #include "Game/Battle/Battle.h"
 #include "Game/Maths/Vector2.h"
 
+class TextManager;
 class InputManager;
 class PlayerManager;
 class Enemy;
@@ -23,6 +24,16 @@ class Accessory;
 class FieldScene
 {
 public:
+    struct Text
+    {
+        bool m_start;
+        bool m_signboard_1;
+        bool m_signboard_2;
+        bool m_signboard_3;
+        bool m_end;
+    };
+    Text STtext;
+    int m_count;
     bool m_isTreasureOpen;
 
     std::vector<Battle::UsedAttackInfo> m_attackEffects;
@@ -52,6 +63,9 @@ private:
     Vector2 Mposition;
     Vector2 Nposition;
     Vector2 size;
+
+    Vector2 drawSlimePosition;
+    Vector2 drawSlimeSize;
 
     // メニュー一覧
     bool m_isMapActive;
@@ -98,7 +112,7 @@ public:
         Grass,
         Soil,
         Wind,
-        Thunder,
+        Darkness,
         SteamExplpsion,
         FloorBreak,
         WaterFlows,
@@ -135,9 +149,9 @@ public:
 
     void Initialize(InputManager& inputmanager,PlayerManager& playerManager,Map& map);
 
-    void Update(InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Battle& battle,Accessory& accessory,Party& party);
+    void Update(TextManager& textManager, InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Battle& battle,Accessory& accessory,Party& party);
 
-    void Render(PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Accessory& accessory,Party& party);
+    void Render(TextManager& textManager, PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Accessory& accessory,Party& party);
 
     void Finalize();
 

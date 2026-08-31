@@ -2,7 +2,7 @@
 #include "SceneManager.h"
 
 #include"Game/InputManager/InputManager.h"
-
+#include"Game/Scene/TextManager.h"
 SceneManager::SceneManager(BossManager&bossManager,Party&party)
     :m_nextSceneID{}
     ,m_currentSceneID{}
@@ -16,7 +16,7 @@ SceneManager::~SceneManager()
 {
 }
 
-void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneManager,PlayerManager&playerManager, Map&map,Party&party,ImageManager&image)
+void SceneManager::Initialize(TextManager& textManager, InputManager& inputmanager, SceneManager& sceneManager,PlayerManager&playerManager, Map&map,Party&party,ImageManager&image)
 {
 
     m_currentSceneID = SceneID::Title;
@@ -24,6 +24,8 @@ void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneMan
 
     m_image = &image;
     m_fieldScene.SetImage(&image);
+    m_fieldScene.STtext.m_start = true;
+    textManager.SetDisplayText();
     m_battleScene.SetImage(&image);
 
     m_gameOver.Initialize();
@@ -36,10 +38,10 @@ void SceneManager::Initialize(InputManager& inputmanager, SceneManager& sceneMan
     }
 }
 
-void SceneManager::Update(InputManager& inputmanager,SceneManager&sceneManager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory)
+void SceneManager::Update(TextManager& textManager, InputManager& inputmanager,SceneManager&sceneManager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory)
 {
     // 現在シーン更新
-    UpdateCurrentScene(inputmanager,sceneManager,playerManager,enemyManager,map,party,battle,accessory);
+    UpdateCurrentScene(textManager, inputmanager,sceneManager,playerManager,enemyManager,map,party,battle,accessory);
 
     // シーン切り替え要求があれば切り替える
     if (m_nextSceneID != SceneID::None)
@@ -48,10 +50,10 @@ void SceneManager::Update(InputManager& inputmanager,SceneManager&sceneManager,P
     }
 }
 
-void SceneManager::Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory)
+void SceneManager::Render(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory)
 {
     DrawFormatString(10, 100, GetColor(255, 255, 255), L"%d", m_currentSceneID);
-    RenderCurrentScene(playerManager,enemyManager,map,party, accessory);
+    RenderCurrentScene(textManager, playerManager,enemyManager,map,party, accessory);
 }
 
 void SceneManager::Finalize()
@@ -91,7 +93,7 @@ void SceneManager::InitializeCurrentScene(InputManager& inputmanager,SceneManage
     }
 }
 
-void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sceneManager,PlayerManager&playerManager,EnemyManager&enemyManager,Map&map,Party&party,Battle&battle,Accessory&accessory)
+void SceneManager::UpdateCurrentScene(TextManager&textManager,InputManager&inputmanager,SceneManager&sceneManager,PlayerManager&playerManager,EnemyManager&enemyManager,Map&map,Party&party,Battle&battle,Accessory&accessory)
 {
     switch (m_currentSceneID)
     {
@@ -108,7 +110,7 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
 
     case SceneID::Field:
    
-        m_fieldScene.Update(inputmanager,playerManager,enemyManager,map,battle,accessory,party);
+        m_fieldScene.Update(textManager,inputmanager,playerManager,enemyManager,map,battle,accessory,party);
 
         if (m_fieldScene.IsBattleRequested())
         {
@@ -143,12 +145,12 @@ void SceneManager::UpdateCurrentScene(InputManager&inputmanager,SceneManager&sce
     }
 }
 
-void SceneManager::RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory)
+void SceneManager::RenderCurrentScene(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory)
 {
     switch (m_currentSceneID)
     {
     case SceneID::Title:   m_titleScene.Render();  break;
-    case SceneID::Field:    m_fieldScene.Render(playerManager,enemyManager,map,accessory,party);   break;
+    case SceneID::Field:    m_fieldScene.Render(textManager, playerManager,enemyManager,map,accessory,party);   break;
     case SceneID::Battle:   m_battleScene.Render(m_gameOver,party,map);   break;
 
 

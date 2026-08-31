@@ -12,26 +12,31 @@ Wolf::~Wolf()
 {
 
 }
-void Wolf::Initialize(Map& map, int x, int y)
+void Wolf::Initialize(Map& map, int x, int y, bool isBoss)
 {
 	type = EnemyType::Wolf;
 
-	name = L"ウルフ";
+	name = L"ガル";
 
 	direction = Direction::Up;
 	moveCounter = 0;
 
-	position.x = x*map.m_chipSize;
-	position.y = y*map.m_chipSize;
+	position.x = x * map.m_chipSize;
+	position.y = y * map.m_chipSize;
 
-	size.x = map.m_chipSize*2;
-	size.y = map.m_chipSize*2;
+	int enemysize = 2;
+	if (isBoss)
+	{
+		enemysize = 5;
+	}
+	size.x = map.m_chipSize * enemysize;
+	size.y = map.m_chipSize * enemysize;
 
-	renderPosition.x = 500.0f;
-	renderPosition.y = 100.0f;
+	renderPosition.x = 500;
+	renderPosition.y = 100;
 
-	renderSize.x = 200.0f;
-	renderSize.y = 200.0f;
+	renderSize.x = 200;
+	renderSize.y = 200;
 
 	power = 5;
 	hp = 10;
@@ -39,31 +44,6 @@ void Wolf::Initialize(Map& map, int x, int y)
 
 void Wolf::Update(Map& map)
 {
-	moveTimer++;
-	if (moveTimer == 90)
-	{
-		if (moveCounter == -2)
-		{
-			direction = Direction::Up;
-		}
-		if (moveCounter == 2)
-		{
-			direction = Direction::Down;
-		}
-		switch (direction)
-		{
-		case Direction::Up:
-			moveCounter++;
-			moveTimer = 0;
-			position.y -= size.y;
-			break;
-		case Direction::Down:
-			moveCounter--;
-			moveTimer = 0;
-			position.y += size.y;
-			break;
-		}
-	}
 }
 
 void Wolf::Render()

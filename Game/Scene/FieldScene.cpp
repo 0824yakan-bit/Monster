@@ -2,6 +2,7 @@
 #include"Game/Scene/FieldScene.h"
 
 #include"Game/Maths/Collisionall.h"
+#include"Game/Scene/TextManager.h"
 #include"Game/Party/Monster.h"
 #include"Game/Party/Party.h"
 #include"Game/Battle/Battle.h"
@@ -20,8 +21,9 @@ static std::vector<Battle::UsedAttackInfo>MakeFieldEffect(Monster::CharacteRisti
 
 
 FieldScene::FieldScene(BossManager& bossManager, Party& party)
-	:m_hitEnemy{ nullptr }
-	, m_isBattleRequested{ false }
+	: m_hitEnemy{ nullptr }
+	, STtext{false,false,false,false}
+	, m_isBattleRequested{ false}
 	, m_isMapActive{ false }
 	, m_isMenuActive{ false }
 	, m_menuList{ MenuList::Empty }
@@ -46,6 +48,12 @@ FieldScene::~FieldScene()
 void FieldScene::Initialize(InputManager& inputmanager, PlayerManager& playerManager, Map& map)
 {
 	playerManager.SetImage(m_image);
+
+	m_count = 0;
+	STtext.m_signboard_1 = false;
+	STtext.m_signboard_2 = false;
+	STtext.m_signboard_3 = false;
+	STtext.m_end = false;
 
 	//初回だけ登録
 	if (m_unlockedSkills.empty())
@@ -78,6 +86,12 @@ void FieldScene::Initialize(InputManager& inputmanager, PlayerManager& playerMan
 	size.x = 50;
 	size.y = 50;
 
+	drawSlimePosition.x = 5*map.GetChipSize();
+	drawSlimePosition.y = 2*map.GetChipSize();
+	drawSlimeSize.x = 1*map.GetChipSize();
+	drawSlimeSize.y = 1*map.GetChipSize();
+
+
 	drawMenuBoxPosition.x = 50;
 	drawMenuBoxPosition.y = 50;
 
@@ -92,9 +106,25 @@ void FieldScene::Initialize(InputManager& inputmanager, PlayerManager& playerMan
 }
 
 
-void FieldScene::Update(InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager, Map& map, Battle& battle, Accessory& accessory, Party& party)
+void FieldScene::Update(TextManager&textManager,InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager, Map& map, Battle& battle, Accessory& accessory, Party& party)
 {
 	inputManager.Update();
+	
+	if (STtext.m_start)textManager.StartText(m_count);
+	if (STtext.m_signboard_1)textManager.SignBoard_1Text(m_count);
+	if (STtext.m_signboard_2)textManager.SignBoard_2Text(m_count);
+	if (STtext.m_signboard_3)textManager.SignBoard_3Text(m_count);
+	if (STtext.m_end)textManager.EndText(m_count);
+
+	if (textManager.SelectDisplayText() == true)
+	{
+		if (inputManager.IsTrigger(KEY_INPUT_RETURN))
+		{
+			m_count++;
+		}
+		textManager.Update(inputManager,*this);
+		return;
+	}
 
 	if (m_isMonsterReplaceSelect)
 	{
@@ -281,10 +311,10 @@ void FieldScene::Update(InputManager& inputManager, PlayerManager& playerManager
 			break;
 
 
-		case CooperatList::Thunder:
-			map.ThunderBreak(playerManager);
+		case CooperatList::Darkness:
+			map.DarknessBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Thunder, L""));
+			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Darkness, L""));
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -399,9 +429,15 @@ void FieldScene::Update(InputManager& inputManager, PlayerManager& playerManager
 }
 
 
-void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager, Map& map, Accessory& accessory, Party& party)
+void FieldScene::Render(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager, Map& map, Accessory& accessory, Party& party)
 {
 	map.Render();
+	if (map.GetCurrentMap() == 0)
+	{
+		m_image->DrawSlime(drawSlimePosition, drawSlimeSize);
+	}
+	textManager.Render();
+
 	//モンスター交換画面
 	if (m_isMonsterReplaceSelect)
 	{
@@ -437,7 +473,7 @@ void FieldScene::Render(PlayerManager& playerManager, EnemyManager& enemyManager
 			DrawBox(0, 0, 1280, 720, GetColor(0, 200, 0), TRUE);
 			break;
 
-		case Monster::CharacteRistics::Thunder:
+		case Monster::CharacteRistics::Darkness:
 			DrawBox(0, 0, 1280, 720, GetColor(255, 255, 0), TRUE);
 			break;
 
@@ -592,7 +628,7 @@ void FieldScene::RenderCooperativeMove()
 	AddSkill(CooperatList::Grass);
 	AddSkill(CooperatList::Soil);
 	AddSkill(CooperatList::Wind);
-	AddSkill(CooperatList::Thunder);
+	AddSkill(CooperatList::Darkness);
 	AddSkill(CooperatList::SteamExplpsion);
 	AddSkill(CooperatList::WaterFlows);
 	AddSkill(CooperatList::FloorBreak);
@@ -665,14 +701,29 @@ void FieldScene::RenderCooperativeMove()
 			name = L"風属性";
 			break;
 
-		case CooperatList::Thunder:
-			name = L"雷属性";
+		case CooperatList::Darkness:
+			name = L"闇属性";
 			break;
 		
 		case CooperatList::SteamExplpsion:
-			name = L"水蒸気爆発";
+			name = L"蒸界爆砕";
 			break;
 
+		case CooperatList::FloorBreak:
+			name = L"地殻崩壊";
+			break;
+
+		case CooperatList::WaterFlows:
+			name = L"蒼波";
+			break;
+
+		case CooperatList::GrawGrass:
+			name = L"大地の恵み";
+			break;
+
+		case CooperatList::Volcazation:
+			name = L"灼界";
+			break;
 
 		default:
 			break;
@@ -799,8 +850,8 @@ void FieldScene::LearnMonsterSkills(const Monster& monster)
 			m_unlockedSkills.insert(CooperatList::Soil);
 			break;
 
-		case Monster::CharacteRistics::Thunder:
-			m_unlockedSkills.insert(CooperatList::Thunder);
+		case Monster::CharacteRistics::Darkness:
+			m_unlockedSkills.insert(CooperatList::Darkness);
 			break;
 
 		case Monster::CharacteRistics::Wind:

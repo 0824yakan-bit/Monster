@@ -9,7 +9,7 @@ public:
 	Slime();
 	~Slime();
 
-	void Initialize(Map&map,int x,int y)override;
+	void Initialize(Map&map,int x,int y, bool isBoss)override;
 	void Update(Map&map)override;
 	void Render()override;
 	void Finalize()override;

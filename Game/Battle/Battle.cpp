@@ -487,118 +487,9 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 void Battle::Render(GameOver& gameOver, Map& map)
 {
 
-	//// 戦闘画面のベース
-	//SetDrawBlendMode(DX_BLENDMODE_ALPHA, 50);
-
-	//// 戦闘画面
-	//DrawBox(10, 10, 1270, 500, GetColor(255, 255, 255), TRUE);
-
-	//// 敵配置
-	//DrawBox(50, 50, 1230, 460, GetColor(255, 0, 0), FALSE);
-
-	//// コマンド選択位置
-	//DrawBox(20, 520, 1260, 700, GetColor(255, 255, 255), TRUE);
-
-
-	//SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
-
-
-	//// 背景(コマンド選択ボックスの上表示)
-	//switch (map.GetCurrentMap())
-	//{
-	//case 0:
-	//	m_image->DrawForest(drawBgPosition, drawBgSize);
-	//	break;
-
-
-	//case 1:
-	//	m_image->DrawPlain(drawBgPosition, drawBgSize);
-	//	break;
-
-
-	//case 2:
-	//	m_image->DrawRiver(drawBgPosition, drawBgSize);
-	//	break;
-
-
-	//case 3:
-	//	m_image->DrawVolcano(drawBgPosition, drawBgSize);
-	//	break;
-
-
-	//case 4:
-	//	m_image->DrawCastle(drawBgPosition, drawBgSize);
-	//	break;
-
-
-	//case 5:
-	//case 6:
-	//case 7:
-	//case 8:
-	//case 9:
-	//	m_image->DrawForest(drawBgPosition, drawBgSize);
-	//	break;
-	//}
-
-	// State Render
-	switch (m_state)
-	{
-	case BattleState::Command:
-		RenderCommand();
-		break;
-
-
-	case BattleState::AttackSelect:
-		RenderAttackSelect();
-		break;
-
-
-	case BattleState::AttackAction:
-		RenderAttackAction();
-		break;
-
-
-	case BattleState::Tool:
-		RenderTool();
-		break;
-
-
-	case BattleState::Suppot:
-		RenderSuppot();
-		break;
-
-
-	case BattleState::Run:
-		RenderRun();
-		break;
-
-
-	case BattleState::EnemyTurn:
-		RenderEnemyTurn();
-		break;
-
-
-	case BattleState::EnemyDead:
-		RenderEnemyDead();
-		break;
-
-
-	case BattleState::Annihilation:
-		if (!gameOver.IsTitleRequest())
-		{
-			RenderAnnihilation(gameOver);
-		}
-		break;
-	}
-
-
 
 	// ターゲット取得
 	Enemy* enemy = GetTargetEnemy();
-
-
-
 	// 敵描画
 	for (Enemy* currentEnemy : m_enemies)
 	{
@@ -676,8 +567,8 @@ void Battle::Render(GameOver& gameOver, Map& map)
 			break;
 
 
-		case Monster::CharacteRistics::Thunder:
-			m_image->DrawThunder(drawEffectPosition, drawEffectSize);
+		case Monster::CharacteRistics::Darkness:
+			m_image->DrawDarkness(drawEffectPosition, drawEffectSize);
 			break;
 
 
@@ -687,6 +578,55 @@ void Battle::Render(GameOver& gameOver, Map& map)
 
 
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
+	switch (m_state)
+	{
+	case BattleState::Command:
+		RenderCommand();
+		break;
+
+
+	case BattleState::AttackSelect:
+		RenderAttackSelect();
+		break;
+
+
+	case BattleState::AttackAction:
+		RenderAttackAction();
+		break;
+
+
+	case BattleState::Tool:
+		RenderTool();
+		break;
+
+
+	case BattleState::Suppot:
+		RenderSuppot();
+		break;
+
+
+	case BattleState::Run:
+		RenderRun();
+		break;
+
+
+	case BattleState::EnemyTurn:
+		RenderEnemyTurn();
+		break;
+
+
+	case BattleState::EnemyDead:
+		RenderEnemyDead();
+		break;
+
+
+	case BattleState::Annihilation:
+		if (!gameOver.IsTitleRequest())
+		{
+			RenderAnnihilation(gameOver);
+		}
+		break;
 	}
 }
 
@@ -748,7 +688,6 @@ void Battle::RenderCommand()
 		int x = 620 + i * 170;
 		int y = 550;
 
-		printf("enemy[%d] = %p\n", i, enemy);
 
 		// 敵の名前
 		int nameColor = GetColor(255, 255, 255);
@@ -1228,29 +1167,23 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 			continue;
 		}
 
-
 		auto& attacks = m_party->GetMonster(i)->GetAttacks();
-
 		auto type = attacks[m_selectedAttack[i]].element;
-
 
 		if (type == Monster::CharacteRistics::Fire)
 		{
 			hasFire = true;
 		}
 
-
 		if (type == Monster::CharacteRistics::Water)
 		{
 			hasWater = true;
 		}
 
-
 		if (type == Monster::CharacteRistics::Grass)
 		{
 			hasGrass = true;
 		}
-
 
 		if (type == Monster::CharacteRistics::Soil)
 		{
@@ -1305,7 +1238,6 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 		Monster* monster = m_party->GetMonster(m_displayIndex);
 
-
 		auto& attacks = monster->GetAttacks();
 
 		int index = m_selectedAttack[m_displayIndex];
@@ -1352,97 +1284,68 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 		switch (m_characteRistics)
 		{
 		case Monster::CharacteRistics::Normal:
-
 			state |= USED_NORMAL;
-
 			break;
 
-
 		case Monster::CharacteRistics::Fire:
-
 			state |= USED_FIRE;
-
 			// 火属性は1.5倍
 			magnification = 1.5f;
-
 			break;
 
 
 		case Monster::CharacteRistics::Water:
-
 			state |= USED_WATER;
-
 			break;
 
 
 		case Monster::CharacteRistics::Grass:
-
 			state |= USED_GRASS;
-
 			break;
 
 
 		case Monster::CharacteRistics::Soil:
-
 			state |= USED_SOIL;
-
 			break;
 
 
-		case Monster::CharacteRistics::Thunder:
-
-			state |= USED_THUNDER;
-
+		case Monster::CharacteRistics::Darkness:
+			state |= USED_DARKNESS;
 			break;
 
 
 		case Monster::CharacteRistics::Wind:
-
 			state |= USED_WIND;
-
 			break;
 
 
 		case Monster::CharacteRistics::Defense:
-
 			// このターン防御
 			m_requestDefense[m_displayIndex] = true;
-
 			m_displayMessage = monster->GetName() + L"は身を守っている！";
-
 			break;
 		}
 
-
-
 		// コンボメンバー判定
 		bool isComboMember = IsComboMember(m_characteRistics, steamCombo, floorCombo);
-
-
 
 		// 通常攻撃処理
 		if (m_characteRistics != Monster::CharacteRistics::Defense && !isComboMember)
 		{
 			Enemy* target = GetSelectedTargetEnemy();
 
-
 			if (target != nullptr)
 			{
 				// 攻撃前のHP
 				int beforeHp = target->GetHp();
-
 				// ダメージ計算
 				int damage = static_cast<int>(attacks[index].power * magnification);
-
 				// 攻撃
 				target->Damage(damage);
-
 				int actualDamage = beforeHp - target->GetHp();
 
 				m_displayMessageDamage =std::wstring(target->GetName())+ L"に"+ std::to_wstring(actualDamage)+ L"ダメージ！";
 			}
-
-
 
 			// 単体属性効果
 			switch (m_characteRistics)
@@ -1477,8 +1380,8 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 				break;
 
 
-			case Monster::CharacteRistics::Thunder:
-				map.ThunderBreak(player);
+			case Monster::CharacteRistics::Darkness:
+				map.DarknessBreak(player);
 				break;
 
 
@@ -1488,12 +1391,9 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 		}
 		else if (isComboMember)
 		{
-
 			// コンボ準備
 			m_displayMessage = monster->GetName() + L"\nは連携の構えをしている！";
 		}
-
-
 
 		// 攻撃メッセージ
 		if (!isComboMember)
@@ -1502,15 +1402,11 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 		}
 	}
 
-
-
 	// 攻撃表示中
 	if (m_displaytextTimer < 60)
 	{
 		return;
 	}
-
-
 
 	// 敵死亡判定
 	if (m_selectedTargetEnemyIndex >= 0 && m_selectedTargetEnemyIndex < static_cast<int>(m_enemies.size()))
@@ -2227,41 +2123,19 @@ void Battle::RenderJoinReplace()
 		}
 
 
-		DrawString(
-			x,
-			y,
-			monster->GetName().c_str(),
-			color
-		);
+		DrawString(x,y,monster->GetName().c_str(),color);
 
 
-		DrawFormatString(
-			x + 180,
-			y,
-			GetColor(255, 255, 255),
-			L"HP %d / %d",
-			monster->GetCurrentHitPoint(),
-			monster->GetMaxHitPoint()
-		);
+		DrawFormatString(x + 180,y,GetColor(255, 255, 255),L"HP %d / %d",monster->GetCurrentHitPoint(),monster->GetMaxHitPoint());
 	}
 
 
 	// 加入するモンスター
 	if (m_joinEnemy != nullptr)
 	{
-		DrawString(
-			900,
-			510,
-			L"加入",
-			GetColor(100, 255, 100)
-		);
+		DrawString(900,510,L"加入",GetColor(100, 255, 100));
 
-		DrawString(
-			900,
-			550,
-			m_joinEnemy->GetName(),
-			GetColor(100, 255, 100)
-		);
+		DrawString(900,550,m_joinEnemy->GetName(),GetColor(100, 255, 100));
 	}
 }
 // Target
@@ -2284,16 +2158,40 @@ Enemy* Battle::GetTargetEnemy()
 		return nullptr;
 	}
 
-
 	if (m_targetEnemyIndex < 0 || m_targetEnemyIndex >= static_cast<int>(m_enemies.size()))
 	{
 		return nullptr;
 	}
 
-
 	Enemy* enemy = m_enemies[m_targetEnemyIndex];
+	if (enemy == nullptr)
+	{
+		return nullptr;
+	}
+
+	if (enemy->GetHp() <= 0)
+	{
+		return nullptr;
+	}
+
+	return enemy;
+}
 
 
+Enemy* Battle::GetSelectedTargetEnemy()
+{
+	if (m_enemies.empty())
+	{
+		return nullptr;
+	}
+
+
+	if (m_selectedTargetEnemyIndex < 0 || m_selectedTargetEnemyIndex >= static_cast<int>(m_enemies.size()))
+	{
+		return nullptr;
+	}
+
+	Enemy* enemy = m_enemies[m_selectedTargetEnemyIndex];
 	if (enemy == nullptr)
 	{
 		return nullptr;
@@ -2310,50 +2208,13 @@ Enemy* Battle::GetTargetEnemy()
 }
 
 
-Enemy* Battle::GetSelectedTargetEnemy()
-{
-if (m_enemies.empty())
-{
-return nullptr;
-}
-
-
-if (m_selectedTargetEnemyIndex < 0 ||m_selectedTargetEnemyIndex >=static_cast<int>(m_enemies.size()))
-{
-return nullptr;
-}
-
-
-Enemy* enemy =m_enemies[m_selectedTargetEnemyIndex];
-
-
-if (enemy == nullptr)
-{
-return nullptr;
-}
-
-
-if (enemy->GetHp() <= 0)
-{
-return nullptr;
-}
-
-
-return enemy;
-}
-
-
 int Battle::GetValidTargetIndex(int index) const
 {
 	if (m_enemies.empty())
 	{
 		return -1;
 	}
-
-
 	const int count = static_cast<int>(m_enemies.size());
-
-
 
 	// 範囲調整
 	if (index < 0)
@@ -2361,21 +2222,16 @@ int Battle::GetValidTargetIndex(int index) const
 		index = 0;
 	}
 
-
 	if (index >= count)
 	{
 		index = count - 1;
 	}
-
-
 
 	// 指定位置が生存していればそのまま
 	if (m_enemies[index] != nullptr && m_enemies[index]->GetHp() > 0)
 	{
 		return index;
 	}
-
-
 
 	// 死亡していた場合、右方向に検索
 	for (int i = 1; i <= count; i++)
@@ -2388,12 +2244,8 @@ int Battle::GetValidTargetIndex(int index) const
 			return searchIndex;
 		}
 	}
-
-
 	return -1;
 }
-
-
 
 // Enemy Management
 bool Battle::AreAllEnemiesDead() const
@@ -2403,7 +2255,6 @@ bool Battle::AreAllEnemiesDead() const
 		return true;
 	}
 
-
 	for (Enemy* enemy : m_enemies)
 	{
 		if (enemy != nullptr && enemy->GetHp() > 0)
@@ -2411,7 +2262,6 @@ bool Battle::AreAllEnemiesDead() const
 			return false;
 		}
 	}
-
 
 	return true;
 }
@@ -2424,10 +2274,7 @@ void Battle::RemoveEnemy(Enemy* enemy)
 		return;
 	}
 
-
 	int removeIndex = -1;
-
-
 
 	// 削除対象検索
 	for (int i = 0;i < static_cast<int>(m_enemies.size());i++)

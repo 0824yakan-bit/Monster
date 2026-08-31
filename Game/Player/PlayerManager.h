@@ -13,6 +13,7 @@ private:
 	ImageManager* m_image = nullptr;
 
 	static constexpr int M_SPEED = 32;
+
 public:
 	Vector2 m_oldposition;//現在から前のポジション
 	Vector2 m_position;//現在のポジション
@@ -27,6 +28,7 @@ public:
 	};
 	Direction m_direction;
 
+	float m_drawScale;
 	bool m_invicible;//にげる選択時のみ
 public:
 	PlayerManager();

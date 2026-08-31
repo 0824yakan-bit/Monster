@@ -127,25 +127,21 @@ void BattleScene::Initialize(InputManager& inputmanager,SceneManager& sceneManag
 
 
 // 更新
-
 void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,FieldScene& fieldScene,GameOver& gameOver,EnemyManager& enemyManager,Map& map,Party& party,PlayerManager& player)
 {
 	inputManager.Update();
 
 	m_receponsTimer++;
 
-
 	// モンスター交換選択中
 	/*
 		仲間になったMonsterはFieldSceneへ渡し、
 		パーティへの追加・交換・技属性取得はFieldScene側で行う。
 	*/
-
 	if (m_isReplaceSelect)
 	{
 		return;
 	}
-
 
 	// 戦闘終了後の仲間加入処理
 	if (m_battle->IsEnemyRequested() &&m_battle->AreAllEnemiesDead())
@@ -162,12 +158,10 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 		}
 	}
 
-
 	// 通常のBattle更新
 	if (!m_isJoinRequested && !m_isReplaceSelect)
 	{
 		m_battle->Update(inputManager,&sceneManager,gameOver,map,player);
-
 
 		// GameOverからタイトル要求
 		if (gameOver.IsTitleRequest())
@@ -176,7 +170,6 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 			return;
 		}
 	}
-
 
 	// フィールドへ戻る要求
 	if (m_battle->IsFieldRequested())
@@ -190,7 +183,6 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 			m_battle->ResetRunSuccess();
 		}
 
-
 		// 戦闘前の位置へ戻す
 		if (m_player != nullptr)
 		{
@@ -202,7 +194,6 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 
 		m_isFieldRequested = true;
 	}
-
 
 	// 仲間加入選択
 	if (m_isJoinRequested)
@@ -248,37 +239,43 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 					switch (targetEnemy->type)
 					{
 					case Enemy::EnemyType::Slime:
-
 						monster =std::make_unique<Monster>(Monster::Type::Slime);
-
 						break;
-
 
 					case Enemy::EnemyType::Wolf:
-
 						monster =std::make_unique<Monster>(Monster::Type::Wolf);
-
 						break;
-
-
-					case Enemy::EnemyType::Dragon:
-
-						monster =std::make_unique<Monster>(Monster::Type::Dragon);
-
-						break;
-
-
-					case Enemy::EnemyType::Golem:
-
-						monster =std::make_unique<Monster>(Monster::Type::Golem);
-
-						break;
-
 
 					case Enemy::EnemyType::Fairy:
-
 						monster =std::make_unique<Monster>(Monster::Type::Fairy);
+						break;
 
+					case Enemy::EnemyType::Turtle:
+						monster = std::make_unique<Monster>(Monster::Type::Turtle);
+						break;
+
+					case Enemy::EnemyType::Mole:
+						monster = std::make_unique<Monster>(Monster::Type::Mole);
+						break;
+
+					case Enemy::EnemyType::Fox:
+						monster = std::make_unique<Monster>(Monster::Type::Fox);
+						break;
+
+					case Enemy::EnemyType::Golem:
+						monster =std::make_unique<Monster>(Monster::Type::Golem);
+						break;
+
+					case Enemy::EnemyType::Phoenix:
+						monster = std::make_unique<Monster>(Monster::Type::Phoenix);
+						break;
+
+					case Enemy::EnemyType::Dragon:
+						monster =std::make_unique<Monster>(Monster::Type::Dragon);
+						break;
+
+					case Enemy::EnemyType::Daemon:
+						monster = std::make_unique<Monster>(Monster::Type::Daemon);
 						break;
 					}
 
@@ -335,7 +332,6 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 
 
 // 描画
-
 void BattleScene::Render(GameOver& gameOver,Party& party,Map& map)
 {
 	// タイトル要求中は描画しない
@@ -399,8 +395,6 @@ void BattleScene::Render(GameOver& gameOver,Party& party,Map& map)
 		break;
 	}
 
-	// Battle描画
-	m_battle->Render(gameOver, map);
 
 	// 現在の攻撃対象カーソル
 	Enemy* target =m_battle->GetTargetEnemy();
@@ -408,7 +402,7 @@ void BattleScene::Render(GameOver& gameOver,Party& party,Map& map)
 
 	if (target != nullptr &&target->GetHp() > 0)
 	{
-		int cursorX =static_cast<int>(target->renderPosition.x) + 50;
+		int cursorX =static_cast<int>(target->renderPosition.x +target->renderSize.x / 2);
 
 		int cursorY =static_cast<int>(target->renderPosition.y) - 40;
 
@@ -420,10 +414,12 @@ void BattleScene::Render(GameOver& gameOver,Party& party,Map& map)
 	{
 		m_battle->RenderAnnihilation(gameOver);
 	}
-	
+	// Battle描画
+	m_battle->Render(gameOver, map);
 	// 仲間加入画面
 	if (m_isJoinRequested)
 	{
+		m_enemy->RenderBattle();
 		m_enemyName = m_enemy->GetName();
 
 		m_image->DrawCommandbox1(drawCommandBoxPosition,drawCommandBoxSize);
@@ -433,10 +429,7 @@ void BattleScene::Render(GameOver& gameOver,Party& party,Map& map)
 
 		if (m_enemy != nullptr)
 		{
-			m_enemy->RenderBattle();
-
 			m_enemyName =m_enemy->GetName();
-
 			DrawFormatString(180,480,GetColor(255, 255, 255),L"%lsを\n仲間にしますか？",m_enemyName);
 		}
 		DrawString(200,610,L"はい",GetColor(255, 255, 255),TRUE);
@@ -447,6 +440,7 @@ void BattleScene::Render(GameOver& gameOver,Party& party,Map& map)
 			: 280;
 		DrawString(cursorX,610,L"▶",GetColor(255, 255, 0),TRUE);////
 	}
+
 }
 
 
@@ -554,8 +548,8 @@ void BattleScene::SetBattleEnemyPositions()
 
 	const int y = 100;
 
-	const int width = 200;
-	const int height = 200;
+	const int width = 300;
+	const int height = 300;
 
 	// 敵の数
 	int enemyCount = 0;
@@ -579,17 +573,17 @@ void BattleScene::SetBattleEnemyPositions()
 	if (enemyCount == 1)
 	{
 		// 1体：中央
-		positions = { 540 };
+		positions = { 440 };
 	}
 	else if (enemyCount == 2)
 	{
 		// 2体：左右均等
-		positions = { 300, 780 };
+		positions = { 200, 680 };
 	}
 	else
 	{
 		// 3体：左・中央・右
-		positions = { 120, 540, 960 };
+		positions = { 70, 490, 910 };
 	}
 
 
@@ -609,13 +603,22 @@ void BattleScene::SetBattleEnemyPositions()
 		}
 
 
-		enemy->renderPosition.x =positions[positionIndex];
-		enemy->renderPosition.y = y;
+		if (enemy->type == Enemy::EnemyType::Daemon)
+		{
+			enemy->renderPosition.x = positions[positionIndex]-300;
+			enemy->renderPosition.y = y-400;
 
-		enemy->renderSize.x = width;
-		enemy->renderSize.y = height;
+			enemy->renderSize.x = 1000;
+			enemy->renderSize.y = 1000;
+		}
+		else
+		{
+			enemy->renderPosition.x = positions[positionIndex];
+			enemy->renderPosition.y = y;
 
-
+			enemy->renderSize.x = width;
+			enemy->renderSize.y = height;
+		}
 		positionIndex++;
 	}
 }

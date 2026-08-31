@@ -15,11 +15,12 @@
 
 
 // ヘッダファイルの読み込み ===================================================
+#include"Game/Inputmanager/InputManager.h"
+#include"Game/Scene/TextManager.h"
 #include"Game/ImageManager/ImageManager.h"
 #include"Game/Map/Map.h"
 #include"Game/Player/PlayerManager.h"
 #include"Game/Enemy/EnemyManager.h"
-#include"Game/Inputmanager/InputManager.h"
 #include"Game/Scene/SceneManager.h"
 #include"Game/Battle/Battle.h"
 #include"Game/Party/Party.h"
@@ -44,6 +45,7 @@ public:
 	//
 private:
 	ImageManager m_imageManager;
+	TextManager m_textManager;
 	Map m_map;
 	PlayerManager m_playerManager;
 	EnemyManager m_enemyManager;

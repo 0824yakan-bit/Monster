@@ -7,6 +7,9 @@ Enemy::Enemy()
     ,name       {}
     ,moveTimer  {}
     ,hp         {}
+    ,moveCounter{}
+    ,level      {}
+    ,direction  {}
 {
 
 }
@@ -83,14 +86,30 @@ Monster::Type Enemy::GetMonsterType() const
     case EnemyType::Wolf:
         return Monster::Type::Wolf;
 
-    case EnemyType::Dragon:
-        return Monster::Type::Dragon;
+    case EnemyType::Fairy:
+        return Monster::Type::Fairy;
 
+    case EnemyType::Turtle:
+        return Monster::Type::Turtle;
+
+    case EnemyType::Mole:
+        return Monster::Type::Mole;
+    
+    case EnemyType::Fox:
+        return Monster::Type::Fox;
+    
     case EnemyType::Golem:
         return Monster::Type::Golem;
 
-    case EnemyType::Fairy:
-        return Monster::Type::Fairy;
+    case EnemyType::Phoenix:
+        return Monster::Type::Phoenix;
+
+    case EnemyType::Dragon:
+        return Monster::Type::Dragon;
+
+    case EnemyType::Daemon:
+        return Monster::Type::Daemon;
+
     }
 
     return Monster::Type::Slime;

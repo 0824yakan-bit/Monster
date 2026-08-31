@@ -40,17 +40,17 @@ public:
 	SceneManager(BossManager&bossManager,Party&party);
 	~SceneManager();
 
-	void Initialize(InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party,ImageManager&image);
-	void Update(InputManager& inputmanager,SceneManager&sceneManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
-	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
+	void Initialize(TextManager& textManager, InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party,ImageManager&image);
+	void Update(TextManager& textManager, InputManager& inputmanager,SceneManager&sceneManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
+	void Render(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
 	void Finalize();
 
 	void NextSceneID(SceneID nextSceneID);
 	void ChangeScene(InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party);
 
 	void InitializeCurrentScene(InputManager& inputmanager, SceneManager& sceneManager,PlayerManager&playerManager, Map&map,Party&party);
-	void UpdateCurrentScene(InputManager& inputmanager,SceneManager&sceneManagerz,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
-	void RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
+	void UpdateCurrentScene(TextManager& textManager, InputManager& inputmanager,SceneManager&sceneManagerz,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
+	void RenderCurrentScene(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
 	void FinalizeCurrentScene();
 
 

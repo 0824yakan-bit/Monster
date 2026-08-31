@@ -27,6 +27,12 @@ private:
 	bool m_hitTreasure;
 	bool m_hitFall;
 	bool m_hitNextFloor;
+	bool m_hitSignboard;
+
+	bool m_isFalling;
+	float m_fallScale;
+	int m_fallTimer;
+	Vector2 m_fallPosition;
 public:
 
 public:
@@ -38,6 +44,7 @@ public:
 	void Render(FieldScene* field, Map*map, PlayerManager* playermanager,Accessory*accessory);
 	void Finalize();
 
-	void ReductionPlayer();
+	void ReductionPlayer(PlayerManager& playermanager, Map* map);
+	Vector2 FindSafePosition(Map* map, PlayerManager& playermanager);
 };
 
