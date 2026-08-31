@@ -9,18 +9,6 @@ class Map;
 class Battle;
 class SceneManager
 {
-private:
-	enum RenderAttack
-	{
-		NORMAL  = 1 << 0,//通常　攻撃
-		FIRE    = 1 << 1,//　火　属性
-		WATER   = 1 << 2,//　水　属性
-		GRASS   = 1 << 3,//　草　属性
-		SOIL    = 1 << 4,//　土　属性
-		THUNDER = 1 << 5,//　雷　属性
-		WIND    = 1 << 6,//　風　属性
-	};
-	unsigned int state = 0;
 public:
 	std::vector <int> m_renderOrders;
 
@@ -52,17 +40,17 @@ public:
 	SceneManager(BossManager&bossManager,Party&party);
 	~SceneManager();
 
-	void Initialize(InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party,ImageManager&image);
-	void Update(InputManager& inputmanager,SceneManager&sceneManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
-	void Render(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
+	void Initialize(TextManager& textManager, InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party,ImageManager&image);
+	void Update(TextManager& textManager, InputManager& inputmanager,SceneManager&sceneManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
+	void Render(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
 	void Finalize();
 
 	void NextSceneID(SceneID nextSceneID);
 	void ChangeScene(InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party);
 
 	void InitializeCurrentScene(InputManager& inputmanager, SceneManager& sceneManager,PlayerManager&playerManager, Map&map,Party&party);
-	void UpdateCurrentScene(InputManager& inputmanager,SceneManager&sceneManagerz,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
-	void RenderCurrentScene(PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
+	void UpdateCurrentScene(TextManager& textManager, InputManager& inputmanager,SceneManager&sceneManagerz,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
+	void RenderCurrentScene(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
 	void FinalizeCurrentScene();
 
 

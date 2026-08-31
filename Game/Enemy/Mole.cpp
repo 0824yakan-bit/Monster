@@ -1,22 +1,22 @@
 ﻿#include "pch.h"
-#include "Game/Enemy/Golem.h"
+#include "Game/Enemy/Mole.h"
 
 #include"Game/Enemy/EnemyManager.h"
 #include"Game/Map/Map.h"
 #include"Game/Maths/Collisionall.h"
-Golem::Golem()
+Mole::Mole()
 {
 }
-Golem::~Golem()
+Mole::~Mole()
 {
 
 }
 
-void Golem::Initialize(Map& map, int x, int y, bool isBoss)
+void Mole::Initialize(Map& map, int x, int y, bool isBoss)
 {
-	type = EnemyType::Golem;
+	type = EnemyType::Mole;
 
-	name = L"ガルム";
+	name = L"モグラード";
 
 	position.x = x * map.m_chipSize;
 	position.y = y * map.m_chipSize;
@@ -24,10 +24,11 @@ void Golem::Initialize(Map& map, int x, int y, bool isBoss)
 	int enemysize = 2;
 	if (isBoss)
 	{
-		enemysize = 6;
+		enemysize = 5;
 	}
 	size.x = map.m_chipSize * enemysize;
 	size.y = map.m_chipSize * enemysize;
+
 
 	renderPosition.x = 500;
 	renderPosition.y = 100;
@@ -39,7 +40,7 @@ void Golem::Initialize(Map& map, int x, int y, bool isBoss)
 	hp = 10;
 }
 
-void Golem::Update(Map& map)
+void Mole::Update(Map& map)
 {
 
 	//moveTimer++;
@@ -51,23 +52,23 @@ void Golem::Update(Map& map)
 	//}
 }
 
-void Golem::Render()
+void Mole::Render()
 {
 	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
-	m_image->DrawGolem(position, size);
+	m_image->DrawMole(position, size);
 }
 
-void Golem::Finalize()
+void Mole::Finalize()
 {
 
 }
 
-void Golem::OnHit(PlayerManager& playermanager)
+void Mole::OnHit(PlayerManager& playermanager)
 {
 }
 
-void Golem::RenderBattle()
+void Mole::RenderBattle()
 {
 	//DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
-	m_image->DrawGolem(renderPosition, renderSize);
+	m_image->DrawMole(renderPosition, renderSize);
 }

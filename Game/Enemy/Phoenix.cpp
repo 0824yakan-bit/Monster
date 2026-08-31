@@ -1,22 +1,22 @@
 ﻿#include "pch.h"
-#include "Game/Enemy/Golem.h"
+#include "Game/Enemy/Phoenix.h"
 
 #include"Game/Enemy/EnemyManager.h"
 #include"Game/Map/Map.h"
 #include"Game/Maths/Collisionall.h"
-Golem::Golem()
+Phoenix::Phoenix()
 {
 }
-Golem::~Golem()
+Phoenix::~Phoenix()
 {
 
 }
 
-void Golem::Initialize(Map& map, int x, int y, bool isBoss)
+void Phoenix::Initialize(Map& map, int x, int y, bool isBoss)
 {
-	type = EnemyType::Golem;
+	type = EnemyType::Phoenix;
 
-	name = L"ガルム";
+	name = L"スザク";
 
 	position.x = x * map.m_chipSize;
 	position.y = y * map.m_chipSize;
@@ -24,7 +24,7 @@ void Golem::Initialize(Map& map, int x, int y, bool isBoss)
 	int enemysize = 2;
 	if (isBoss)
 	{
-		enemysize = 6;
+		enemysize = 7;
 	}
 	size.x = map.m_chipSize * enemysize;
 	size.y = map.m_chipSize * enemysize;
@@ -39,7 +39,7 @@ void Golem::Initialize(Map& map, int x, int y, bool isBoss)
 	hp = 10;
 }
 
-void Golem::Update(Map& map)
+void Phoenix::Update(Map& map)
 {
 
 	//moveTimer++;
@@ -51,23 +51,23 @@ void Golem::Update(Map& map)
 	//}
 }
 
-void Golem::Render()
+void Phoenix::Render()
 {
 	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
-	m_image->DrawGolem(position, size);
+	m_image->DrawPhoenix(position, size);
 }
 
-void Golem::Finalize()
+void Phoenix::Finalize()
 {
 
 }
 
-void Golem::OnHit(PlayerManager& playermanager)
+void Phoenix::OnHit(PlayerManager& playermanager)
 {
 }
 
-void Golem::RenderBattle()
+void Phoenix::RenderBattle()
 {
 	//DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
-	m_image->DrawGolem(renderPosition, renderSize);
+	m_image->DrawPhoenix(renderPosition, renderSize);
 }

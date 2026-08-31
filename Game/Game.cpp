@@ -25,6 +25,7 @@
  */
 Game::Game()
 	: m_inputManager{}
+	, m_textManager{}
 	, m_accessory{}
 	, m_bossManager{}
 	, m_map{m_accessory,m_bossManager}
@@ -78,7 +79,7 @@ void Game::Initialize()
 	m_enemyManager.Initialize(m_map);
 	m_accessory.Initialize();
 	m_inputManager.Initialize();
-	m_sceneManager.Initialize(m_inputManager,m_sceneManager,m_playerManager, m_map, m_party,m_imageManager);
+	m_sceneManager.Initialize(m_textManager,m_inputManager,m_sceneManager,m_playerManager, m_map, m_party,m_imageManager);
 
 	m_oldMapNo = m_map.GetCurrentMap();
 }
@@ -102,7 +103,7 @@ void Game::Update(float elapsedTime)
 
 
 	// ゲームの更新
-	m_sceneManager.Update(m_inputManager,m_sceneManager, m_playerManager, m_enemyManager, m_map, m_party,m_battle,m_accessory);
+	m_sceneManager.Update(m_textManager,m_inputManager,m_sceneManager, m_playerManager, m_enemyManager, m_map, m_party,m_battle,m_accessory);
 	if (m_sceneManager.IsTitleRequested())
 	{
 		m_sceneManager.ResetTitleRequest();
@@ -130,7 +131,7 @@ void Game::Update(float elapsedTime)
 void Game::Render()
 {
 	// ゲームの描画
-	m_sceneManager.Render(m_playerManager, m_enemyManager, m_map, m_party,m_accessory);
+	m_sceneManager.Render(m_textManager,m_playerManager, m_enemyManager, m_map, m_party,m_accessory);
 
 }
 

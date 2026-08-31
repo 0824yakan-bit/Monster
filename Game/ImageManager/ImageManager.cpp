@@ -12,9 +12,14 @@ void ImageManager::LoadTextures()
 
 	textures.push_back({ L"Slime", LoadGraph(L"Resources/Textures/slime.png") });
 	textures.push_back({ L"Wolf", LoadGraph(L"Resources/Textures/wolf.png") });
-	textures.push_back({ L"Dragon", LoadGraph(L"Resources/Textures/dragon.png") });
-	textures.push_back({ L"Golem", LoadGraph(L"Resources/Textures/golem.png") });
 	textures.push_back({ L"Fairy", LoadGraph(L"Resources/Textures/fairy.png") });
+	textures.push_back({ L"Turtle", LoadGraph(L"Resources/Textures/turtle.png") });
+	textures.push_back({ L"Mole", LoadGraph(L"Resources/Textures/mole.png") });
+	textures.push_back({ L"Fox", LoadGraph(L"Resources/Textures/fox.png") });
+	textures.push_back({ L"Golem", LoadGraph(L"Resources/Textures/golem.png") });
+	textures.push_back({ L"Phoenix", LoadGraph(L"Resources/Textures/phoenix.png") });
+	textures.push_back({ L"Dragon", LoadGraph(L"Resources/Textures/dragon.png") });
+	textures.push_back({ L"Daemon", LoadGraph(L"Resources/Textures/daemon.png") });
 
 	textures.push_back({ L"N", LoadGraph(L"Resources/Textures/N.png") });
 	textures.push_back({ L"M", LoadGraph(L"Resources/Textures/M.png") });
@@ -31,10 +36,12 @@ void ImageManager::LoadTextures()
 	
 	textures.push_back({ L"fire",LoadGraph(L"Resources/Textures/fire.png") });
 	textures.push_back({ L"water",LoadGraph(L"Resources/Textures/water.png") });
-	textures.push_back({ L"water",LoadGraph(L"Resources/Textures/grass.png") });
-	textures.push_back({ L"water",LoadGraph(L"Resources/Textures/soil.png") });
+	textures.push_back({ L"grass",LoadGraph(L"Resources/Textures/grass.png") });
+	textures.push_back({ L"soil",LoadGraph(L"Resources/Textures/soil.png") });
 	textures.push_back({ L"wind",LoadGraph(L"Resources/Textures/wind.png") });
-	textures.push_back({ L"water",LoadGraph(L"Resources/Textures/thunder.png") });
+	textures.push_back({ L"darkness",LoadGraph(L"Resources/Textures/darkness.png") });
+	textures.push_back({ L"steamexplosion",LoadGraph(L"Resources/Textures/steamexplosion.png") });
+	textures.push_back({ L"growgrass",LoadGraph(L"Resources/Textures/growgrass.png") });
 
 
 
@@ -92,9 +99,30 @@ void ImageManager::DrawWolf(Vector2 position, Vector2 size)
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }
 
-void ImageManager::DrawDragon(Vector2 position, Vector2 size)
+void ImageManager::DrawFairy(Vector2 position, Vector2 size)
 {
-	int gh = GetTexture(L"Dragon");
+	int gh = GetTexture(L"Fairy");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+void ImageManager::DrawTurtle(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"Turtle");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+void ImageManager::DrawMole(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"Mole");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+void ImageManager::DrawFox(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"Fox");
 
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }
@@ -106,13 +134,26 @@ void ImageManager::DrawGolem(Vector2 position, Vector2 size)
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }
 
-void ImageManager::DrawFairy(Vector2 position, Vector2 size)
+void ImageManager::DrawPhoenix(Vector2 position, Vector2 size)
 {
-	int gh = GetTexture(L"Fairy");
+	int gh = GetTexture(L"Phoenix");
 
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }
 
+void ImageManager::DrawDragon(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"Dragon");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+void ImageManager::DrawDaemon(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"Daemon");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
 
 
 
@@ -216,9 +257,23 @@ void ImageManager::DrawWind(Vector2 position, Vector2 size)
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }
 
-void ImageManager::DrawThunder(Vector2 position, Vector2 size)
+void ImageManager::DrawDarkness(Vector2 position, Vector2 size)
 {
-	int gh = GetTexture(L"thunder");
+	int gh = GetTexture(L"darkness");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+void ImageManager::DrawSteamexplosion(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"steamexplosion");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+void ImageManager::DrawGrowgrass(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"growgrass");
 
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }

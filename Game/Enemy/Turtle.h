@@ -1,13 +1,13 @@
-﻿#pragma once
+#pragma once
 
 #include"Enemy.h"
 
 class Map;
-class Dragon : public Enemy
+class Turtle : public Enemy
 {
 public:
-	Dragon();
-	~Dragon();
+	Turtle();
+	~Turtle();
 
 	void Initialize(Map& map, int x, int y, bool isBoss)override;
 	void Update(Map& map)override;
@@ -18,4 +18,3 @@ public:
 
 	void RenderBattle()override;
 };
-

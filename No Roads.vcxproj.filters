@@ -189,6 +189,24 @@
     <ClCompile Include="Game\Enemy\BossManager.cpp">
       <Filter>Game\Enemy</Filter>
     </ClCompile>
+    <ClCompile Include="Game\Enemy\Turtle.cpp">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Enemy\Phoenix.cpp">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Enemy\Mole.cpp">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Enemy\Fox.cpp">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Enemy\Daemon.cpp">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scene\TextManager.cpp">
+      <Filter>Game\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game\Player\PlayerManager.h">
@@ -268,6 +286,24 @@
     </ClInclude>
     <ClInclude Include="Game\Enemy\BossManager.h">
       <Filter>Game\Enemy</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Enemy\Turtle.h">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Enemy\Phoenix.h">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Enemy\Mole.h">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Enemy\Fox.h">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Enemy\Daemon.h">
+      <Filter>Game\Enemy\Enemys%28%29</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\TextManager.h">
+      <Filter>Game\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -353,6 +389,21 @@
       <Filter>Resources\Textures</Filter>
     </Image>
     <Image Include="Resources\Textures\grass.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\mole.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\turtle.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\deamon.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\fox.png">
+      <Filter>Resources\Textures</Filter>
+    </Image>
+    <Image Include="Resources\Textures\growgrass.png">
       <Filter>Resources\Textures</Filter>
     </Image>
   </ItemGroup>

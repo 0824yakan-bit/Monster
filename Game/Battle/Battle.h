@@ -29,14 +29,10 @@ public:
 
 
 private:
-
-
 	// 定数
 	static constexpr int MAX_PARTY = 4;
 	static constexpr int COMMAND_NUM = 4;
 	static constexpr int ATTACK_EFFECT_DURATION = 150;
-
-
 
 	// 列挙型
 	// 戦闘中の状態
@@ -62,7 +58,7 @@ private:
 		USED_WATER = 1 << 2,
 		USED_GRASS = 1 << 3,
 		USED_SOIL = 1 << 4,
-		USED_THUNDER = 1 << 5,
+		USED_DARKNESS = 1 << 5,
 		USED_WIND = 1 << 6
 	};
 
@@ -266,12 +262,22 @@ public:
 	void ResetRunSuccess();									//にげる状態リセット
 
 
-	//パーティ加入
+	// 仲間加入確認
 	void RequestJoinEnemy(Enemy* enemy);
+	void UpdateJoinWindow();
+	void RenderJoinWindow();
+
+	// 仲間追加
 	void AddJoinEnemy();
+
+	// 仲間入れ替え
 	void UpdateJoinReplace();
-	void ReplaceMonster();
 	void RenderJoinReplace();
+	void ReplaceMonster();
+
+	// 仲間加入状態
+	bool IsJoinWindow() const;
+	bool IsJoinReplace() const;
 
 	// 敵ターゲット
 	void SetTargetEnemyIndex(int index);						// 攻撃対象を設定

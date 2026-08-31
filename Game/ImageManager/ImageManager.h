@@ -24,9 +24,14 @@ public:
 
 	void DrawSlime(Vector2 position, Vector2 size);
 	void DrawWolf(Vector2 position, Vector2 size);
-	void DrawDragon(Vector2 position, Vector2 size);
-	void DrawGolem(Vector2 position, Vector2 size);
 	void DrawFairy(Vector2 position, Vector2 size);
+	void DrawTurtle(Vector2 position, Vector2 size);
+	void DrawMole(Vector2 position, Vector2 size);
+	void DrawFox(Vector2 position, Vector2 size);
+	void DrawGolem(Vector2 position, Vector2 size);
+	void DrawPhoenix(Vector2 position, Vector2 size);
+	void DrawDragon(Vector2 position, Vector2 size);
+	void DrawDaemon(Vector2 position, Vector2 size);
 
 
 	void DrawN(Vector2 position, Vector2 size);
@@ -47,7 +52,9 @@ public:
 	void DrawGrass(Vector2 position, Vector2 size);
 	void DrawSoil(Vector2 position, Vector2 size);
 	void DrawWind(Vector2 position, Vector2 size);
-	void DrawThunder(Vector2 position, Vector2 size);
+	void DrawDarkness(Vector2 position, Vector2 size);
+	void DrawSteamexplosion(Vector2 position, Vector2 size);
+	void DrawGrowgrass(Vector2 position, Vector2 size);
 
 
 

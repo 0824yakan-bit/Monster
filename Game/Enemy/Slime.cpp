@@ -12,7 +12,7 @@ Slime::~Slime()
 
 }
 
-void Slime::Initialize(Map& map, int x, int y)
+void Slime::Initialize(Map& map, int x, int y, bool isBoss)
 {
 
 	type = EnemyType::Slime;
@@ -22,8 +22,16 @@ void Slime::Initialize(Map& map, int x, int y)
 	direction = Direction::Right;
 	moveCounter = 0;
 
-	position.x = x*map.m_chipSize;
-	position.y = y*map.m_chipSize;
+	position.x = x * map.m_chipSize;
+	position.y = y * map.m_chipSize;
+
+	int enemysize = 2;
+	if (isBoss)
+	{
+		enemysize = 5;
+	}
+	size.x = map.m_chipSize * enemysize;
+	size.y = map.m_chipSize * enemysize;
 
 	size.x = map.m_chipSize;
 	size.y = map.m_chipSize;
@@ -40,45 +48,6 @@ void Slime::Initialize(Map& map, int x, int y)
 
 void Slime::Update(Map&map)
 {
-	moveTimer++;
-	level=map.GetBreakLevel();
-	switch (level)
-	{
-	case 0:
-		if (moveTimer == 120)
-		{
-			if (moveCounter == 0)
-			{
-				direction = Direction::Right;
-			}
-			if (moveCounter == 5)
-			{
-				direction = Direction::Left;
-			}
-			switch (direction)
-			{
-			case Direction::Right:
-				moveCounter++;
-				moveTimer = 0;
-				position.x += size.x;
-				break;
-			case Direction::Left:
-				moveCounter--;
-				moveTimer = 0;
-				position.x -= size.x;
-				break;
-			}
-			break;
-	case 1:
-		break;
-	case 2:
-		break;
-	case 3:
-		break;
-	case 4:
-		break;
-		}
-	}
 }
 
 void Slime::Render()

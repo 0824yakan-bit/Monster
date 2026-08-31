@@ -12,17 +12,22 @@ Dragon::~Dragon()
 
 }
 
-void Dragon::Initialize(Map& map, int x, int y)
+void Dragon::Initialize(Map& map, int x, int y,bool isBoss)
 {
 	type = EnemyType::Dragon;
 
-	name = L"ドラゴン";
+	name = L"マグナ";
 
 	position.x = x * map.m_chipSize;
 	position.y = y * map.m_chipSize;
 
-	size.x = map.m_chipSize*5;
-	size.y = map.m_chipSize*5;
+	int enemysize = 2;
+	if (isBoss)
+	{
+		enemysize = 6;
+	}
+	size.x = map.m_chipSize * enemysize;
+	size.y = map.m_chipSize * enemysize;
 
 
 	renderPosition.x = 500;
@@ -37,19 +42,10 @@ void Dragon::Initialize(Map& map, int x, int y)
 
 void Dragon::Update(Map& map)
 {
-
-	//moveTimer++;
-	//if (moveTimer == 30)
-	//{
-	//	moveTimer = 0;
-	//	position.x += m_size;
-	//
-	//}
 }
 
 void Dragon::Render()
 {
-	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
 	m_image->DrawDragon(position, size);
 }
 
@@ -64,6 +60,5 @@ void Dragon::OnHit(PlayerManager& playermanager)
 
 void Dragon::RenderBattle()
 {
-	//DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
 	m_image->DrawDragon(renderPosition, renderSize);
 }

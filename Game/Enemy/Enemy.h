@@ -13,13 +13,18 @@ class Enemy
 public:
     ImageManager* m_image = nullptr;
 
-    enum class EnemyType
+    enum class EnemyType//エネミー追加ならここ//順番を変えたらEnemyManager::Initialize・CreateRandomEnemyも変更MonsterのTypeとBattleSceneの仲間加入にも追加
     {
-        Slime,
-        Wolf,
-        Dragon,
-        Golem,
-        Fairy
+        Slime,  //0
+        Wolf,   //1
+        Fairy,  //2
+        Turtle, //3
+        Mole,   //4
+        Fox,    //5
+        Golem,  //6
+        Phoenix,//7
+        Dragon, //8
+        Daemon, //9
     };
     EnemyType type;
 
@@ -74,7 +79,7 @@ public:
     Enemy();
     virtual ~Enemy() = default;
 
-    virtual void Initialize(Map& map,int x,int y) = 0;
+    virtual void Initialize(Map& map,int x,int y,bool isBoss) = 0;
     virtual void Update(Map&map) = 0;
     virtual void Render() = 0;//マップシーンでの描画
     virtual void Finalize() = 0;

@@ -51,6 +51,11 @@ void Map::Initialize(const wchar_t* fileName)
 	m_isbossAreaOpen = false;
 	m_breakLevel = 0;
 
+	m_changeX = MAP_WIDTH;
+	m_changeY = 22;
+	m_changeMap = 9;
+
+	m_changeTimer = 0;
 
 	m_isTransition = false;
 	m_transition = 0;
@@ -281,7 +286,6 @@ void Map::DrawCurrentMap(int offsetX, int offsetY)
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, m_fogdensity);
 				DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
-				//DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}
@@ -310,7 +314,6 @@ void Map::DrawNextMap(int offsetX, int offsetY)
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, m_fogdensity);
 				DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
-				//DrawBox(x * m_chipSize + offsetX,y * m_chipSize + offsetY,x * m_chipSize + offsetX + m_chipSize,y * m_chipSize + offsetY + m_chipSize,GetColor(0, 0, 0),TRUE);
 				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 			}
 		}
@@ -373,6 +376,43 @@ void Map::LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][
 
 void Map::LastBossDefeated()
 {
+	m_changeTimer++;
+
+	if (m_changeTimer < CHANGE_INTERVAL)
+		return;
+
+	m_changeTimer = 0;
+
+	printfDx(L"map=%d x=%d y=%d\n",m_changeMap,m_changeX,m_changeY);
+
+	m_basemap[m_changeMap][m_changeY][m_changeX] = TileType::Fall;
+
+	// 見た目をFallにする
+	m_workmap[m_changeMap][m_changeY][m_changeX] = 291;
+
+	// オブジェクトを消す
+	m_objectmap[m_changeMap][m_changeY][m_changeX] = -1;
+
+	// 次のマス
+	m_changeX--;
+
+	if (m_changeX < 0)
+	{
+		m_changeX = MAP_WIDTH;
+		m_changeY--;
+	}
+
+	// 次のマップ
+	if (m_changeY < 0)
+	{
+		m_changeY = MAP_HEIGHT - 1;
+		m_changeMap--;
+
+		if (m_changeMap < 0)
+		{
+			m_changeMap = 9;
+		}
+	}
 }
 
 void Map::MapBreak()
@@ -448,6 +488,19 @@ bool Map::IsFallRect(int px, int py, int width, int height) const
 			GetTileType(right, bottom)	== TileType::Fall;
 }
 
+bool Map::IsSignboardRect(int px, int py, int width, int height) const
+{
+	int left = px / m_chipSize;
+	int right = (px + width - 1) / m_chipSize;
+	int top = py / m_chipSize;
+	int bottom = (py + height - 1) / m_chipSize;
+
+	return	GetTileType(left, top)		== TileType::Signboard ||
+			GetTileType(right, top)		== TileType::Signboard ||
+			GetTileType(left, bottom)	== TileType::Signboard ||
+			GetTileType(right, bottom)	== TileType::Signboard;
+}
+
 TileType Map::GetTileType(int x, int y) const
 {
 	if (x < 0 || x >= MAP_WIDTH ||
@@ -518,6 +571,21 @@ int Map::GetBreakLevel()const
 {
 	return m_level;
 }
+
+bool Map::PrepareBreakArea(int centerX,int centerY,int x,int y,int& tx,int& ty)
+{
+	tx = centerX + x;
+	ty = centerY + y;
+
+	if (tx < 0 || tx >= MAP_WIDTH ||ty < 0 || ty >= MAP_HEIGHT)
+	{
+		return false;
+	}
+
+	RevealArea(tx, ty, 2);
+
+	return true;
+}
 /**
  * @brief 指定範囲のオブジェクトとタイルを置き換える
  * @param centerX 範囲の中心X座標
@@ -531,29 +599,68 @@ int Map::GetBreakLevel()const
  * @param replaceType   置換後のタイル種別
  * @param dangerAdd   属性ごとの上昇量
  */
-void Map::BreakArea(int centerX, int centerY,int left, int right,int top, int bottom,int targetObject,int replaceObject,TileType replaceType, int dangerAdd)
+void Map::BreakArea(int centerX,int centerY,int left,int right,int top,int bottom,int targetObject,int replaceObject,TileType replaceType,int dangerAdd)
 {
+	// 技1回分のBreakLevel上昇
 	m_breakLevel = std::min(40, m_breakLevel + dangerAdd);
 	m_level = m_breakLevel / 10;
+
 	for (int y = top; y <= bottom; ++y)
 	{
 		for (int x = left; x <= right; ++x)
 		{
-			int tx = centerX + x;
-			int ty = centerY + y;
+			int tx;
+			int ty;
 
-			// 範囲外防止
-			if (tx < 0 || tx >= MAP_WIDTH ||ty < 0 || ty >= MAP_HEIGHT)
+			// 座標チェック＋霧解除
+			if (!PrepareBreakArea(centerX, centerY,x, y,tx,ty))
 			{
 				continue;
 			}
 
-			if (targetObject < 0 ||m_objectmap[m_currentMap][ty][tx] == targetObject)
+			// 対象オブジェクトなら変更
+			if (targetObject < 0 ||
+				m_objectmap[m_currentMap][ty][tx] == targetObject)
 			{
 				m_objectmap[m_currentMap][ty][tx] = replaceObject;
 				m_basemap[m_currentMap][ty][tx] = replaceType;
 			}
-			RevealArea(tx, ty, 2);
+		}
+	}
+}
+void Map::BreakAreaByGroup(int centerX,int centerY,int left,int right,int top,int bottom,TileGroup group,int dangerAdd)
+{
+	const auto& breakTiles =m_tileRole.GetBreakTiles(group);
+
+	// 技1回分のBreakLevel上昇
+	m_breakLevel = std::min(40, m_breakLevel + dangerAdd);
+	m_level = m_breakLevel / 10;
+
+	for (int y = top; y <= bottom; ++y)
+	{
+		for (int x = left; x <= right; ++x)
+		{
+			int tx;
+			int ty;
+
+			// 座標チェック＋霧解除
+			if (!PrepareBreakArea(centerX, centerY,x, y,tx, ty))
+			{
+				continue;
+			}
+
+			int objectNo =m_objectmap[m_currentMap][ty][tx];
+
+			// TileGroupに登録されたタイルを探す
+			for (const auto& breakTile : breakTiles)
+			{
+				if (objectNo == breakTile.targetTile)
+				{
+					m_objectmap[m_currentMap][ty][tx]= breakTile.replaceTile;
+					m_basemap[m_currentMap][ty][tx]= breakTile.replaceType;
+					break;
+				}
+			}
 		}
 	}
 }
@@ -566,8 +673,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = centerX + x;
 			int ty = centerY + y;
 
-			if (tx < 0 || tx >= MAP_WIDTH ||
-				ty < 0 || ty >= MAP_HEIGHT)
+			if (tx < 0 || tx >= MAP_WIDTH ||ty < 0 || ty >= MAP_HEIGHT)
 				continue;
 
 			m_fog[m_currentMap][ty][tx] = false;
@@ -596,8 +702,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx, ty, 0, 1, 0, 0, 40, 1, TileType::Floor,0);//右１マスを削る
-			BreakArea(tx, ty, -1, 1, -1, 1, -1, 1, TileType::Floor,1);
+			BreakAreaByGroup(tx, ty, -1, 2, -1, 2,TileGroup::Normal,0);
 		}
 
 		void Map::FireBreak(PlayerManager& player)
@@ -607,7 +712,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx, ty, -5, 5, -5, 5,57, 1, TileType::Floor,3);//枯れ木（５７）を燃やす
+			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Fire, 3);
+
 
 		}
 
@@ -618,7 +724,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx, ty, 0, 0, 0, 0,40, 1, TileType::Floor,1);
+			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Water, 1);
+
 		}
 
 		void Map::GrassBreak(PlayerManager& player)
@@ -628,7 +735,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx, ty, -5, 5, -5, 5, 3, 92, TileType::Floor,0);//土（３）を草（９２）に変える
+			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Grass, 0);
+
 
 		}
 
@@ -639,7 +747,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx, ty, -2, 2, -2, 2, 33, 3, TileType::Floor,2);//水（３３）を土（３）に変える
+			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Soil, 5);
+
 		}
 
 		void Map::WindBreak(PlayerManager& player)
@@ -657,57 +766,35 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			{
 			case PlayerManager::Direction::Right:
 				// → 右へ一直線
-				BreakArea(tx + 1, ty, 0, length, 0, 1,40, 57, TileType::Wall, 2);
-				BreakArea(tx + 1, ty, 0, length, 0, 1,41, 57, TileType::Wall, 2);
+				BreakAreaByGroup(tx + 1, ty, 0, length, 0, 1,TileGroup::Wind, 2);
 				break;
 
 			case PlayerManager::Direction::Left:
 				// ← 左へ一直線
-				BreakArea(tx - 1, ty, -length, 0, 0, 1,40, 57, TileType::Wall, 2);
-				BreakArea(tx - 1, ty, -length, 0, 0, 1,41, 57, TileType::Wall, 2);
+				BreakAreaByGroup(tx - 1, ty, -length, 0, 0, 1, TileGroup::Wind, 2);
 				break;
 
 			case PlayerManager::Direction::Up:
 				// ↑ 上へ一直線
-				BreakArea(tx, ty - 1, 0, 1, -length, 0,40, 57, TileType::Wall, 2);
-				BreakArea(tx, ty - 1, 0, 1, -length, 0,41, 57, TileType::Wall, 2);
+				BreakAreaByGroup(tx, ty - 1, 0, 1, -length, 0,TileGroup::Wind, 2);
 				break;
 
 			case PlayerManager::Direction::Down:
 				// ↓ 下へ一直線
-				BreakArea(tx, ty + 1, 0, 1, 0, length,40, 57, TileType::Wall, 2);
-				BreakArea(tx, ty + 1, 0, 1, 0, length,41, 57, TileType::Wall, 2);
+				BreakAreaByGroup(tx, ty + 1, 0, 1, 0, length,TileGroup::Wind, 2);
 				break;
 			}
 		}
 
-		void Map::ThunderBreak(PlayerManager& player)
+		void Map::DarknessBreak(PlayerManager& player)
 		{
 			Vector2 pos = player.GetPosition();
+
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
+			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Darkness, 5);
 
-			// 隠し壁(250)を可視化
-			for (int y = -10; y <= 10; ++y)
-			{
-				for (int x = -10; x <= 10; ++x)
-				{
-					int nx = tx + x;
-					int ny = ty + y;
-
-					if (nx < 0 || nx >= MAP_WIDTH ||
-						ny < 0 || ny >= MAP_HEIGHT)
-						continue;
-
-					if (m_objectmap[m_currentMap][ny][nx] == 250)
-					{
-						m_objectmap[m_currentMap][ny][nx] = 251;
-					}
-				}
-			}
-
-			m_breakLevel = std::min(40, m_breakLevel + 1);
 		}
 
 ////連携技
