@@ -30,6 +30,7 @@ public:
         bool m_signboard_1;
         bool m_signboard_2;
         bool m_signboard_3;
+        bool m_signboard_4;
         bool m_end;
     };
     Text STtext;
@@ -45,6 +46,10 @@ public:
     void SetAttackEffects(const std::vector<Battle::UsedAttackInfo>& effects);
 
 private:
+    static constexpr int MAX_PARTY = 4;
+    bool m_annihilation;
+    int m_monsterhp[MAX_PARTY];
+
     bool m_isBattleRequested;
     int m_breakLevel;
     // 仲間加入待ち
@@ -78,6 +83,9 @@ private:
 
     Vector2 drawMenuBoxPosition_1;
     Vector2 drawMenuBoxSize_1;
+
+    Vector2 drawSelectCursorPosition;
+    Vector2 drawSelectCursorSize;
 
     enum class MenuList
     {
@@ -119,14 +127,15 @@ public:
         GrawGrass,
         Volcazation,
     };
-
     CooperatList m_cooperatList;
 
     // 取得済みの技属性
     std::set<CooperatList> m_unlockedSkills;
-
     // 現在表示する技一覧
     std::vector<CooperatList> m_visibleSkills;
+
+    Vector2 drawEffectPosition;
+    Vector2 drawEffectSize;
 
     // 宝箱中身
     enum class TreasureList
@@ -149,9 +158,9 @@ public:
 
     void Initialize(InputManager& inputmanager,PlayerManager& playerManager,Map& map);
 
-    void Update(TextManager& textManager, InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Battle& battle,Accessory& accessory,Party& party);
+    void Update(TextManager& textManager, InputManager& inputManager,GameOver&gameOver,PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Battle& battle,Accessory& accessory,Party& party);
 
-    void Render(TextManager& textManager, PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Accessory& accessory,Party& party);
+    void Render(TextManager& textManager,GameOver&gameOver, PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Accessory& accessory,Party& party);
 
     void Finalize();
 

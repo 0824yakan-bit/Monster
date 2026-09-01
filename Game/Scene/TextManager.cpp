@@ -15,6 +15,7 @@ TextManager::TextManager()
 	m_TextCount[Signboard_1]	= 5;
 	m_TextCount[Signboard_2]	= 5;
 	m_TextCount[Signboard_3]	= 5;
+	m_TextCount[Signboard_4]	= 5;
 	m_TextCount[End]			= 5;
 }
 
@@ -47,6 +48,8 @@ void TextManager::Update(InputManager& inputManager,FieldScene&fieldScene)
 			break;
 		case Signboard_3:
 			fieldScene.STtext.m_signboard_3 = false;
+		case Signboard_4:
+			fieldScene.STtext.m_signboard_4 = false;
 			break;
 		case End:
 			fieldScene.STtext.m_end = false;
@@ -121,6 +124,19 @@ void TextManager::SignBoard_3Text(int count)
 	{
 	case 0:
 		m_displayText = L"ボード3";
+		break;
+	}
+}
+
+void TextManager::SignBoard_4Text(int count)
+{
+	m_display = true;
+
+	m_currentTextType = TextType::Signboard_4;
+	switch (count)
+	{
+	case 0:
+		m_displayText = L"ボード4";
 		break;
 	}
 }

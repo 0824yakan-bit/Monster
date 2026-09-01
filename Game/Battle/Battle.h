@@ -186,6 +186,8 @@ private:
 		L"逃げ出す"
 	};
 
+	Vector2 drawCommandCursorPosition;
+	Vector2 drawCommandCursorSize;
 
 public:
 
@@ -209,7 +211,7 @@ public:
 
 
 	// 攻撃選択
-	void UpdateAttackSelect();								// 攻撃選択の更新
+	void UpdateAttackSelect(InputManager& inputManager);								// 攻撃選択の更新
 	void RenderAttackSelect();								// 攻撃選択画面の描画
 
 
@@ -221,13 +223,13 @@ public:
 
 
 	// 道具
-	void UpdateTool();										// 道具選択の更新
+	void UpdateTool(InputManager& inputManager);										// 道具選択の更新
 	void RenderTool();										// 道具画面の描画
 
 
 
 	// 応援
-	void UpdateSuppot();										// 応援処理の更新
+	void UpdateSuppot(InputManager& inputManager);										// 応援処理の更新
 	void RenderSuppot();										// 応援画面の描画
 
 
@@ -271,7 +273,7 @@ public:
 	void AddJoinEnemy();
 
 	// 仲間入れ替え
-	void UpdateJoinReplace();
+	void UpdateJoinReplace(InputManager& inputManager);
 	void RenderJoinReplace();
 	void ReplaceMonster();
 

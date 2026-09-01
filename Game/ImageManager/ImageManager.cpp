@@ -4,6 +4,10 @@
 #include"Game/Maths/Vector2.h"
 void ImageManager::LoadTextures()
 {
+	textures.push_back({ L"titletext", LoadGraph(L"Resources/Textures/titletext.png") });
+	textures.push_back({ L"title", LoadGraph(L"Resources/Textures/title.png") });
+
+
 	textures.push_back({ L"player1", LoadGraph(L"Resources/Textures/front.png") });
 	textures.push_back({ L"player2", LoadGraph(L"Resources/Textures/back.png") });
 	textures.push_back({ L"player3", LoadGraph(L"Resources/Textures/left.png") });
@@ -23,6 +27,8 @@ void ImageManager::LoadTextures()
 
 	textures.push_back({ L"N", LoadGraph(L"Resources/Textures/N.png") });
 	textures.push_back({ L"M", LoadGraph(L"Resources/Textures/M.png") });
+	textures.push_back({ L"key", LoadGraph(L"Resources/Textures/key.png") });
+	textures.push_back({ L"controller", LoadGraph(L"Resources/Textures/controller.png") });
 
 	textures.push_back({ L"forest",LoadGraph(L"Resources/Textures/forest.png") });
 	textures.push_back({ L"plain",LoadGraph(L"Resources/Textures/plain.png") });
@@ -31,6 +37,7 @@ void ImageManager::LoadTextures()
 	textures.push_back({ L"volcano",LoadGraph(L"Resources/Textures/volcano.png") });
 	textures.push_back({L"castle",LoadGraph(L"Resources/Textures/castle.png") });
 
+	textures.push_back({ L"commandcursor",LoadGraph(L"Resources/Textures/command.png") });
 	textures.push_back({ L"commandbox1",LoadGraph(L"Resources/Textures/commandbox1.png") });
 	textures.push_back({ L"commandbox2",LoadGraph(L"Resources/Textures/commandbox2.png") });
 	
@@ -41,6 +48,9 @@ void ImageManager::LoadTextures()
 	textures.push_back({ L"wind",LoadGraph(L"Resources/Textures/wind.png") });
 	textures.push_back({ L"darkness",LoadGraph(L"Resources/Textures/darkness.png") });
 	textures.push_back({ L"steamexplosion",LoadGraph(L"Resources/Textures/steamexplosion.png") });
+	textures.push_back({ L"waterflows",LoadGraph(L"Resources/Textures/waterflows.png") });
+	textures.push_back({ L"floorbreak",LoadGraph(L"Resources/Textures/floorbreak.png") });
+	textures.push_back({ L"volcazation",LoadGraph(L"Resources/Textures/volcazation.png") });
 	textures.push_back({ L"growgrass",LoadGraph(L"Resources/Textures/growgrass.png") });
 
 
@@ -58,6 +68,20 @@ int ImageManager::GetTexture(const std::wstring& name)
 	}
 	return-1;
 }
+///タイトル画像
+void ImageManager::DrawTitleText(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"titletext");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawTitle(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"title");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
 /// プレイヤー画像
 void ImageManager::DrawPlayer1(Vector2 position, Vector2 size)
 {
@@ -157,7 +181,7 @@ void ImageManager::DrawDaemon(Vector2 position, Vector2 size)
 
 
 
-////キー画像
+////フィールドシーンUI画像
 void ImageManager::DrawN(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"N");
@@ -167,6 +191,18 @@ void ImageManager::DrawN(Vector2 position, Vector2 size)
 void ImageManager::DrawM(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"M");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawKey(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"key");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawController(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"controller");
 
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }
@@ -212,6 +248,12 @@ void ImageManager::DrawCastle(Vector2 position, Vector2 size)
 
 
 //バトルシーンUI画像
+void ImageManager::DrawCommandCursor(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"commandcursor");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
 void ImageManager::DrawCommandbox1(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"commandbox1");
@@ -270,7 +312,24 @@ void ImageManager::DrawSteamexplosion(Vector2 position, Vector2 size)
 
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }
+void ImageManager::DrawWaterflows(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"waterflows");
 
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawFloorBreak(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"floorbreak");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+void ImageManager::DrawVolcazation(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"volcazation");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
 void ImageManager::DrawGrowgrass(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"growgrass");

@@ -311,7 +311,7 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 			{
 
 				// 上
-				if (CheckHitKey(KEY_INPUT_UP))
+				if (inputManager.IsTrigger(KEY_INPUT_UP)||inputManager.IsPadTrigger(PAD_INPUT_UP))
 				{
 					m_select--;
 
@@ -324,7 +324,7 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 				}
 
 				// 下
-				if (CheckHitKey(KEY_INPUT_DOWN))
+				if (inputManager.IsTrigger(KEY_INPUT_DOWN) || inputManager.IsPadTrigger(PAD_INPUT_DOWN))
 				{
 					m_select++;
 
@@ -337,7 +337,7 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 				}
 
 				// 決定
-				if (CheckHitKey(KEY_INPUT_RETURN))
+				if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A))
 				{
 					m_receponsTimer = 0;
 
@@ -393,10 +393,8 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 					}
 				}
 
-
-
 				// 戻る処理
-				if (!m_IsActive && m_state == BattleState::AttackSelect && CheckHitKey(KEY_INPUT_BACK) && m_monsterSelect == 0)
+				if (!m_IsActive && m_state == BattleState::AttackSelect && (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B)) && m_monsterSelect == 0)
 				{
 					m_state = BattleState::Command;
 
@@ -406,8 +404,6 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 					m_windowWidth = 0;
 					m_windowWidthFront = 0;
 				}
-
-
 			}
 		}
 	}
@@ -415,60 +411,41 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 	{
 		m_receponsTimer++;
 
-		UpdateJoinReplace();
+		UpdateJoinReplace(inputManager);
 
 		return;
 	}
-
 
 	// State Update
 	switch (m_state)
 	{
 	case BattleState::Command:
 		break;
-
-
 	case BattleState::AttackSelect:
-		UpdateAttackSelect();
+		UpdateAttackSelect(inputManager);
 		break;
-
-
 	case BattleState::AttackAction:
 		UpdateAttackAction(map, player);
 		break;
-
-
 	case BattleState::Tool:
-		UpdateTool();
+		UpdateTool(inputManager);
 		break;
-
-
 	case BattleState::Suppot:
-		UpdateSuppot();
+		UpdateSuppot(inputManager);
 		break;
-
-
 	case BattleState::Run:
 		UpdateRun();
 		break;
-
-
 	case BattleState::EnemyTurn:
 		UpdateEnemyTurn(sceneManager);
 		break;
-
-
 	case BattleState::EnemyDead:
 		UpdateEnemyDead();
 		break;
-
-
 	case BattleState::Annihilation:
 		UpdateAnnihilation(gameOver, inputManager);
 		break;
 	}
-
-
 
 	// 攻撃エフェクト更新
 	if (m_playAttackEffect)
@@ -486,8 +463,6 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 // Render
 void Battle::Render(GameOver& gameOver, Map& map)
 {
-
-
 	// ターゲット取得
 	Enemy* enemy = GetTargetEnemy();
 	// 敵描画
@@ -497,7 +472,6 @@ void Battle::Render(GameOver& gameOver, Map& map)
 		{
 			continue;
 		}
-
 
 		// 死亡演出中
 		if (currentEnemy == m_deadEnemy && m_enemyDeadMotion)
@@ -526,8 +500,6 @@ void Battle::Render(GameOver& gameOver, Map& map)
 		// 生きている敵
 		currentEnemy->RenderBattle();
 	}
-
-
 
 	// 攻撃エフェクト描画
 	if (m_playAttackEffect)
@@ -644,15 +616,6 @@ void Battle::RenderCommand()
 
 	m_image->DrawCommandbox1(drawCommandBoxPosition1_1, drawCommandBoxSize1_1);
 
-	//DrawBox(40, 530, 320, 690, GetColor(0, 0, 0), TRUE);
-
-	//DrawBox(340, 530, 630, 690, GetColor(0, 0, 0), TRUE);
-
-	//DrawBox(650, 530, 930, 690, GetColor(0, 0, 0), TRUE);
-
-	//DrawBox(950, 530, 1240, 690, GetColor(0, 0, 0), TRUE);
-
-
 	SetFontSize(40);
 
 	for (int i = 0; i < COMMAND_NUM; i++)
@@ -662,7 +625,11 @@ void Battle::RenderCommand()
 
 
 	// カーソル
-	DrawString(220, 480 + 50 * m_select, L"▶", GetColor(255, 255, 0));
+	drawCommandCursorPosition.x = 200;
+	drawCommandCursorPosition.y = 480+50*m_select;
+	drawCommandCursorSize = { 40,40 };
+	//DrawString(220, 480 + 50 * m_select, L"▶", GetColor(255, 255, 0));
+	m_image->DrawCommandCursor(drawCommandCursorPosition, drawCommandCursorSize);
 	SetFontSize(30);
 	// 敵情報
 	DrawString(620,490,L"敵データ",GetColor(255, 255, 255));
@@ -688,7 +655,10 @@ void Battle::RenderCommand()
 		int x = 620 + i * 170;
 		int y = 550;
 
+		drawCommandCursorPosition.x = x-25;
+		drawCommandCursorPosition.y = y;
 
+		drawCommandCursorSize = { 20,20 };
 		// 敵の名前
 		int nameColor = GetColor(255, 255, 255);
 
@@ -697,7 +667,8 @@ void Battle::RenderCommand()
 		{
 			nameColor = GetColor(255, 255, 0);
 
-			DrawString(x - 25, y, L"▶", GetColor(255, 255, 0));
+			//DrawString(x - 25, y, L"▶", GetColor(255, 255, 0));
+			m_image->DrawCommandCursor(drawCommandCursorPosition, drawCommandCursorSize);
 		}
 
 
@@ -738,6 +709,9 @@ void Battle::RenderCurrentCommand()
 
 		int x = 620 + column * 250;
 		int y = 530 + row * 80;
+		drawCommandCursorPosition.x = x-25;
+		drawCommandCursorPosition.y = y;
+		drawCommandCursorSize = { 30,30 };
 
 		// 死亡しているか
 		bool isDead = (m_monsterhp[i] <= 0);
@@ -754,7 +728,8 @@ void Battle::RenderCurrentCommand()
 		{
 			nameColor = GetColor(255, 255, 0);
 
-			DrawString(x - 25,y,L"▶",GetColor(255, 255, 0));
+			//DrawString(x - 25,y,L"▶",GetColor(255, 255, 0));
+			m_image->DrawCommandCursor(drawCommandCursorPosition, drawCommandCursorSize);
 		}
 
 		// 仲間の名前
@@ -821,7 +796,7 @@ void Battle::RenderCurrentHp()
 
 
 // Attack Select
-void Battle::UpdateAttackSelect()
+void Battle::UpdateAttackSelect(InputManager&inputManager)
 {
 	if (m_party == nullptr)
 	{
@@ -838,14 +813,10 @@ void Battle::UpdateAttackSelect()
 		return;
 	}
 
-
-
 	// 戻る
-	if (m_receponsTimer > 25 && CheckHitKey(KEY_INPUT_BACK))
+	if (m_receponsTimer > 25 && (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B)))
 	{
 		m_receponsTimer = 0;
-
-
 
 		// 1体目ならコマンド画面へ戻る
 		if (m_monsterSelect == 0)
@@ -866,13 +837,10 @@ void Battle::UpdateAttackSelect()
 			return;
 		}
 
-
-
 		// 2体目以降なら1体前へ戻る
 		do
 		{
 			m_monsterSelect--;
-
 		} while (m_monsterSelect >= 0 && m_monsterhp[m_monsterSelect] <= 0);
 
 
@@ -891,8 +859,6 @@ void Battle::UpdateAttackSelect()
 		return;
 	}
 
-
-
 	// 選択終了
 	if (m_monsterSelect >= m_party->GetMonsterCount())
 	{
@@ -904,15 +870,11 @@ void Battle::UpdateAttackSelect()
 		return;
 	}
 
-
-
 	// HP0の仲間を自動で飛ばす
 	while (m_monsterSelect < m_party->GetMonsterCount() && m_monsterhp[m_monsterSelect] <= 0)
 	{
 		m_monsterSelect++;
 	}
-
-
 
 	// 全員選択済み
 	if (m_monsterSelect >= m_party->GetMonsterCount())
@@ -925,37 +887,28 @@ void Battle::UpdateAttackSelect()
 		return;
 	}
 
-
-
 	// 現在選択中モンスターの技
 	auto& attacks = m_party->GetMonster(m_monsterSelect)->GetAttacks();
-
-
 	if (m_receponsTimer > 25)
 	{
-
 		// 左：敵ターゲット変更
-		if (CheckHitKey(KEY_INPUT_LEFT))
+		if (inputManager.IsTrigger(KEY_INPUT_LEFT) || inputManager.IsPadTrigger(PAD_INPUT_LEFT))
 		{
 			m_targetEnemyIndex = GetValidTargetIndex(m_targetEnemyIndex - 1);
 
 			m_receponsTimer = 0;
 		}
 
-
-
 		// 右：敵ターゲット変更
-		if (CheckHitKey(KEY_INPUT_RIGHT))
+		if (inputManager.IsTrigger(KEY_INPUT_RIGHT) || inputManager.IsPadTrigger(PAD_INPUT_RIGHT))
 		{
 			m_targetEnemyIndex = GetValidTargetIndex(m_targetEnemyIndex + 1);
 
 			m_receponsTimer = 0;
 		}
 
-
-
 		// 下：技選択
-		if (CheckHitKey(KEY_INPUT_DOWN))
+		if (inputManager.IsTrigger(KEY_INPUT_DOWN) || inputManager.IsPadTrigger(PAD_INPUT_DOWN))
 		{
 			m_attackSelect++;
 			m_receponsTimer = 0;
@@ -966,10 +919,8 @@ void Battle::UpdateAttackSelect()
 			}
 		}
 
-
-
 		// 上：技選択
-		if (CheckHitKey(KEY_INPUT_UP))
+		if (inputManager.IsTrigger(KEY_INPUT_UP) || inputManager.IsPadTrigger(PAD_INPUT_UP))
 		{
 			m_attackSelect--;
 			m_receponsTimer = 0;
@@ -980,30 +931,23 @@ void Battle::UpdateAttackSelect()
 			}
 		}
 
-
-
 		// 決定
-		if (CheckHitKey(KEY_INPUT_RETURN))
+		if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A))
 		{
 			m_receponsTimer = 0;
 
 			int targetIndex = GetValidTargetIndex(m_targetEnemyIndex);
 
-
 			if (targetIndex < 0)
 			{
 				return;
 			}
-
-
 			// 現在カーソル位置を確定
 			m_targetEnemyIndex = targetIndex;
 			m_selectedTargetEnemyIndex = targetIndex;
 
-
 			// 技を確定
 			m_selectedAttack[m_monsterSelect] = m_attackSelect;
-
 
 			// 次のモンスターへ
 			m_monsterSelect++;
@@ -1068,7 +1012,12 @@ void Battle::RenderAttackSelect()
 		// 現在のカーソル
 		if (i == m_attackSelect)
 		{
-			DrawString(250-25,580 + i * 40,L"▶",GetColor(255, 255, 0));
+			drawCommandCursorPosition.x = 220;
+			drawCommandCursorPosition.y= 580 + i * 40 ;
+			drawCommandCursorSize = { 30,30 };
+			
+			//DrawString(250-25,580 + i * 40,L"▶",GetColor(255, 255, 0));
+			m_image->DrawCommandCursor(drawCommandCursorPosition, drawCommandCursorSize);
 		}
 	}
 }
@@ -1449,20 +1398,20 @@ void Battle::RenderAttackAction()
 
 
 // Tool
-void Battle::UpdateTool()
+void Battle::UpdateTool(InputManager&inputManager)
 {
 	if (m_state != BattleState::Tool)
 	{
 		return;
 	}
 	//決定
-	if (m_receponsTimer > 25 && CheckHitKey(KEY_INPUT_RETURN))
+	if (m_receponsTimer > 25 && (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A)))
 	{
 		m_receponsTimer = 0;
 		m_state = BattleState::EnemyTurn;
 	}
 	// 戻る
-	if (m_receponsTimer > 25 && CheckHitKey(KEY_INPUT_BACK))
+	if (m_receponsTimer > 25 && (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B)))
 	{
 		m_receponsTimer = 0;
 
@@ -1483,22 +1432,13 @@ void Battle::UpdateTool()
 
 void Battle::RenderTool()
 {
-	if (m_windowWidthFront > 300)
-	{
-		m_windowWidthFront = 300;
-	}
-
-	if (m_windowWidth > 610)
-	{
-		m_windowWidth = 610;
-	}
-
-
-	DrawBox(340 - m_windowWidthFront, 530, 630 + m_windowWidth, 690, GetColor(0, 0, 0), TRUE);
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
+	DrawString(200, 470, L"道具", GetColor(255, 255, 255));
+	DrawFormatString(250, 580, GetColor(255, 255, 255), L"未入手");
 }
 
 //Suppot
-void Battle::UpdateSuppot()
+void Battle::UpdateSuppot(InputManager&inputManager)
 {
 	if (m_state != BattleState::Suppot)
 	{
@@ -1506,13 +1446,13 @@ void Battle::UpdateSuppot()
 	}
 
 	//決定
-	if (m_receponsTimer > 25 && CheckHitKey(KEY_INPUT_RETURN))
+	if (m_receponsTimer > 25 && (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A)))
 	{
 		m_receponsTimer = 0;
 		m_state = BattleState::EnemyTurn;
 	}
 	// 戻る
-	if (m_receponsTimer > 25 && CheckHitKey(KEY_INPUT_BACK))
+	if (m_receponsTimer > 25 && (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B)))
 	{
 		m_receponsTimer = 0;
 
@@ -1533,12 +1473,9 @@ void Battle::UpdateSuppot()
 void Battle::RenderSuppot()
 {
 	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
-	DrawString(40, 580, L"応援", GetColor(255, 255, 255));
+	DrawString(200, 470, L"応援", GetColor(255, 255, 255));
+	DrawFormatString(250, 580, GetColor(255, 255, 255), L"未開放");
 }
-
-
-
-
 
 // Run
 void Battle::UpdateRun()
@@ -1660,15 +1597,11 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 			return;
 		}
 
-
 		m_displayMessage =target->GetName() + L"に攻撃！";///////後に技名にする
-
-
 		// 120フレーム目にダメージ
 		if (m_displaytextTimer == 120)
 		{
 			int damage = enemy->GetPower();
-
 
 			// 防御中なら半減
 			if (m_requestDefense[m_enemyTargetIndex])
@@ -1676,24 +1609,18 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 				damage /= 2;
 			}
 
-
 			int beforeHp =target->GetCurrentHitPoint();
-
 
 			target->Damage(damage);
 
-
 			int actualDamage =beforeHp - target->GetCurrentHitPoint();
 
-
 			m_monsterhp[m_enemyTargetIndex] =target->GetCurrentHitPoint();
-
 
 			if (m_monsterhp[m_enemyTargetIndex] < 0)
 			{
 				m_monsterhp[m_enemyTargetIndex] = 0;
 			}
-
 
 			m_displayMessageEnemyAttackDamage[m_enemyTargetIndex] =target->GetName()+ L"に"+ std::to_wstring(actualDamage)+ L"ダメージ";
 		}
@@ -1704,7 +1631,6 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 	else if (m_enemyAttackType == 1 &&m_displaytextTimer <= 120)
 	{
 		m_displayMessage = L"全体攻撃";///////後に技名にする
-
 
 		// 120フレーム目にダメージ
 		if (m_displaytextTimer == 120)
@@ -1718,16 +1644,13 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 					continue;
 				}
 
-
 				// 死亡している仲間には攻撃しない
 				if (m_monsterhp[i] <= 0)
 				{
 					continue;
 				}
 
-
 				int damage = enemy->GetPower();
-
 
 				// 防御中なら半減
 				if (m_requestDefense[i])
@@ -1735,30 +1658,18 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 					damage /= 2;
 				}
 
-
 				int beforeHp =monster->GetCurrentHitPoint();
-
-
 				monster->Damage(damage);
-
-
 				int actualDamage =beforeHp - monster->GetCurrentHitPoint();
-
-
 				m_monsterhp[i] =monster->GetCurrentHitPoint();
-
-
 				if (m_monsterhp[i] < 0)
 				{
 					m_monsterhp[i] = 0;
 				}
-
 				m_displayMessageEnemyAttackDamage[i] =monster->GetName()+ L"に"+ std::to_wstring(actualDamage)+ L"ダメージ";
 			}
 		}
 	}
-
-
 	// ダメージ表示
 	if (m_displaytextTimer >= 180)
 	{
@@ -1771,7 +1682,6 @@ void Battle::RenderEnemyTurn()
 {
 	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
 	RenderCurrentHp();
-
 
 	DrawString(150, 480, m_displayMessage.c_str(), GetColor(255, 255, 255));
 	for (int i=0;i < m_party->GetMonsterCount();i++)
@@ -1971,7 +1881,7 @@ void Battle::AddJoinEnemy()
 	m_joinState = JoinState::None;
 }
 
-void Battle::UpdateJoinReplace()
+void Battle::UpdateJoinReplace(InputManager&inputManager)
 {
 	if (m_party == nullptr)
 	{
@@ -1986,7 +1896,7 @@ void Battle::UpdateJoinReplace()
 
 
 	// 上
-	if (m_receponsTimer > 15 && CheckHitKey(KEY_INPUT_UP))
+	if (m_receponsTimer > 15 && (inputManager.IsTrigger(KEY_INPUT_UP) || inputManager.IsPadTrigger(PAD_INPUT_UP)))
 	{
 		m_replaceSelect--;
 
@@ -2000,7 +1910,7 @@ void Battle::UpdateJoinReplace()
 
 
 	// 下
-	if (m_receponsTimer > 15 && CheckHitKey(KEY_INPUT_DOWN))
+	if (m_receponsTimer > 15 && (inputManager.IsTrigger(KEY_INPUT_DOWN) || inputManager.IsPadTrigger(PAD_INPUT_DOWN)))
 	{
 		m_replaceSelect++;
 
@@ -2014,7 +1924,7 @@ void Battle::UpdateJoinReplace()
 
 
 	// 決定
-	if (m_receponsTimer > 15 && CheckHitKey(KEY_INPUT_RETURN))
+	if (m_receponsTimer > 15 && (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A)))
 	{
 		m_receponsTimer = 0;
 
@@ -2025,7 +1935,7 @@ void Battle::UpdateJoinReplace()
 
 
 	// キャンセル
-	if (m_receponsTimer > 15 && CheckHitKey(KEY_INPUT_BACK))
+	if (m_receponsTimer > 15 && (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B)))
 	{
 		m_receponsTimer = 0;
 
@@ -2049,10 +1959,8 @@ void Battle::ReplaceMonster()
 		return;
 	}
 
-
 	// 外す仲間のindex
 	int removeIndex = m_replaceSelect;
-
 
 	// 範囲チェック
 	if (removeIndex < 0 ||
@@ -2061,19 +1969,14 @@ void Battle::ReplaceMonster()
 		return;
 	}
 
-
 	// 敵の種類を保存
 	Monster::Type joinType = m_joinEnemy->GetMonsterType();
-
 
 	// 先に現在の仲間を削除
 	m_party->RemoveMonster(removeIndex);
 
-
 	// 新しい仲間を作成
-	auto newMonster =
-		std::make_unique<Monster>(joinType);
-
+	auto newMonster =std::make_unique<Monster>(joinType);
 
 	// パーティに追加
 	m_party->AddMonster(std::move(newMonster));

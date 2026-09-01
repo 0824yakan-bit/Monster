@@ -16,7 +16,7 @@ void GameOver::Initialize()
 
 void GameOver::Update(InputManager&inputManager)
 {
-    if (inputManager.IsTrigger(KEY_INPUT_RETURN))
+    if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A))
     {
         m_isTitleRequest = true;
     }
@@ -30,14 +30,14 @@ void GameOver::Render()
     DrawString(420, 300, L"GAME OVER", GetColor(255, 0, 0), TRUE);
 
     SetFontSize(24);
-    DrawString(430, 420, L"Enterでタイトルへ", GetColor(255, 255, 255), TRUE);
+    DrawString(430, 420, L"AorEnterでタイトルへ", GetColor(255, 255, 255), TRUE);
 }
 
 void GameOver::Finalize()
 {
 }
 
-bool GameOver::IsTitleRequest()
+bool GameOver::IsTitleRequest()const
 {
     return m_isTitleRequest;
 }

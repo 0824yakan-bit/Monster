@@ -13,6 +13,6 @@ public:
 		void Render();
 		void Finalize();
 
-		bool IsTitleRequest();//GameOver→TitleScene
+		bool IsTitleRequest()const;//GameOver→TitleScene
 };
 

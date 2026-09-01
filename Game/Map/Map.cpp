@@ -49,6 +49,7 @@ void Map::Initialize(const wchar_t* fileName)
 	m_moveDir = MoveDir::None;
 	m_stageNo = 0;
 	m_isbossAreaOpen = false;
+	m_level = 0;
 	m_breakLevel = 0;
 
 	m_changeX = MAP_WIDTH;
@@ -131,7 +132,7 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 	{
 		if (m_difference[GAME_CLEAR_MAP][GAME_CLEAR_Y][GAME_CLEAR_X] == false)
 		{
-			printfDx(L"MapBreak");
+			//printfDx(L"MapBreak");
 			MapBreak();
 		}
 
@@ -383,7 +384,7 @@ void Map::LastBossDefeated()
 
 	m_changeTimer = 0;
 
-	printfDx(L"map=%d x=%d y=%d\n",m_changeMap,m_changeX,m_changeY);
+	//printfDx(L"map=%d x=%d y=%d\n",m_changeMap,m_changeX,m_changeY);
 
 	m_basemap[m_changeMap][m_changeY][m_changeX] = TileType::Fall;
 
@@ -501,6 +502,23 @@ bool Map::IsSignboardRect(int px, int py, int width, int height) const
 			GetTileType(right, bottom)	== TileType::Signboard;
 }
 
+bool Map::IsSlimeRect(int px, int py, int width, int height) const
+{
+	int left = px / m_chipSize;
+	int right = (px + width - 1) / m_chipSize;
+	int top = py / m_chipSize;
+	int bottom = (py + height - 1) / m_chipSize;
+
+	// プレイヤーが (5,5) のマスに触れているか
+	if (m_currentMap == 0)
+	{
+		if (left <= 5 && 5 <= right && top <= 5 && 5 <= bottom)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 TileType Map::GetTileType(int x, int y) const
 {
 	if (x < 0 || x >= MAP_WIDTH ||
@@ -566,7 +584,10 @@ void Map::EnterBossArea()
 {
 	m_currentMap = 9;
 }
-
+void Map::ExitBossArea()
+{
+	m_currentMap = 8;
+}
 int Map::GetBreakLevel()const
 {
 	return m_level;
@@ -712,7 +733,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Fire, 3);
+			BreakAreaByGroup(tx, ty, -2, 3, -2, 3, TileGroup::Fire, 3);
 
 
 		}
@@ -724,7 +745,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Water, 1);
+			BreakAreaByGroup(tx, ty, -3, 4, -3, 4, TileGroup::Water, 1);
 
 		}
 
@@ -735,7 +756,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Grass, 0);
+			BreakAreaByGroup(tx, ty, -3, 4, -3, 4, TileGroup::Grass, 0);
 
 
 		}
@@ -747,7 +768,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Soil, 5);
+			BreakAreaByGroup(tx, ty, -3, 4, -3, 4, TileGroup::Soil, 5);
 
 		}
 

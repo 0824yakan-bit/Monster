@@ -6,6 +6,14 @@ BossManager::BossManager()
 {
 }
 
+void BossManager::Initialize()
+{
+    for (int i = 0;i < 4;i++)
+    {
+        m_bossDefeated[i]=false;
+    }
+}
+
 void BossManager::DefeatBoss(int bossNo)
 {
     if (bossNo < 0 || bossNo >= 4)

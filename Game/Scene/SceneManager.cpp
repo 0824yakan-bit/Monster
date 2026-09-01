@@ -23,6 +23,7 @@ void SceneManager::Initialize(TextManager& textManager, InputManager& inputmanag
     m_nextSceneID = SceneID::None;
 
     m_image = &image;
+    m_titleScene.SetImage(&image);
     m_fieldScene.SetImage(&image);
     m_fieldScene.STtext.m_start = true;
     textManager.SetDisplayText();
@@ -110,7 +111,7 @@ void SceneManager::UpdateCurrentScene(TextManager&textManager,InputManager&input
 
     case SceneID::Field:
    
-        m_fieldScene.Update(textManager,inputmanager,playerManager,enemyManager,map,battle,accessory,party);
+        m_fieldScene.Update(textManager,inputmanager,m_gameOver,playerManager,enemyManager,map,battle,accessory,party);
 
         if (m_fieldScene.IsBattleRequested())
         {
@@ -150,7 +151,7 @@ void SceneManager::RenderCurrentScene(TextManager& textManager, PlayerManager& p
     switch (m_currentSceneID)
     {
     case SceneID::Title:   m_titleScene.Render();  break;
-    case SceneID::Field:    m_fieldScene.Render(textManager, playerManager,enemyManager,map,accessory,party);   break;
+    case SceneID::Field:    m_fieldScene.Render(textManager,m_gameOver,playerManager,enemyManager,map,accessory,party);   break;
     case SceneID::Battle:   m_battleScene.Render(m_gameOver,party,map);   break;
 
 
@@ -173,10 +174,11 @@ void SceneManager::FinalizeCurrentScene()
 
 bool SceneManager::IsTitleRequested() const
 {
-    return m_battleScene.IsTitleRequested();
+    return m_battleScene.IsTitleRequested()||m_gameOver.IsTitleRequest();
 }
 
 void SceneManager::ResetTitleRequest()
 {
     m_battleScene.ResetTitleRequest();
+    m_gameOver.Initialize();
 }

@@ -41,8 +41,6 @@ private:
 	// タイル情報
 	TileRole m_tileRole;
 
-
-
 	// ステージ情報
 	int m_stageNo = 0;					// 0 = ステージ1、1 = ステージ2 ...
 	static constexpr int MAPS_PER_STAGE = 10;
@@ -67,7 +65,7 @@ private:
 	int m_changeMap;
 
 	int m_changeTimer;
-	static const int CHANGE_INTERVAL = 10;
+	static const int CHANGE_INTERVAL = 5;
 
 	// グラフィックハンドル
 	int m_ghChip[GH_MAX];
@@ -129,6 +127,7 @@ public:
 	bool IsNextFloorRect	(int px,int py,int width,int height) const;	// 階段との当たり判定
 	bool IsFallRect(int px, int py, int width, int height) const;	// 穴との当たり判定
 	bool IsSignboardRect(int px, int py, int width, int height) const;	// 看板との当たり判定
+	bool IsSlimeRect(int px, int py, int width, int height) const;	// 看板との当たり判定
 	
 
 	TileType GetTileType	(int x, int y) const;	// 指定座標のタイル種類を取得
@@ -148,6 +147,7 @@ public:
 	void	OpenBossArea	();				//ラスボスエリア開放
 	//エリア移動
 	void	EnterBossArea	();				//ラスボスエリア侵入
+	void	ExitBossArea	();				//ラスボスエリア脱出
 
 	// マップ描画
 	void	DrawCurrentMap	(int offsetX, int offsetY);		// 現在のマップを描画

@@ -110,10 +110,7 @@ void BattleScene::Initialize(InputManager& inputmanager,SceneManager& sceneManag
 			size_t insertIndex =
 				std::min<size_t>(1, m_battleEnemies.size());
 
-			m_battleEnemies.insert(
-				m_battleEnemies.begin() + insertIndex,
-				m_enemy
-			);
+			m_battleEnemies.insert(m_battleEnemies.begin() + insertIndex,m_enemy);
 		}
 	}
 
@@ -186,12 +183,10 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 		// 戦闘前の位置へ戻す
 		if (m_player != nullptr)
 		{
-			m_player->m_position =
-				m_player->m_oldposition;
+			m_player->m_position =m_player->m_oldposition;
 
 			m_player->m_invicible = true;
 		}
-
 		m_isFieldRequested = true;
 	}
 
@@ -200,34 +195,29 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 	{
 		m_battle->SetJoinWindow(true);
 
-
 		if (m_receponsTimer > 30)
 		{
 			// 左右選択
-			if (CheckHitKey(KEY_INPUT_LEFT))
+			if (inputManager.IsTrigger(KEY_INPUT_LEFT)||inputManager.IsPadTrigger(PAD_INPUT_LEFT))
 			{
 				m_joinSelect = 0;
 				m_receponsTimer = 0;
 			}
-			else if (CheckHitKey(KEY_INPUT_RIGHT))
+			else if (inputManager.IsTrigger(KEY_INPUT_RIGHT) || inputManager.IsPadTrigger(PAD_INPUT_RIGHT))
 			{
 				m_joinSelect = 1;
 				m_receponsTimer = 0;
 			}
 
-
 			// 決定
-			else if (CheckHitKey(KEY_INPUT_RETURN))
+			else if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A))
 			{
 				// 倒したエンカウント敵
 				Enemy* targetEnemy = m_enemy;
-
-
 				if (targetEnemy == nullptr)
 				{
 					return;
 				}
-
 
 				// 仲間にする
 				if (m_joinSelect == 0)
@@ -279,7 +269,6 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 						break;
 					}
 
-
 					// Monsterが生成できていない場合
 					if (monster == nullptr)
 					{
@@ -287,42 +276,28 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 					}
 
 					fieldScene.ReceiveJoinedMonster(std::move(monster));
-
 					// Battleから敵を削除
 					m_battle->RemoveEnemy(targetEnemy);
-
 					// EnemyManagerから敵本体を削除
 					enemyManager.RemoveEnemy(targetEnemy);
-
 					m_enemy = nullptr;
-
 					// 加入選択終了
 					m_isJoinRequested = false;
-
 					// Fieldへ戻る
 					m_isFieldRequested = true;
-
 					m_receponsTimer = 0;
-
 					return;
 				}
-
 
 				// 仲間にしない
 				else
 				{
 					m_battle->RemoveEnemy(targetEnemy);
-
 					enemyManager.RemoveEnemy(targetEnemy);
-
 					m_enemy = nullptr;
-
 					m_isJoinRequested = false;
-
 					m_isFieldRequested = true;
-
 					m_receponsTimer = 0;
-
 					return;
 				}
 			}
@@ -395,11 +370,8 @@ void BattleScene::Render(GameOver& gameOver,Party& party,Map& map)
 		break;
 	}
 
-
 	// 現在の攻撃対象カーソル
 	Enemy* target =m_battle->GetTargetEnemy();
-
-
 	if (target != nullptr &&target->GetHp() > 0)
 	{
 		int cursorX =static_cast<int>(target->renderPosition.x +target->renderSize.x / 2);

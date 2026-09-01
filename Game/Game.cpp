@@ -38,6 +38,7 @@ Game::Game()
 	, m_oldKey{ 0 }
 	, m_oldMapNo{ 0 }
 	, m_WorldTimer{ 0 }
+
 {
 	SRand(static_cast<unsigned int>(time(nullptr)));
 }
@@ -73,7 +74,7 @@ void Game::Initialize()
 
 	m_imageManager.LoadTextures();
 	m_enemyManager.SetImage(&m_imageManager);
-
+	m_bossManager.Initialize();
 	m_map.Initialize(L"Resources/map.csv");
 	m_playerManager.Initialize(&m_map);
 	m_enemyManager.Initialize(m_map);

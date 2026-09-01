@@ -10,6 +10,7 @@ public:
 		Signboard_1,//看板１
 		Signboard_2,//看板２
 		Signboard_3,//看板３
+		Signboard_4,//看板４
 		End,//ゲーム終了時
 		textend,
 	};
@@ -34,6 +35,7 @@ public:
 	void SignBoard_1Text(int count);
 	void SignBoard_2Text(int count);
 	void SignBoard_3Text(int count);
+	void SignBoard_4Text(int count);
 	void EndText(int count);
 
 };

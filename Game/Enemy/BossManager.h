@@ -6,6 +6,7 @@ private:
 public:
     BossManager();
 
+    void Initialize();
     void DefeatBoss(int bossNo);//倒したボスを撃破(TRUE)にする
 
     bool IsBossDefeated(int bossNo) const;//指定したボスが撃破(TRUE)されたか

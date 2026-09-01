@@ -48,7 +48,7 @@ void PlayerMove::Initialize(Map* map, PlayerManager& playermanager)
 	m_fallPosition = { 0,0 };
 }
 
-void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanager, Accessory* accessory)
+void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanager, Accessory* accessory,Party*party)
 {
 	m_mapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
 	m_mapY = static_cast<int>(playermanager->m_position.y) / m_chipsize;
@@ -65,7 +65,15 @@ void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanage
 
 	if (m_hitFall || m_isFalling)
 	{
-		//落下中は入力を更新しない
+		// 落下した瞬間だけダメージ
+		if (!m_isFalling)
+		{
+			for (int i = 0; i < party->GetMonsterCount(); i++)
+			{
+				party->GetMonster(i)->Damage(5);
+			}
+		}
+
 		ReductionPlayer(*playermanager, map);
 		return;
 	}
@@ -93,10 +101,31 @@ void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanage
 
 	if (m_hitNextFloor)
 	{
-		map->EnterBossArea();
+		switch (map->GetCurrentMap())
+		{
+		case 0:
+			field->STtext.m_signboard_1 = true;
+			break;
+		case 4:
+			field->STtext.m_signboard_2 = true;
+			break;
+		case 5:
+			field->STtext.m_signboard_3 = true;
+			break;
+		case 8:
+			map->EnterBossArea();
 
-		playermanager->m_position.x = 10 * m_chipsize;
-		playermanager->m_position.y = 10 * m_chipsize;
+			playermanager->m_position.x = 2 * m_chipsize;
+			playermanager->m_position.y = 2 * m_chipsize;
+			break;
+		case 9:
+			map->ExitBossArea();
+
+			playermanager->m_position.x = 37 * m_chipsize;
+			playermanager->m_position.y = 20 * m_chipsize;
+			break;
+		}
+
 		return;
 	}
 
@@ -106,7 +135,7 @@ void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanage
 		playermanager->m_size.x,
 		playermanager->m_size.y);
 
-	if (m_hitSignboard&&m_inputManager.IsTrigger(KEY_INPUT_RETURN))
+	if (m_hitSignboard&&(m_inputManager.IsTrigger(KEY_INPUT_RETURN)||m_inputManager.IsPadTrigger(PAD_INPUT_A)))
 	{
 		switch (map->GetCurrentMap())
 		{
@@ -119,6 +148,9 @@ void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanage
 		case 5:
 			field->STtext.m_signboard_3 = true;
 			break;
+		case 6:
+			field->STtext.m_signboard_4 = true;
+			break;
 		}
 	}
 	//通常移動
@@ -126,22 +158,22 @@ void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanage
 	{
 		playermanager->m_oldposition = playermanager->m_position;
 
-		if (m_inputManager.IsPress(KEY_INPUT_RIGHT))
+		if (m_inputManager.IsPress(KEY_INPUT_RIGHT)||m_inputManager.IsPadPress(PAD_INPUT_RIGHT))
 		{
 			playermanager->m_position.x += m_speed;
 			playermanager->m_direction = playermanager->Direction::Right;
 		}
-		else if (m_inputManager.IsPress(KEY_INPUT_LEFT))
+		else if (m_inputManager.IsPress(KEY_INPUT_LEFT) || m_inputManager.IsPadPress(PAD_INPUT_LEFT))
 		{
 			playermanager->m_position.x -= m_speed;
 			playermanager->m_direction = playermanager->Direction::Left;
 		}
-		else if (m_inputManager.IsPress(KEY_INPUT_UP))
+		else if (m_inputManager.IsPress(KEY_INPUT_UP) || m_inputManager.IsPadPress(PAD_INPUT_UP))
 		{
 			playermanager->m_position.y -= m_speed;
 			playermanager->m_direction = playermanager->Direction::Up;
 		}
-		else if (m_inputManager.IsPress(KEY_INPUT_DOWN))
+		else if (m_inputManager.IsPress(KEY_INPUT_DOWN) || m_inputManager.IsPadPress(PAD_INPUT_DOWN))
 		{
 			playermanager->m_position.y += m_speed;
 			playermanager->m_direction = playermanager->Direction::Down;
@@ -158,6 +190,16 @@ void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanage
 			playermanager->m_position = playermanager->m_oldposition;
 		}
 		m_movetimer = 5;
+	}
+	m_hitSlime = map->IsSlimeRect(
+		static_cast<int>(playermanager->m_position.x),
+		static_cast<int>(playermanager->m_position.y),
+		playermanager->m_size.x,
+		playermanager->m_size.y);
+	if (m_hitSlime&& (m_inputManager.IsTrigger(KEY_INPUT_RETURN) || m_inputManager.IsPadTrigger(PAD_INPUT_A)))
+	{
+		field->STtext.m_start = true;
+		return;
 	}
 }
 
