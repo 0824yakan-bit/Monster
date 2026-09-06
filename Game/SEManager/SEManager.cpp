@@ -7,6 +7,7 @@ void SEManager::LoadSounds()
     soundEffects.push_back({ SoundList::Decision,LoadSoundMem(L"Resources/Sounds/decision.ogg") });
     soundEffects.push_back({ SoundList::Cancel,LoadSoundMem(L"Resources/Sounds/cancel.ogg") });
     soundEffects.push_back({ SoundList::Cursor,LoadSoundMem(L"Resources/Sounds/cursor.ogg") });
+    soundEffects.push_back({ SoundList::Lose,LoadSoundMem(L"Resources/Sounds/lose.ogg") });
 
     //Title
     soundEffects.push_back({ SoundList::TitleBGM,LoadSoundMem(L"Resources/Sounds/titleBGM.ogg") });
@@ -18,7 +19,8 @@ void SEManager::LoadSounds()
     soundEffects.push_back({ SoundList::BattleBGM_Normal_1  ,LoadSoundMem(L"Resources/Sounds/battleBGM_1.ogg") });
     soundEffects.push_back({ SoundList::BattleBGM_Normal_2  ,LoadSoundMem(L"Resources/Sounds/battleBGM_2.ogg") });
     soundEffects.push_back({ SoundList::BattleBGM_Boss      ,LoadSoundMem(L"Resources/Sounds/battleBossBGM.ogg") });
-    soundEffects.push_back({ SoundList::Run                 ,LoadSoundMem(L"Resources/Sounds/run.ogg" )});
+    soundEffects.push_back({ SoundList::Run                 ,LoadSoundMem(L"Resources/Sounds/run.ogg") });
+    soundEffects.push_back({ SoundList::Win                 ,LoadSoundMem(L"Resources/Sounds/win.ogg" )});
 
 }
 

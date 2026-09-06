@@ -5,7 +5,7 @@ public:
 	enum class SoundList
 	{
 		Decision,Cancel,Cursor,
-		
+		Lose,//GameOver
 		//Title
 		TitleBGM,
 		TitleSE,
@@ -16,7 +16,7 @@ public:
 		
 		//Battle
 		BattleBGM_Normal_1,BattleBGM_Normal_2,BattleBGM_Boss,
-		Run,
+		Run,Win,
 	};
 private:
 	struct SoundEffects

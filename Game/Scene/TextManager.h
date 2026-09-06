@@ -25,6 +25,7 @@ private:
 	TextType m_currentTextType;
 	int m_TextCount[TextType::textend];
 	bool m_display;
+	bool m_blinking;
 	int m_displayTimer;
 	int m_receptionTimer;
 	std::wstring m_displayText;

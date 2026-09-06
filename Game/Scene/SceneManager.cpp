@@ -204,7 +204,7 @@ void SceneManager::FinalizeCurrentScene()
     {
     case SceneID::Title:   m_titleScene.Finalize();m_sound->SoundStop(SEManager::SoundList::TitleBGM);  break;
     case SceneID::Field:    m_fieldScene.Finalize();m_sound->SoundStop(SEManager::SoundList::FieldBGM);   break;
-    case SceneID::Battle:   m_battleScene.Finalize();m_sound->SoundStop(SEManager::SoundList::BattleBGM_Normal_1);m_sound->SoundStop(SEManager::SoundList::BattleBGM_Normal_2);   break;
+    case SceneID::Battle:   m_battleScene.Finalize();m_sound->SoundStop(SEManager::SoundList::BattleBGM_Normal_1);m_sound->SoundStop(SEManager::SoundList::BattleBGM_Normal_2);m_sound->SoundStop(SEManager::SoundList::BattleBGM_Boss);   break;
 
     default:      assert(!"シーンIDが不正です");break;
     }
