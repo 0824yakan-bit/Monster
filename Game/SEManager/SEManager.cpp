@@ -8,6 +8,7 @@ void SEManager::LoadSounds()
     soundEffects.push_back({ SoundList::Cancel,LoadSoundMem(L"Resources/Sounds/cancel.ogg") });
     soundEffects.push_back({ SoundList::Cursor,LoadSoundMem(L"Resources/Sounds/cursor.ogg") });
     soundEffects.push_back({ SoundList::Lose,LoadSoundMem(L"Resources/Sounds/lose.ogg") });
+    soundEffects.push_back({ SoundList::Break,LoadSoundMem(L"Resources/Sounds/break.ogg") });////
 
     //Title
     soundEffects.push_back({ SoundList::TitleBGM,LoadSoundMem(L"Resources/Sounds/titleBGM.ogg") });

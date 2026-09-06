@@ -70,10 +70,10 @@ private:
 	bool m_isbossAreaOpen;
 
 	//ボスエリアまでの階段の座標
-	static constexpr int X_LEFT		= 20;//左
-	static constexpr int X_RIGHT	= 21;//右
-	static constexpr int Y_TOP		= 10;//上
-	static constexpr int Y_BOTTOM	= 11;//下
+	static constexpr int X		= 33;//
+	static constexpr int Y_1	= 12;//
+	static constexpr int Y_2	= 13;//
+
 
 	// ブレイク情報
 	int dangerAdd = 1;

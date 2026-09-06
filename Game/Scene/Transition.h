@@ -19,7 +19,7 @@ private:
 	PositionY m_posY;
 	
 private://TitletoPlay
-	static constexpr float MAX_RADIUS = 3000.0f; // 虹彩の最大半径（1280x720の時）
+	static constexpr float MAX_RADIUS = 2000.0f; // 虹彩の最大半径（1280x720の時）
 
 	float m_irisRadius;     // 虹彩の半径
 	int   m_ghIrisScreen;   // 虹彩の描画先（バックバッファ）

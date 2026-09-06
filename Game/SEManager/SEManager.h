@@ -5,7 +5,8 @@ public:
 	enum class SoundList
 	{
 		Decision,Cancel,Cursor,
-		Lose,//GameOver
+		Lose,/*GameOver*/Break,/*Map->Break*/
+
 		//Title
 		TitleBGM,
 		TitleSE,
