@@ -12,7 +12,7 @@ Turtle::~Turtle()
 
 }
 
-void Turtle::Initialize(Map& map, int x, int y, bool isBoss)
+void Turtle::Initialize(Map& map, Party& party, int x, int y, bool isBoss)
 {
 	type = EnemyType::Turtle;
 
@@ -36,8 +36,8 @@ void Turtle::Initialize(Map& map, int x, int y, bool isBoss)
 	renderSize.x = 200;
 	renderSize.y = 200;
 
-	power = 10;
-	hp = 10;
+	SetEnemyStats(map, party, 4, 20);
+
 }
 
 void Turtle::Update(Map& map)

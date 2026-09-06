@@ -3,6 +3,7 @@
 #include"Game/InputManager/InputManager.h"
 #include"Game/Map/Map.h"
 #include"Game/TileRole/TileRole.h"
+#include"Game/Party/Party.h"
 class FieldScene;
 class PlayerManager;
 class Battle;
@@ -28,6 +29,7 @@ private:
 	bool m_hitFall;
 	bool m_hitNextFloor;
 	bool m_hitSignboard;
+	bool m_hitSlime;
 
 	bool m_isFalling;
 	float m_fallScale;
@@ -40,7 +42,7 @@ public:
 	~PlayerMove();
 
 	void Initialize(Map*map,PlayerManager& palayermanager);
-	void Update(FieldScene* field,Map*map, PlayerManager* playermanager,Accessory*accessory);
+	void Update(FieldScene* field,Map*map, PlayerManager* playermanager,BossManager*bossManager,Accessory*accessory,Party*party);
 	void Render(FieldScene* field, Map*map, PlayerManager* playermanager,Accessory*accessory);
 	void Finalize();
 

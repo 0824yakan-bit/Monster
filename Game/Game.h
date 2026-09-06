@@ -18,6 +18,7 @@
 #include"Game/Inputmanager/InputManager.h"
 #include"Game/Scene/TextManager.h"
 #include"Game/ImageManager/ImageManager.h"
+#include"Game/SEManager/SEManager.h"
 #include"Game/Map/Map.h"
 #include"Game/Player/PlayerManager.h"
 #include"Game/Enemy/EnemyManager.h"
@@ -45,6 +46,7 @@ public:
 	//
 private:
 	ImageManager m_imageManager;
+	SEManager m_seManager;
 	TextManager m_textManager;
 	Map m_map;
 	PlayerManager m_playerManager;

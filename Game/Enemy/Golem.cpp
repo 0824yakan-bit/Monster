@@ -12,11 +12,11 @@ Golem::~Golem()
 
 }
 
-void Golem::Initialize(Map& map, int x, int y, bool isBoss)
+void Golem::Initialize(Map& map, Party& party, int x, int y, bool isBoss)
 {
 	type = EnemyType::Golem;
 
-	name = L"ガルム";
+	name = L"ゴーレム";
 
 	position.x = x * map.m_chipSize;
 	position.y = y * map.m_chipSize;
@@ -35,8 +35,8 @@ void Golem::Initialize(Map& map, int x, int y, bool isBoss)
 	renderSize.x = 200;
 	renderSize.y = 200;
 
-	power = 10;
-	hp = 10;
+	SetEnemyStats(map, party, 12, 20);
+
 }
 
 void Golem::Update(Map& map)

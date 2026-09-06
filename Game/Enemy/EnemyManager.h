@@ -32,7 +32,7 @@ public:
     EnemyManager();
     ~EnemyManager();
 
-    void Initialize(Map& map);
+    void Initialize(Map& map, Party& party);
     void Update(Map&map);
     void Render();
     void Finalize();
@@ -43,18 +43,18 @@ public:
 
     void RemoveEnemy(Enemy* enemy);
 
-    void CreateRandomEnemy(Map& map, int x, int y);
-    Enemy* CreateBattleEnemy(Map& map, Enemy::EnemyType type);
+    void CreateRandomEnemy(Map& map, Party& party, int x, int y);
+    Enemy* CreateBattleEnemy(Map& map, Party& party, Enemy::EnemyType type);
 
 
-    void CreateSlime    (int x, int y, Map& map, bool isBoss, int bossNo);
-    void CreateWolf     (int x, int y, Map& map, bool isBoss, int bossNo);
-    void CreateFairy    (int x, int y, Map& map, bool isBoss, int bossNo);
-    void CreateTurtle   (int x, int y, Map& map, bool isBoss, int bossNo);
-    void CreateMole     (int x, int y, Map& map, bool isBoss, int bossNo);
-    void CreateFox      (int x, int y, Map& map, bool isBoss, int bossNo);
-    void CreateGolem    (int x, int y, Map& map, bool isBoss, int bossNo);
-    void CreatePhoenix  (int x, int y, Map& map, bool isBoss, int bossNo);
-    void CreateDragon   (int x, int y, Map& map, bool isBoss, int bossNo);
-    void CreateDaemon   (int x, int y, Map& map, bool isBoss, int bossNo);
+    void CreateSlime    (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+    void CreateWolf     (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+    void CreateFairy    (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+    void CreateTurtle   (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+    void CreateMole     (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+    void CreateFox      (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+    void CreateGolem    (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+    void CreatePhoenix  (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+    void CreateDragon   (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+    void CreateDaemon   (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
 };

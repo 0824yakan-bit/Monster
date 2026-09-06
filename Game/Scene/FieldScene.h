@@ -11,6 +11,8 @@
 #include "Game/Maths/Vector2.h"
 
 class TextManager;
+class ImageManager;
+class SEManager;
 class InputManager;
 class PlayerManager;
 class Enemy;
@@ -30,6 +32,7 @@ public:
         bool m_signboard_1;
         bool m_signboard_2;
         bool m_signboard_3;
+        bool m_signboard_4;
         bool m_end;
     };
     Text STtext;
@@ -45,6 +48,10 @@ public:
     void SetAttackEffects(const std::vector<Battle::UsedAttackInfo>& effects);
 
 private:
+    static constexpr int MAX_PARTY = 4;
+    bool m_annihilation;
+    int m_monsterhp[MAX_PARTY];
+
     bool m_isBattleRequested;
     int m_breakLevel;
     // 仲間加入待ち
@@ -56,6 +63,8 @@ private:
     // 交換する現在のパーティメンバー
     int m_replaceSelect = 0;
     ImageManager* m_image = nullptr;
+    SEManager* m_sound = nullptr;
+
     BossManager& m_bossManager;
     Party* m_party;
     Enemy* m_hitEnemy;
@@ -78,6 +87,9 @@ private:
 
     Vector2 drawMenuBoxPosition_1;
     Vector2 drawMenuBoxSize_1;
+
+    Vector2 drawSelectCursorPosition;
+    Vector2 drawSelectCursorSize;
 
     enum class MenuList
     {
@@ -119,14 +131,18 @@ public:
         GrawGrass,
         Volcazation,
     };
-
     CooperatList m_cooperatList;
+    bool m_isSkillLearned = false;
+    int m_skillLearnTimer = 0;
 
+    CooperatList m_learnedSkill = CooperatList::None;
     // 取得済みの技属性
     std::set<CooperatList> m_unlockedSkills;
-
     // 現在表示する技一覧
     std::vector<CooperatList> m_visibleSkills;
+
+    Vector2 drawEffectPosition;
+    Vector2 drawEffectSize;
 
     // 宝箱中身
     enum class TreasureList
@@ -147,11 +163,11 @@ public:
     FieldScene(BossManager& bossManager,Party&party);
     ~FieldScene();
 
-    void Initialize(InputManager& inputmanager,PlayerManager& playerManager,Map& map);
+    void Initialize(TextManager&textManager,InputManager& inputmanager,PlayerManager& playerManager,Map& map);
 
-    void Update(TextManager& textManager, InputManager& inputManager,PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Battle& battle,Accessory& accessory,Party& party);
+    void Update(TextManager& textManager, InputManager& inputManager,GameOver&gameOver,PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Battle& battle,Accessory& accessory,Party& party);
 
-    void Render(TextManager& textManager, PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Accessory& accessory,Party& party);
+    void Render(TextManager& textManager,GameOver&gameOver, PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Accessory& accessory,Party& party);
 
     void Finalize();
 
@@ -174,8 +190,9 @@ public:
     // 技属性を取得
     void LearnCompositeSkill(CooperatList skill);
 
-
     // Monsterが持っている技属性を取得
+    const wchar_t* GetSkillName(CooperatList skill);
+    bool TryLearnSkill(CooperatList skill);
     void LearnMonsterSkills(const Monster& monster);
 
     bool HasSkill(CooperatList skill) const;
@@ -187,6 +204,7 @@ public:
     void RenderTreasureOpen(Accessory& accessory);
 
     void SetImage(ImageManager* image);
+    void SetSound(SEManager* sound);
 
     bool IsBattleRequested() const;
 

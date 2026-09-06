@@ -4,6 +4,8 @@
 #include "Game/Scene/FieldScene.h"
 
 class InputManager;
+class ImageManager;
+class SEManager;
 class FieldScene;
 class SceneManager;
 class PlayerManager;
@@ -35,6 +37,7 @@ private:
 	bool m_isJoinRequested;
 
 	ImageManager* m_image = nullptr;
+	SEManager* m_sound = nullptr;
 	Battle* m_battle;
 	PlayerManager* m_player;
 	EnemyManager* m_enemyManager;
@@ -79,12 +82,13 @@ public:
 
 	void SetFieldScene(FieldScene* fieldScene);
 	void SetImage(ImageManager* image);
+	void SetSound(SEManager* sound);
 	void SetPlayer(PlayerManager* player);
 	void SetEnemyManager(EnemyManager* enemyManager);
 	void SetEnemy(Enemy* enemy);
 
 	void SetBattleEnemyPositions();
-	void CreateBattleEnemies(Map& map);
+	void CreateBattleEnemies(Map& map, Party& party);
 	void SetBattleEnemies();
 
 	// 現在の攻撃対象

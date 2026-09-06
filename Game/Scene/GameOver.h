@@ -9,10 +9,12 @@ public:
 		~GameOver();
 
 		void Initialize();
-		void Update(InputManager&inputManager);
-		void Render();
+		void GameOverUpdate(InputManager&inputManager);
+		void GameOverRender();
+		void GameClearUpdate(InputManager& inputManager);
+		void GameClearRender();
 		void Finalize();
 
-		bool IsTitleRequest();//GameOver→TitleScene
+		bool IsTitleRequest()const;//GameOver→TitleScene
 };
 

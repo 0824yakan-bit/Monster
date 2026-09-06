@@ -12,7 +12,7 @@ Daemon::~Daemon()
 
 }
 
-void Daemon::Initialize(Map& map, int x, int y,bool isBoss)
+void Daemon::Initialize(Map& map,Party&party, int x, int y,bool isBoss)
 {
 	type = EnemyType::Daemon;
 
@@ -36,8 +36,7 @@ void Daemon::Initialize(Map& map, int x, int y,bool isBoss)
 	renderSize.x = 500;
 	renderSize.y = 500;
 
-	power = 10;
-	hp = 10;
+	SetEnemyStats(map,party, 10, 30);
 }
 
 void Daemon::Update(Map& map)

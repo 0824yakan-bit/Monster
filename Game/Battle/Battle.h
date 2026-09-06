@@ -5,6 +5,10 @@
 #include "Game/Party/Party.h"
 #include "Game/Enemy/Enemy.h"
 
+#include<map>
+#include <deque>
+
+class SEManager;
 class Map;
 class FieldScene;
 class SceneManager;
@@ -26,7 +30,7 @@ public:
 	};
 
 	std::vector<UsedAttackInfo> m_usedAttackOrder;
-
+	std::map<Enemy*, int> m_comboDamageTotal;
 
 private:
 	// 定数
@@ -42,7 +46,7 @@ private:
 		AttackSelect,	// 技選択
 		AttackAction,	// 攻撃演出
 		Tool,
-		Suppot,
+		Party,
 		Run,
 		EnemyTurn,
 		EnemyDead,
@@ -62,14 +66,12 @@ private:
 		USED_WIND = 1 << 6
 	};
 
-
-
 	// ポインタ
 	ImageManager* m_image = nullptr;
+	SEManager* m_sound = nullptr;
 	PlayerManager* m_player = nullptr;
 	Party* m_party = nullptr;
 	FieldScene* m_fieldScene=nullptr;
-
 
 	// 敵関連
 	BossManager& m_bossManager;
@@ -82,8 +84,6 @@ private:
 
 	Enemy* m_deadEnemy = nullptr;
 	std::wstring m_deadEnemyName;
-
-
 
 	// 描画関連
 	Vector2 drawBgPosition;
@@ -107,8 +107,6 @@ private:
 	int m_attackEffectTimer = 0;
 	Monster::CharacteRistics m_effectElement =Monster::CharacteRistics::None;
 
-
-
 	// パーティ関連
 	enum class JoinState
 	{
@@ -128,8 +126,6 @@ private:
 	int m_attackSelect = 0;
 
 	std::vector<int> m_selectedAttack;
-
-
 
 	// 戦闘進行関連
 	BattleState m_state = BattleState::Command;
@@ -152,8 +148,6 @@ private:
 	bool m_isEnemyRequested = false;
 	bool m_isRun			= false;
 
-
-
 	// タイマー・ウィンドウ関連
 	int m_receponsTimer = 0;
 	int m_displaytextTimer = 0;
@@ -162,19 +156,37 @@ private:
 	int m_windowWidth = 0;
 	int m_windowHeight = 0;
 
-
-
 	// 敵死亡演出関連
 	bool m_enemyDeadMotion = false;
 	int m_enemyDeadOffsetY = 0;
 
-
-
 	// メッセージ
+	enum class DisplayMessageType
+	{
+		Normal,
+		Damage,
+		Combo
+	};
+
+	struct BattleDisplayMessage
+	{
+		DisplayMessageType type;
+		std::wstring text;
+	};
+	std::deque<BattleDisplayMessage> m_displayQueue;
+
+	// 現在表示しているメッセージ
+	BattleDisplayMessage m_currentDisplayMessage;
+
+	// 現在の表示時間
+	int m_currentDisplayTimer = 0;
+
+	// 表示中かどうか
+	bool m_isDisplayingMessage = false;
 	std::wstring m_displayMessage;
+	std::wstring m_displayMessageCombo;
 	std::wstring m_displayMessageDamage;
 	std::vector<std::wstring>m_displayMessageEnemyAttackDamage;
-
 
 
 	// コマンド
@@ -182,10 +194,12 @@ private:
 	{
 		L"指示する",
 		L"所持品",
-		L"応援する",
+		L"仲間を見る",
 		L"逃げ出す"
 	};
 
+	Vector2 drawCommandCursorPosition;
+	Vector2 drawCommandCursorSize;
 
 public:
 
@@ -200,67 +214,46 @@ public:
 	void Render(GameOver& gameOver, Map& map);				// 戦闘画面の描画
 	void Finalize();										// 戦闘の終了処理
 
-
-
 	// コマンド選択
 	void RenderCommand();									// コマンド選択画面の描画
 	void RenderCurrentCommand();
 
-
-
 	// 攻撃選択
-	void UpdateAttackSelect();								// 攻撃選択の更新
+	void UpdateAttackSelect(InputManager& inputManager);								// 攻撃選択の更新
 	void RenderAttackSelect();								// 攻撃選択画面の描画
-
-
 
 	// 攻撃実行
 	void UpdateAttackAction(Map& map,PlayerManager& player);// 攻撃処理の更新
 	void RenderAttackAction();								// 攻撃演出の描画
 
-
-
 	// 道具
-	void UpdateTool();										// 道具選択の更新
+	void UpdateTool(InputManager& inputManager);										// 道具選択の更新
 	void RenderTool();										// 道具画面の描画
 
-
-
-	// 応援
-	void UpdateSuppot();										// 応援処理の更新
-	void RenderSuppot();										// 応援画面の描画
-
-
+	// パーティ確認
+	void UpdateParty(InputManager& inputManager);			// パーティ確認の更新
+	void RenderParty();										// パーティ確認画面の描画
 
 	// 逃走
 	void UpdateRun();										// 逃走処理の更新
 	void RenderRun();										// 逃走画面の描画
-
-
 
 	// 敵ターン
 	void UpdateEnemyTurn(SceneManager* sceneManager);		// 敵ターンの更新
 	void RenderEnemyTurn();									// 敵ターンの描画
 	void RenderCurrentHp();
 
-
 	// 敵死亡
 	void UpdateEnemyDead();									// 敵死亡演出の更新
 	void RenderEnemyDead();									// 敵死亡演出の描画
 
-
-
 	// 全滅
 	void UpdateAnnihilation(GameOver& gameOver,InputManager& inputManager);	// 全滅処理の更新
-
 	void RenderAnnihilation(GameOver& gameOver);				// 全滅画面の描画
-
-
 
 	// ターン処理
 	void EndTurn();											// ターン終了処理
 	void ResetRunSuccess();									//にげる状態リセット
-
 
 	// 仲間加入確認
 	void RequestJoinEnemy(Enemy* enemy);
@@ -271,7 +264,7 @@ public:
 	void AddJoinEnemy();
 
 	// 仲間入れ替え
-	void UpdateJoinReplace();
+	void UpdateJoinReplace(InputManager& inputManager);
 	void RenderJoinReplace();
 	void ReplaceMonster();
 
@@ -287,24 +280,22 @@ public:
 	Enemy* GetSelectedTargetEnemy();							// 確定した攻撃対象を取得
 
 	int GetValidTargetIndex(int index) const;					// 有効な敵番号を取得
-
 	void SetEnemies(const std::vector<Enemy*>& enemies);		// 戦闘中の敵を設定
-
 	void RemoveEnemy(Enemy* enemy);							// 敵を戦闘リストから削除
-
 	bool AreAllEnemiesDead() const;							// 敵が全滅しているか確認
 
-
+	void AddDisplayMessage(DisplayMessageType type, const std::wstring& text);
+	void UpdateDisplayMessage();
+	void ClearDisplayMessageQueue();
 
 	// 各種設定
 	void SetFieldScene(FieldScene* fieldScene);				// FieldSceneを設定
 	void SetImage(ImageManager* image);						// ImageManagerを設定
+	void SetSound(SEManager* sound);						// SEManagerを設定
 	void SetPlayer(PlayerManager* player);					// PlayerManagerを設定
-	void SetParty(Party* party);								// Partyを設定
+	void SetParty(Party* party);							// Partyを設定
 
 	void SetJoinWindow(bool flag);							// 仲間選択画面の表示状態を設定
-
-
 
 	// 状態取得
 	bool IsFieldRequested();								// フィールド遷移要求を取得
@@ -312,19 +303,12 @@ public:
 	bool IsEnemyRequested();								// 敵削除要求を取得
 	bool IsRunSuccess() const;								// 逃走状態を取得
 
-
-
 	// 属性・連携
 	void DamageAllEnemies(int damage);//全体ダメージ時関数
-
 	void UesElementalAttack(Map& map,PlayerManager& player);														// 属性連携攻撃を実行
-
-	bool IsComboMember(	Monster::CharacteRistics type,bool steamcombo,bool floorcombo);														// 連携攻撃の対象か確認
-
-
+	bool IsComboMember(Monster::CharacteRistics type, bool steamcombo, bool floorcombo, bool waterfallcombo, bool growgrasscombo, bool volcazationcombo);														// 連携攻撃の対象か確認
 
 	// 攻撃履歴
 	const std::vector<UsedAttackInfo>&GetUsedAttackOrder() const;								// 攻撃履歴を取得
-
 	void ClearUsedAttackOrder();								// 攻撃履歴をクリア
 };

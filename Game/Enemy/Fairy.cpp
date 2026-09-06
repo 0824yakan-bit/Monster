@@ -12,7 +12,7 @@ Fairy::~Fairy()
 
 }
 
-void Fairy::Initialize(Map& map, int x, int y, bool isBoss)
+void Fairy::Initialize(Map& map, Party& party, int x, int y, bool isBoss)
 {
 	type = EnemyType::Fairy;
 
@@ -35,8 +35,8 @@ void Fairy::Initialize(Map& map, int x, int y, bool isBoss)
 	renderSize.x = 200;
 	renderSize.y = 200;
 
-	power = 10;
-	hp = 10;
+	SetEnemyStats(map, party, 2, 20);
+
 }
 
 void Fairy::Update(Map& map)

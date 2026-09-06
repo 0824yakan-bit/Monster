@@ -3,6 +3,8 @@
 
 #include"Game/Maths/Collisionall.h"
 #include"Game/Scene/TextManager.h"
+#include"Game/ImageManager/ImageManager.h"
+#include"Game/SEManager/SEManager.h"
 #include"Game/Party/Monster.h"
 #include"Game/Party/Party.h"
 #include"Game/Battle/Battle.h"
@@ -19,40 +21,42 @@ static std::vector<Battle::UsedAttackInfo>MakeFieldEffect(Monster::CharacteRisti
 	return{ info };
 }
 
-
 FieldScene::FieldScene(BossManager& bossManager, Party& party)
-	: m_hitEnemy{ nullptr }
-	, STtext{false,false,false,false}
-	, m_isBattleRequested{ false}
-	, m_isMapActive{ false }
-	, m_isMenuActive{ false }
-	, m_menuList{ MenuList::Empty }
-	, m_menuListSelect{ 0 }
-	, m_isCooperatDetailActive{ false }
-	, m_CooperatDetailSelect{ 0 }
-	, m_cooperatList{ CooperatList::Empty }
-	, m_isTreasureOpen{ false }
-	, m_breakLevel{}
-	, m_bossManager{ bossManager }
-	, m_party{ &party }
+	: m_hitEnemy				{ nullptr }
+	, STtext					{false,false,false,false,false}
+	, m_isBattleRequested		{false}
+	, m_isMapActive				{ false }
+	, m_isMenuActive			{ false }
+	, m_menuList				{ MenuList::Empty }
+	, m_menuListSelect			{ 0 }
+	, m_isCooperatDetailActive	{ false }
+	, m_CooperatDetailSelect	{ 0 }
+	, m_cooperatList			{ CooperatList::Empty }
+	, m_isTreasureOpen			{ false }
+	, m_breakLevel				{}
+	, m_bossManager				{ bossManager }
+	, m_party					{ &party }
+	,m_monsterhp				{}
+	,m_count					{}
+	,m_annihilation				{}
 {
 
 }
-
-
 FieldScene::~FieldScene()
 {
 }
 
-
-void FieldScene::Initialize(InputManager& inputmanager, PlayerManager& playerManager, Map& map)
+void FieldScene::Initialize(TextManager&textManager,InputManager& inputmanager, PlayerManager& playerManager, Map& map)
 {
+
 	playerManager.SetImage(m_image);
+	textManager.SetImage(m_image);
 
 	m_count = 0;
 	STtext.m_signboard_1 = false;
 	STtext.m_signboard_2 = false;
 	STtext.m_signboard_3 = false;
+	STtext.m_signboard_4 = false;
 	STtext.m_end = false;
 
 	//初回だけ登録
@@ -72,6 +76,7 @@ void FieldScene::Initialize(InputManager& inputmanager, PlayerManager& playerMan
 	{
 		map.ChangeStage(0);
 	}
+	m_annihilation = false;
 
 	m_hitEnemy = nullptr;
 	m_isBattleRequested = false;
@@ -87,7 +92,7 @@ void FieldScene::Initialize(InputManager& inputmanager, PlayerManager& playerMan
 	size.y = 50;
 
 	drawSlimePosition.x = 5*map.GetChipSize();
-	drawSlimePosition.y = 2*map.GetChipSize();
+	drawSlimePosition.y = 5*map.GetChipSize();
 	drawSlimeSize.x = 1*map.GetChipSize();
 	drawSlimeSize.y = 1*map.GetChipSize();
 
@@ -103,22 +108,58 @@ void FieldScene::Initialize(InputManager& inputmanager, PlayerManager& playerMan
 
 	drawMenuBoxSize_1.x = 1030;
 	drawMenuBoxSize_1.y = 630;
+
+	drawEffectPosition = { 0,0 };
+	drawEffectSize = { 1280,720 };
+
+	m_sound->PlayTypeLoopStart(SEManager::SoundList::FieldBGM);
 }
 
+void FieldScene::Finalize()
+{
+}
 
-void FieldScene::Update(TextManager&textManager,InputManager& inputManager, PlayerManager& playerManager, EnemyManager& enemyManager, Map& map, Battle& battle, Accessory& accessory, Party& party)
+void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameOver&gameOver, PlayerManager& playerManager, EnemyManager& enemyManager,Map& map, Battle& battle, Accessory& accessory, Party& party)
 {
 	inputManager.Update();
-	
+	//味方HPを保存
+	for (int i = 0; i < m_party->GetMonsterCount(); i++)
+	{
+		Monster* monster = m_party->GetMonster(i);
+		m_monsterhp[i] = monster->GetCurrentHitPoint();
+	}
+	// 全滅判定
+	m_annihilation = true;
+
+	for (int i = 0; i < m_party->GetMonsterCount(); i++)
+	{
+		if (m_monsterhp[i] != 0)
+		{
+			m_annihilation = false;
+			break;
+		}
+	}
+
+	if (m_annihilation)
+	{
+		gameOver.GameOverUpdate(inputManager);
+		return;
+	}
+	if (textManager.GameClear())
+	{
+		gameOver.GameClearUpdate(inputManager);
+		return;
+	}
 	if (STtext.m_start)textManager.StartText(m_count);
 	if (STtext.m_signboard_1)textManager.SignBoard_1Text(m_count);
 	if (STtext.m_signboard_2)textManager.SignBoard_2Text(m_count);
 	if (STtext.m_signboard_3)textManager.SignBoard_3Text(m_count);
+	if (STtext.m_signboard_4)textManager.SignBoard_4Text(m_count);
 	if (STtext.m_end)textManager.EndText(m_count);
 
 	if (textManager.SelectDisplayText() == true)
 	{
-		if (inputManager.IsTrigger(KEY_INPUT_RETURN))
+		if (inputManager.IsTrigger(KEY_INPUT_RETURN)||inputManager.IsPadTrigger(PAD_INPUT_A))
 		{
 			m_count++;
 		}
@@ -134,20 +175,29 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 	map.Update(inputManager, playerManager);
 
 	m_breakLevel = map.GetBreakLevel();
+	// スキル習得表示
+	if (m_isSkillLearned)
+	{
+		m_skillLearnTimer--;
 
+		if (m_skillLearnTimer <= 0)
+		{
+			m_skillLearnTimer = 0;
+			m_isSkillLearned = false;
+		}
+	}
 	//マップ表示・メニュー表示状態管理
+	//if ((inputManager.IsTrigger(KEY_INPUT_X)||inputManager.IsPadTrigger(PAD_INPUT_Y)) && !m_isMapActive && !m_isMenuActive)
+	//{
+	//	m_isMapActive = true;
+	//}
+	//else if ((inputManager.IsTrigger(KEY_INPUT_X) || inputManager.IsPadTrigger(PAD_INPUT_Y)|| (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B))) && m_isMapActive)
+	//{
+	//	m_isMapActive = false;
+	//}
 
-	if (inputManager.IsTrigger(KEY_INPUT_Z) && !m_isMapActive && !m_isMenuActive)
-	{
-		m_isMapActive = true;
-	}
-	else if (inputManager.IsTrigger(KEY_INPUT_Z) && m_isMapActive)
-	{
-		m_isMapActive = false;
-	}
 
-
-	if (inputManager.IsTrigger(KEY_INPUT_X) && !m_isMenuActive && !m_isMapActive)
+	if ((inputManager.IsTrigger(KEY_INPUT_Z) || inputManager.IsPadTrigger(PAD_INPUT_X)) && !m_isMenuActive && !m_isMapActive)
 	{
 		m_menuListSelect = 0;
 		m_CooperatDetailSelect = 0;
@@ -156,16 +206,19 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 		m_cooperatList = CooperatList::Empty;
 
 		m_isMenuActive = true;
+		m_sound->PlayTypeBackStart(SEManager::SoundList::Decision);
 	}
-	else if (inputManager.IsTrigger(KEY_INPUT_X) && m_isMenuActive)
+	else if ((inputManager.IsTrigger(KEY_INPUT_Z) || inputManager.IsPadTrigger(PAD_INPUT_X)|| (m_isCooperatDetailActive==false&&(inputManager.IsTrigger(KEY_INPUT_BACK)) || inputManager.IsPadTrigger(PAD_INPUT_B))) && m_isMenuActive)
 	{
 		m_isMenuActive = false;
-	}
+		m_isCooperatDetailActive = false;
+		m_sound->PlayTypeBackStart(SEManager::SoundList::Cancel);
 
+	}
 
 	if (m_isMenuActive)
 	{
-		if (inputManager.IsTrigger(KEY_INPUT_UP))
+		if (inputManager.IsTrigger(KEY_INPUT_UP) || inputManager.IsPadTrigger(PAD_INPUT_UP))
 		{
 			if (m_isCooperatDetailActive)
 			{
@@ -174,11 +227,15 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			else
 			{
 				m_menuListSelect--;
+				if (m_menuListSelect < 0)
+				{
+					m_menuListSelect = 3;
+				}
 			}
+			m_sound->PlayTypeBackStart(SEManager::SoundList::Cursor);
 		}
 
-
-		if (inputManager.IsTrigger(KEY_INPUT_DOWN))
+		if (inputManager.IsTrigger(KEY_INPUT_DOWN) || inputManager.IsPadTrigger(PAD_INPUT_DOWN))
 		{
 			if (m_isCooperatDetailActive)
 			{
@@ -187,11 +244,15 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			else
 			{
 				m_menuListSelect++;
+				if (m_menuListSelect > 3)
+				{
+					m_menuListSelect = 0;
+				}
 			}
+			m_sound->PlayTypeBackStart(SEManager::SoundList::Cursor);
 		}
 
-
-		if (inputManager.IsTrigger(KEY_INPUT_RETURN))
+		if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A))
 		{
 			if (m_isCooperatDetailActive)
 			{
@@ -221,13 +282,15 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 					m_menuList = MenuList::OperationInstructions;
 					break;
 				}
+				m_sound->PlayTypeBackStart(SEManager::SoundList::Decision);
 			}
 		}
-		else if (inputManager.IsTrigger(KEY_INPUT_BACK))
+		else if (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B))
 		{
 			m_menuList = MenuList::Empty;
 			m_menuListSelect = 0;
 			m_isCooperatDetailActive = false;
+			m_sound->PlayTypeBackStart(SEManager::SoundList::Cancel);
 		}
 
 
@@ -253,7 +316,6 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			break;
 		}
 
-
 		//メニューから技使用可能
 		switch (m_cooperatList)//連携技未追加
 		{
@@ -267,7 +329,6 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			m_cooperatList = CooperatList::Empty;
 			break;
 
-
 		case CooperatList::Fire:
 			map.FireBreak(playerManager);
 
@@ -277,7 +338,6 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			m_isCooperatDetailActive = false;
 			m_cooperatList = CooperatList::Empty;
 			break;
-
 
 		case CooperatList::Water:
 			map.WaterBreak(playerManager);
@@ -289,7 +349,6 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			m_cooperatList = CooperatList::Empty;
 			break;
 
-
 		case CooperatList::Grass:
 			map.GrassBreak(playerManager);
 
@@ -298,7 +357,6 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			m_isCooperatDetailActive = false;
 			m_cooperatList = CooperatList::Empty;
 			break;
-
 
 		case CooperatList::Soil:
 			map.SoilBreak(playerManager);
@@ -310,6 +368,15 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			m_cooperatList = CooperatList::Empty;
 			break;
 
+		case CooperatList::Wind:
+			map.WindBreak(playerManager);
+
+			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Wind, L""));
+
+			m_isMenuActive = false;
+			m_isCooperatDetailActive = false;
+			m_cooperatList = CooperatList::Empty;
+			break;
 
 		case CooperatList::Darkness:
 			map.DarknessBreak(playerManager);
@@ -321,42 +388,74 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			m_cooperatList = CooperatList::Empty;
 			break;
 
+		case CooperatList::SteamExplpsion:
+			map.SteamExplosionBreak(playerManager);
 
-		case CooperatList::Wind:
-			map.WindBreak(playerManager);
-
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Wind, L""));
+			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::SteamExplpsion, L""));
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
 			m_cooperatList = CooperatList::Empty;
 			break;
 
+		case CooperatList::WaterFlows:
+			map.WaterFlowsBreak(playerManager);
 
+			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::WaterFlows, L""));
+
+			m_isMenuActive = false;
+			m_isCooperatDetailActive = false;
+			m_cooperatList = CooperatList::Empty;
+			break;
+
+		case CooperatList::FloorBreak:
+			map.FloorBreak(playerManager);
+
+			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::FloorBreak, L""));
+
+			m_isMenuActive = false;
+			m_isCooperatDetailActive = false;
+			m_cooperatList = CooperatList::Empty;
+			break;
+
+		case CooperatList::GrawGrass:
+			map.GrowGrassBreak(playerManager);
+
+			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::GrawGrass, L""));
+
+			m_isMenuActive = false;
+			m_isCooperatDetailActive = false;
+			m_cooperatList = CooperatList::Empty;
+			break;
+
+		case CooperatList::Volcazation:
+			map.VolcazationBreak(playerManager);
+
+			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Volcazation, L""));
+
+			m_isMenuActive = false;
+			m_isCooperatDetailActive = false;
+			m_cooperatList = CooperatList::Empty;
+			break;
 		case CooperatList::Empty:
 			break;
 		}
 	}
 
-
 	//プレイヤー管理
 	if (!m_isMapActive && !m_isMenuActive)
 	{
-		playerManager.Update(this, &map, &accessory);
+		playerManager.Update(this, &map,&m_bossManager ,&accessory,party);
 	}
-
 
 	if (playerManager.m_oldposition != playerManager.m_position)
 	{
 		playerManager.m_invicible = false;
 	}
 
-
 	//エネミー管理
 	enemyManager.Update(map);
-
 	Enemy* enemy =enemyManager.CheckHit(playerManager);
-
 
 	if (!playerManager.m_invicible)
 	{
@@ -370,7 +469,6 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			playerManager.m_invicible = true;
 		}
 	}
-
 
 	//エフェクト管理
 	if (m_playEffect)
@@ -388,7 +486,6 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 			}
 		}
 	}
-
 
 	//ブレイクレベル管理
 	int m_level = m_breakLevel / 10;
@@ -416,7 +513,6 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 		break;
 	}
 
-
 	//LastBoss状態管理
 	if (m_bossManager.IsAllBossDefeated())
 	{
@@ -428,15 +524,22 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager, Play
 	}
 }
 
-
-void FieldScene::Render(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager, Map& map, Accessory& accessory, Party& party)
+void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManager& playerManager, EnemyManager& enemyManager, Map& map, Accessory& accessory, Party& party)
 {
 	map.Render();
+	if (m_annihilation)
+	{
+		gameOver.GameOverRender();
+	}
+	if (textManager.GameClear())
+	{
+		gameOver.GameClearRender();
+		return;
+	}
 	if (map.GetCurrentMap() == 0)
 	{
 		m_image->DrawSlime(drawSlimePosition, drawSlimeSize);
 	}
-	textManager.Render();
 
 	//モンスター交換画面
 	if (m_isMonsterReplaceSelect)
@@ -450,35 +553,55 @@ void FieldScene::Render(TextManager& textManager, PlayerManager& playerManager, 
 	{
 		enemyManager.Render();
 	}
-
+	textManager.Render();
 
 	//フィールド技エフェクト
 	if (m_playEffect && m_effectIndex < static_cast<int>(m_attackEffects.size()))
 	{
 		const auto& info = m_attackEffects[m_effectIndex];
 
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 20);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
 
 		switch (info.element)////連携技未追加
 		{
+		case Monster::CharacteRistics::None:
+			m_image->DrawNormal(drawEffectPosition, drawEffectSize);
+			break;
+
 		case Monster::CharacteRistics::Fire:
-			DrawBox(0, 0, 1280, 720, GetColor(255, 80, 0), TRUE);
+			m_image->DrawFire(drawEffectPosition, drawEffectSize);
 			break;
 
 		case Monster::CharacteRistics::Water:
-			DrawBox(0, 0, 1280, 720, GetColor(0, 120, 255), TRUE);
+			m_image->DrawWater(drawEffectPosition, drawEffectSize);
+
 			break;
 
 		case Monster::CharacteRistics::Grass:
-			DrawBox(0, 0, 1280, 720, GetColor(0, 200, 0), TRUE);
-			break;
-
-		case Monster::CharacteRistics::Darkness:
-			DrawBox(0, 0, 1280, 720, GetColor(255, 255, 0), TRUE);
+			m_image->DrawGrass(drawEffectPosition, drawEffectSize);
 			break;
 
 		case Monster::CharacteRistics::Wind:
-			DrawBox(0, 0, 1280, 720, GetColor(180, 180, 180), TRUE);
+			m_image->DrawWind(drawEffectPosition, drawEffectSize);
+			break;
+
+		case Monster::CharacteRistics::Darkness:
+			m_image->DrawDarkness(drawEffectPosition, drawEffectSize);
+			break;
+		case Monster::CharacteRistics::SteamExplpsion:
+			m_image->DrawSteamexplosion(drawEffectPosition, drawEffectSize);
+			break;
+		case Monster::CharacteRistics::WaterFlows:
+			m_image->DrawWaterflows(drawEffectPosition, drawEffectSize);
+			break;
+		case Monster::CharacteRistics::FloorBreak:
+			m_image->DrawFloorBreak(drawEffectPosition, drawEffectSize);
+			break;
+		case Monster::CharacteRistics::GrawGrass:
+			m_image->DrawGrowgrass(drawEffectPosition, drawEffectSize);
+			break;
+		case Monster::CharacteRistics::Volcazation:
+			m_image->DrawVolcazation(drawEffectPosition, drawEffectSize);
 			break;
 
 		default:
@@ -486,7 +609,6 @@ void FieldScene::Render(TextManager& textManager, PlayerManager& playerManager, 
 		}
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
-		DrawString(20, 20, info.attackName.c_str(), GetColor(255, 255, 255));
 	}
 
 
@@ -494,31 +616,32 @@ void FieldScene::Render(TextManager& textManager, PlayerManager& playerManager, 
 	{
 		DrawBox(200, 200, 900, 900, GetColor(0, 0, 0), TRUE);
 
-		DrawString(500, 500, L"マップオープン", GetColor(255, 255, 255), TRUE);
+		//DrawString(500, 500, L"マップオープン", GetColor(255, 255, 255), TRUE);
 	}
 
 
 	if (m_isMenuActive)
 	{
 		m_image->DrawCommandbox1(drawMenuBoxPosition, drawMenuBoxSize);
-		DrawString(500, 500, L"メニューオープン", GetColor(0, 0, 0), TRUE);
+		//DrawString(500, 500, L"メニューオープン", GetColor(0, 0, 0), TRUE);
 
 
-		float positionx = 60.0f;
-		float positiony = 65.0f;
+		float positionx = 70.0f;
+		float positiony = 82.0f;
 		float sizex = 100.0f;
 		float sizey = 50.0f;
 
 		float cursorY = positiony + 50.0f * m_menuListSelect;
+		drawSelectCursorPosition.x = positionx;
+		drawSelectCursorPosition.y = cursorY;
+		drawSelectCursorSize = { 30,30 };
+		m_image->DrawCommandCursor(drawSelectCursorPosition, drawSelectCursorSize);
 
-		DrawBoxAA(positionx, cursorY, positionx + sizex, cursorY + sizey, GetColor(0, 255, 255), FALSE);
-
-
-		SetFontSize(30);
+		SetFontSize(25);
 
 		for (int i = 0;i < static_cast<int>(MenuList::Empty);i++)
 		{
-			DrawString(80, 70 + i * 50, m_menuText[i], GetColor(255, 255, 255), TRUE);
+			DrawString(100, 85 + i * 50, m_menuText[i], GetColor(255, 255, 255), TRUE);
 		}
 
 		SetFontSize(10);
@@ -554,64 +677,48 @@ void FieldScene::Render(TextManager& textManager, PlayerManager& playerManager, 
 		return;
 	}
 
-
-	DrawFormatString(10, 200, GetColor(255, 255, 255), L"BreakLevel:%d", m_breakLevel, TRUE);
-
-
-	m_image->DrawM(Mposition, size);
-	m_image->DrawN(Nposition, size);
-
+	//m_image->DrawM(Mposition, size);
+	//m_image->DrawN(Nposition, size);
 
 	//LastBoss状態管理
 	if (m_bossManager.IsAllBossDefeated())
 	{
-		DrawString(10, 30, L"OPEN", GetColor(255, 255, 255), TRUE);
+		DrawString(500, 350, L"どこかの階段が開いたようだ", GetColor(255, 255, 255), TRUE);
 	}
-}
-
-
-void FieldScene::Finalize()
-{
+	// スキル習得表示
+	if (m_isSkillLearned)
+	{
+		DrawBox(500, 300,1420, 500,GetColor(0, 0, 0),TRUE);
+		DrawString(800, 330,L"スキル習得！",GetColor(255, 255, 0));
+		DrawFormatString(760, 400,GetColor(255, 255, 255),L"%lsを習得しました！",GetSkillName(m_learnedSkill));
+	}
 }
 
 
 void FieldScene::UpdateCooperativeMove()
 {
 }
-
-
 void FieldScene::UpdatePartyCheck()
 {
 }
-
-
 void FieldScene::UpdateToolCheck()
 {
 }
-
-
 void FieldScene::UpdateOperationInstructions()
 {
 }
-
 
 void FieldScene::RenderCooperativeMove()
 {
 	m_image->DrawCommandbox1(drawMenuBoxPosition_1, drawMenuBoxSize_1);
 
-	DrawString(500, 500, L"連携技選択オープン", GetColor(0, 0, 0), TRUE);
-
-
 	float positionx = 250.0f;
-	float positiony = 150.0f;
+	float positiony = 200.0f;
 	float sizex = 200.0f;
 	float sizey = 50.0f;
 
-
 	//表示中の技一覧を作り直す
-
 	m_visibleSkills.clear();
-
 
 	auto AddSkill = [&](CooperatList skill)
 		{
@@ -635,13 +742,10 @@ void FieldScene::RenderCooperativeMove()
 	AddSkill(CooperatList::GrawGrass);
 	AddSkill(CooperatList::Volcazation);
 
-
-
 	if (m_visibleSkills.empty())
 	{
 		return;
 	}
-
 
 	//カーソル補正
 	if (m_CooperatDetailSelect < 0)
@@ -649,26 +753,22 @@ void FieldScene::RenderCooperativeMove()
 		m_CooperatDetailSelect = static_cast<int>(m_visibleSkills.size()) - 1;
 	}
 
-
 	if (m_CooperatDetailSelect >= static_cast<int>(m_visibleSkills.size()))
 	{
 		m_CooperatDetailSelect = 0;
 	}
 
-
 	float cursorY = positiony + 50.0f * m_CooperatDetailSelect;
+	Vector2 drawSelectCursorPosition;
+	Vector2 drawSelectCursorSize = { 40,40 };
+		drawSelectCursorPosition.x = positionx;
+		drawSelectCursorPosition.y = cursorY;
 
-
-	DrawBoxAA(positionx, cursorY, positionx + sizex, cursorY + sizey, GetColor(0, 0, 0), FALSE);
-
+	m_image->DrawCommandCursor(drawSelectCursorPosition, drawSelectCursorSize);
 
 	SetFontSize(50);
-
-	DrawString(250, 50, L"技一覧", GetColor(0, 0, 0), TRUE);
-
-
-	int y = 150;
-
+	DrawString(300, 100, L"技一覧", GetColor(255,255,255), TRUE);
+	int y = 200;
 
 	for (auto skill : m_visibleSkills)////連携技未追加
 	{
@@ -729,153 +829,192 @@ void FieldScene::RenderCooperativeMove()
 			break;
 		}
 
-
-		DrawString(250, y, name, GetColor(0, 0, 0), TRUE);
+		DrawString(300, y, name, GetColor(255,255,255), TRUE);
 		y += 50;
 	}
-
-
 	SetFontSize(10);
 }
-
-
 void FieldScene::RenderPartyCheck(Party& party)
 {
 	m_image->DrawCommandbox1(drawMenuBoxPosition_1, drawMenuBoxSize_1);
 	SetFontSize(40);
+	DrawString(300, 100, L"仲間", GetColor(255,255,255), TRUE);
 
-	DrawString(250, 80, L"仲間", GetColor(0, 0, 0), TRUE);
-
-	int y = 150;
-
+	int y = 200;
 	for (int i = 0;i < party.GetMonsterCount();i++)
 	{
 		Monster* monster = party.GetMonster(i);
-
 		if (monster == nullptr)
 		{
 			continue;
 		}
 
 		//名前
-		DrawString(300, y, monster->GetName().c_str(), GetColor(0, 0, 0), TRUE);
+		DrawString(350, y, monster->GetName().c_str(), GetColor(255,255,255), TRUE);
 
 		//HP
-		DrawFormatString(600, y, GetColor(0, 0, 0), L"HP%d/%d", monster->GetCurrentHitPoint(), monster->GetMaxHitPoint());
+		DrawFormatString(650, y, GetColor(255,255,255), L"HP%d/%d", monster->GetCurrentHitPoint(), monster->GetMaxHitPoint());
 		y += 80;
 	}
 
 	SetFontSize(10);
 }
-
-
 void FieldScene::RenderToolCheck()
 {
 	m_image->DrawCommandbox1(drawMenuBoxPosition_1, drawMenuBoxSize_1);
-	DrawString(500, 500, L"道具一覧オープン", GetColor(0, 0, 0), TRUE);
+	SetFontSize(50);
+	DrawFormatString(600, 300, GetColor(255, 255, 255), L"未入手");
+	SetFontSize(30);
 }
-
-
 void FieldScene::RenderOperationInstructions()
 {
 	m_image->DrawCommandbox1(drawMenuBoxPosition_1, drawMenuBoxSize_1);
-	DrawString(500, 500, L"操作説明オープン", GetColor(0, 0, 0), TRUE);
+	Vector2 drawKeyPosition = { 450,120 };
+	Vector2 drawKeySize = { 700,250 };
+	Vector2 drawControllerPosition = { 550,400 };
+	Vector2 drawControllerSize = { 300,200 };
+	m_image->DrawKey(drawKeyPosition, drawKeySize);
+	m_image->DrawController(drawControllerPosition, drawControllerSize);
+	SetFontSize(20);
+	DrawFormatString(300, 100, GetColor(255, 255, 255), L"←→↑↓ ：移動・選択");
+	DrawFormatString(300, 150, GetColor(255, 255, 255), L"　ENTER  ：決定・話す・読む");
+	DrawFormatString(300, 200, GetColor(255, 255, 255), L"BACKSPACE：戻る");
+	DrawFormatString(300, 250, GetColor(255, 255, 255), L"　　Z　　：メニュー");
+	
+	DrawLine(300, 370, 1100, 370, GetColor(255, 255, 255), 5);
+
+	DrawFormatString(300, 400, GetColor(255, 255, 255), L"スティック：移動・選択");
+	DrawFormatString(900, 400, GetColor(255, 255, 255), L"A：決定・話す・読む");
+	DrawFormatString(900, 450, GetColor(255, 255, 255), L"B：戻る");
+	//DrawFormatString(900, 550, GetColor(255, 255, 255), L"X：マップ");
+	DrawFormatString(900, 500, GetColor(255, 255, 255), L"Y：メニュー");
+
+
+
+	SetFontSize(30);
 }
 
 
 void FieldScene::Level1()
 {
 }
-
-
 void FieldScene::Level2()
 {
 }
-
-
 void FieldScene::Level3()
 {
 }
-
-
 void FieldScene::Level4()
 {
 }
-
-
 void FieldScene::Level5(EnemyManager&enemyManager,Map&map)
 {
 enemyManager.Update(map);
 }
-
-
-//技属性を1つ取得
-void FieldScene::LearnCompositeSkill(CooperatList skill)
-{
-	m_unlockedSkills.insert(skill);//自動で重複を防止
-}
-
-
-//Monsterが持っている技属性をすべて取得
-void FieldScene::LearnMonsterSkills(const Monster& monster)
-{
-	const std::vector<Monster::Attack>& attacks = monster.GetAttacks();
-
-
-	for (const Monster::Attack& attack : attacks)
-	{
-		switch (attack.element)
-		{
-		case Monster::CharacteRistics::None:
-			m_unlockedSkills.insert(CooperatList::None);
-			break;
-
-		case Monster::CharacteRistics::Normal:
-			m_unlockedSkills.insert(CooperatList::None);
-			break;
-
-		case Monster::CharacteRistics::Fire:
-			m_unlockedSkills.insert(CooperatList::Fire);
-			break;
-
-		case Monster::CharacteRistics::Water:
-			m_unlockedSkills.insert(CooperatList::Water);
-			break;
-
-		case Monster::CharacteRistics::Grass:
-			m_unlockedSkills.insert(CooperatList::Grass);
-			break;
-
-		case Monster::CharacteRistics::Soil:
-			m_unlockedSkills.insert(CooperatList::Soil);
-			break;
-
-		case Monster::CharacteRistics::Darkness:
-			m_unlockedSkills.insert(CooperatList::Darkness);
-			break;
-
-		case Monster::CharacteRistics::Wind:
-			m_unlockedSkills.insert(CooperatList::Wind);
-			break;
-
-		case Monster::CharacteRistics::Defense:
-			//防御は連携技属性として取得しない
-			break;
-		}
-	}
-}
-
-bool FieldScene::HasSkill(CooperatList skill)const
-{
-	return m_unlockedSkills.count(skill) > 0;
-}
-
 
 void FieldScene::LastBossDefeat()
 {
 	//printfDx(L"CollLastBossDefeat");
 }
 
+//技属性を1つ取得
+void FieldScene::LearnCompositeSkill(CooperatList skill)
+{
+	m_unlockedSkills.insert(skill);//自動で重複を防止
+}
+const wchar_t* FieldScene::GetSkillName(CooperatList skill)
+{
+	switch (skill)
+	{
+	case CooperatList::Fire:
+		return L"炎属性";
+
+	case CooperatList::Water:
+		return L"水属性";
+
+	case CooperatList::Grass:
+		return L"草属性";
+
+	case CooperatList::Soil:
+		return L"土属性";
+
+	case CooperatList::Darkness:
+		return L"闇属性";
+
+	case CooperatList::Wind:
+		return L"風属性";
+
+	default:
+		return L"連携スキル";
+	}
+}
+bool FieldScene::TryLearnSkill(CooperatList skill)
+{
+	auto result = m_unlockedSkills.insert(skill);
+
+	// 新しく習得した場合だけ表示
+	if (result.second)
+	{
+		m_isSkillLearned = true;
+		m_skillLearnTimer = 120; // 約2秒
+		m_learnedSkill = skill;
+
+		return true;
+	}
+
+	return false;
+}
+//Monsterが持っている技属性をすべて取得
+void FieldScene::LearnMonsterSkills(const Monster& monster)
+{
+	const std::vector<Monster::Attack>& attacks = monster.GetAttacks();
+
+	for (const Monster::Attack& attack : attacks)
+	{
+		switch (attack.element)
+		{
+		case Monster::CharacteRistics::None:
+			TryLearnSkill(CooperatList::None);
+			break;
+
+		case Monster::CharacteRistics::Normal:
+			TryLearnSkill(CooperatList::None);
+			break;
+
+		case Monster::CharacteRistics::Fire:
+			TryLearnSkill(CooperatList::Fire);
+			break;
+
+		case Monster::CharacteRistics::Water:
+			TryLearnSkill(CooperatList::Water);
+			break;
+
+		case Monster::CharacteRistics::Grass:
+			TryLearnSkill(CooperatList::Grass);
+			break;
+
+		case Monster::CharacteRistics::Soil:
+			TryLearnSkill(CooperatList::Soil);
+			break;
+
+		case Monster::CharacteRistics::Darkness:
+			TryLearnSkill(CooperatList::Darkness);
+			break;
+
+		case Monster::CharacteRistics::Wind:
+			TryLearnSkill(CooperatList::Wind);
+			break;
+
+		case Monster::CharacteRistics::Defense:
+			// 防御は連携技属性として取得しない
+			break;
+		}
+	}
+}
+bool FieldScene::HasSkill(CooperatList skill)const
+{
+	return m_unlockedSkills.count(skill) > 0;
+}
 
 //宝箱
 void FieldScene::UpdateTreasureOpen(InputManager& inputManager, PlayerManager& playerManager, Map& map, Accessory& accessory)
@@ -903,33 +1042,22 @@ void FieldScene::UpdateTreasureOpen(InputManager& inputManager, PlayerManager& p
 		accessory.GetAccessory(Accessory::NOMAL);
 
 
-		if (inputManager.IsTrigger(KEY_INPUT_BACK))
+		if (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B))
 		{
 			accessory.Upgrade(Accessory::NOMAL);
-
 			accessory.Upgrade(Accessory::FIRE);
-
 			accessory.Upgrade(Accessory::WATER);
-
 			accessory.Upgrade(Accessory::GRASS);
-
 			accessory.Upgrade(Accessory::SOIL);
-
 			accessory.Upgrade(Accessory::THUNDER);
-
 			accessory.Upgrade(Accessory::WIND);
 
-
 			m_isTreasureOpen = false;
-
 			map.UsedTreasure(playerManager);
-
 			playerManager.m_position = playerManager.m_oldposition;
 		}
 	}
 }
-
-
 void FieldScene::RenderTreasureOpen(Accessory& accessory)
 {
 	if (m_isTreasureOpen)
@@ -942,7 +1070,6 @@ void FieldScene::RenderTreasureOpen(Accessory& accessory)
 		for (int i = 0;i < static_cast<int>(result.size());i++)
 		{
 			DrawFormatString(150 + i * 400, 200, GetColor(0, 0, 0), L"%d%ls", i + 1, accessory.GetElementName(static_cast<Accessory::ElementType>(result[i])));
-
 			DrawFormatString(150 + i * 400, 250, GetColor(0, 0, 0), L"%d", accessory.GetAccessory(static_cast<Accessory::ElementType>(result[i])).level);
 		}
 	}
@@ -954,27 +1081,10 @@ void FieldScene::SetImage(ImageManager* image)
 {
 	m_image = image;
 }
-
-
-bool FieldScene::IsBattleRequested()const
+void FieldScene::SetSound(SEManager* sound)
 {
-	return m_isBattleRequested;
+	m_sound = sound;
 }
-
-
-Enemy* FieldScene::GetHitEnemy()const
-{
-	return m_hitEnemy;
-}
-
-
-void FieldScene::ResetBattleRequest()
-{
-	m_isBattleRequested = false;
-	m_hitEnemy = nullptr;
-}
-
-
 void FieldScene::SetAttackEffects(const std::vector<Battle::UsedAttackInfo>& effects)
 {
 	m_attackEffects = effects;
@@ -983,6 +1093,20 @@ void FieldScene::SetAttackEffects(const std::vector<Battle::UsedAttackInfo>& eff
 	m_effectTimer = 0;
 
 	m_playEffect = !effects.empty();
+}
+void FieldScene::ResetBattleRequest()
+{
+	m_isBattleRequested = false;
+	m_hitEnemy = nullptr;
+}
+bool FieldScene::IsBattleRequested()const
+{
+	return m_isBattleRequested;
+}
+
+Enemy* FieldScene::GetHitEnemy()const
+{
+	return m_hitEnemy;
 }
 void FieldScene::ReceiveJoinedMonster(std::unique_ptr<Monster>monster)
 {
@@ -1007,7 +1131,6 @@ void FieldScene::ReceiveJoinedMonster(std::unique_ptr<Monster>monster)
 	m_replaceSelect = 0;
 	m_isMonsterReplaceSelect = true;
 }
-
 void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 {
 	if (m_pendingJoinedMonster == nullptr)
@@ -1028,7 +1151,7 @@ void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 	}
 
 	//上
-	if (inputManager.IsTrigger(KEY_INPUT_UP))
+	if (inputManager.IsTrigger(KEY_INPUT_UP) || inputManager.IsPadTrigger(PAD_INPUT_UP))
 	{
 		m_replaceSelect--;
 
@@ -1039,7 +1162,7 @@ void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 	}
 
 	//下
-	if (inputManager.IsTrigger(KEY_INPUT_DOWN))
+	if (inputManager.IsTrigger(KEY_INPUT_DOWN) || inputManager.IsPadTrigger(PAD_INPUT_DOWN))
 	{
 		m_replaceSelect++;
 
@@ -1050,7 +1173,7 @@ void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 	}
 
 	//決定
-	if (inputManager.IsTrigger(KEY_INPUT_RETURN))
+	if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A))
 	{
 		Monster* oldMonster = m_party->GetMonster(m_replaceSelect);
 
@@ -1073,7 +1196,7 @@ void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 	}
 
 	//キャンセル
-	if (inputManager.IsTrigger(KEY_INPUT_BACK))
+	if (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B))
 	{
 		//仲間にするのをキャンセル
 		m_pendingJoinedMonster.reset();
@@ -1082,7 +1205,6 @@ void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 		m_replaceSelect = 0;
 	}
 }
-
 void FieldScene::RenderMonsterReplaceSelect()
 {
 	DrawBox(100, 80, 1180, 650, GetColor(255, 255, 255), TRUE);

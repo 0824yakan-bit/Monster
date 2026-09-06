@@ -4,6 +4,7 @@
 #include"Game/Maths/Vector2.h"
 
 class ImageManager;
+class Party;
 class PlayerManager
 {
 private:
@@ -35,7 +36,7 @@ public:
 	~PlayerManager();
 
 	void Initialize(Map*map);
-	void Update(FieldScene* field, Map*map,Accessory*accessory);
+	void Update(FieldScene* field, Map*map,BossManager*bossManager,Accessory*accessory, Party& party);
 	void Render(FieldScene* field,Map* map, Accessory* accessory);
 	void Finalize();
 

@@ -25,6 +25,7 @@
  */
 Game::Game()
 	: m_inputManager{}
+	, m_seManager{}
 	, m_textManager{}
 	, m_accessory{}
 	, m_bossManager{}
@@ -38,6 +39,7 @@ Game::Game()
 	, m_oldKey{ 0 }
 	, m_oldMapNo{ 0 }
 	, m_WorldTimer{ 0 }
+
 {
 	SRand(static_cast<unsigned int>(time(nullptr)));
 }
@@ -72,14 +74,17 @@ void Game::Initialize()
 	m_party.AddMonster(std::move(slime));
 
 	m_imageManager.LoadTextures();
-	m_enemyManager.SetImage(&m_imageManager);
+	m_seManager.LoadSounds();
 
+	m_enemyManager.SetImage(&m_imageManager);
+	m_bossManager.Initialize();
 	m_map.Initialize(L"Resources/map.csv");
 	m_playerManager.Initialize(&m_map);
-	m_enemyManager.Initialize(m_map);
+	m_enemyManager.Initialize(m_map,m_party);
 	m_accessory.Initialize();
 	m_inputManager.Initialize();
-	m_sceneManager.Initialize(m_textManager,m_inputManager,m_sceneManager,m_playerManager, m_map, m_party,m_imageManager);
+	m_textManager.Initialize();
+	m_sceneManager.Initialize(m_textManager,m_seManager,m_inputManager,m_sceneManager,m_playerManager, m_map, m_party,m_imageManager);
 
 	m_oldMapNo = m_map.GetCurrentMap();
 }
@@ -113,7 +118,7 @@ void Game::Update(float elapsedTime)
 	if (m_oldMapNo != m_map.GetCurrentMap())
 	{
 		// 敵を作り直す
-		m_enemyManager.Initialize(m_map);
+		m_enemyManager.Initialize(m_map,m_party);
 
 		// 現在マップ更新
 		m_oldMapNo = m_map.GetCurrentMap();

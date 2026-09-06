@@ -12,7 +12,7 @@ Slime::~Slime()
 
 }
 
-void Slime::Initialize(Map& map, int x, int y, bool isBoss)
+void Slime::Initialize(Map& map, Party& party, int x, int y, bool isBoss)
 {
 
 	type = EnemyType::Slime;
@@ -42,8 +42,8 @@ void Slime::Initialize(Map& map, int x, int y, bool isBoss)
 	renderSize.x = 200;
 	renderSize.y = 200;
 
-	power = 2;
-	hp = 10;
+	SetEnemyStats(map, party, 2, 5);
+
 }
 
 void Slime::Update(Map&map)
