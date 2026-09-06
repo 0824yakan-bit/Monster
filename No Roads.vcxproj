@@ -169,6 +169,9 @@
     <ClCompile Include="Game\Scene\SceneManager.cpp" />
     <ClCompile Include="Game\Scene\TextManager.cpp" />
     <ClCompile Include="Game\Scene\TitleScene.cpp" />
+    <ClCompile Include="Game\Scene\Transition.cpp" />
+    <ClCompile Include="Game\Scene\TransitionManager.cpp" />
+    <ClCompile Include="Game\SEManager\SEManager.cpp" />
     <ClCompile Include="Game\TileRole\TileRole.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -204,6 +207,9 @@
     <ClInclude Include="Game\Scene\SceneManager.h" />
     <ClInclude Include="Game\Scene\TextManager.h" />
     <ClInclude Include="Game\Scene\TitleScene.h" />
+    <ClInclude Include="Game\Scene\Transition.h" />
+    <ClInclude Include="Game\Scene\TransitionManager.h" />
+    <ClInclude Include="Game\SEManager\SEManager.h" />
     <ClInclude Include="Game\TileRole\TileRole.h" />
     <ClInclude Include="pch.h" />
     <!-- メイン -->
@@ -263,7 +269,6 @@
     <None Include="packages.config" />
     <None Include="Resources\CSV\map.csv" />
     <None Include="Resources\CSV\object.csv" />
-    <None Include="Resources\Sounds\SE00.ogg" />
     <Image Include="Resources\Textures\testmapchip.png" />
     <Image Include="Resources\Textures\TridentLogo.png" />
   </ItemGroup>

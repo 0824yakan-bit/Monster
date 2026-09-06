@@ -51,27 +51,39 @@ namespace
         {0, 1, 26,  7, false, -1},
 
         // map1
-
+        {1,0,11,8,false,-1},
+        {1,2,21,14,false,-1},
         // map2
         {2, 6, 9,  7, true ,  0},  //ボス１ゴーレム
-
+        {2,4,33,13,false,-1},
+        {2,1,33,19,false,-1},
         // map3
         {3, 7,  18, 13, true, 1},//ボス２フェニックス
-
+        {3,5,33,4,false,-1},
         // map4
-
+        {4,3,14,3,false,-1},
+        {4,0,12,19,false,-1},
+        {4,0,27,20,false,-1},
+        {4,6,35,16,false,-1},
+        {4,3,25,8,false,-1},
 
         // map5
-
+        {5,5,26,13,false,-1},
 
         // map6
-
+        {6,5,6,10,false,-1},
+        {6,1,29,11,false,-1},
 
         // map7
-        {7, 8, 15, 4, true,  2}, // ボス3ドラゴン
-
+        {7, 8, 15, 4, true,2}, // ボス3ドラゴン
+        {7,3,15,14,false,-1},
+        {7,4,29,12,false,-1},
+        {7,0,33,6,false,-1},
         // map8
-
+        {8,5,5,5,false,-1},
+        {8,4,9,12,false,-1},
+        {8,3,11,19,false,-1},
+        {8,1,21,17,false,-1},
 
         // map9 ボス専用マップ
         {9,9,15,0,true,3}//ボス4
@@ -79,7 +91,7 @@ namespace
 }
 
 
-void EnemyManager::Initialize(Map& map)
+void EnemyManager::Initialize(Map& map,Party&party)
 {
 
     m_enemies.clear();
@@ -93,48 +105,46 @@ void EnemyManager::Initialize(Map& map)
         switch (data.enemyType)
         {
         case 0:
-            CreateSlime(data.x, data.y, map,data.isBoss,data.bossNo);
+            CreateSlime(data.x, data.y, map,data.isBoss,data.bossNo, party);
             break;
 
         case 1:
-            CreateWolf(data.x, data.y, map, data.isBoss, data.bossNo);
+            CreateWolf(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
 
         case 2:
-            CreateFairy(data.x, data.y, map, data.isBoss, data.bossNo);
+            CreateFairy(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
 
         case 3:
-            CreateTurtle(data.x, data.y, map, data.isBoss, data.bossNo);
+            CreateTurtle(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
 
         case 4:
-            CreateMole(data.x, data.y, map, data.isBoss, data.bossNo);
+            CreateMole(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
 
         case 5:
-            CreateFox(data.x, data.y, map, data.isBoss, data.bossNo);
+            CreateFox(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
 
         case 6:
-            CreateGolem(data.x, data.y, map, data.isBoss, data.bossNo);
+            CreateGolem(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
 
         case 7:
-            CreatePhoenix(data.x, data.y, map, data.isBoss, data.bossNo);
+            CreatePhoenix(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
 
         case 8:
-            CreateDragon(data.x, data.y, map, data.isBoss, data.bossNo);
+            CreateDragon(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
 
         case 9:
-            CreateDaemon(data.x, data.y, map, data.isBoss, data.bossNo);
+            CreateDaemon(data.x, data.y, map, data.isBoss, data.bossNo,party);
             break;
         }
     }
-
-
 }
 
 void EnemyManager::Update(Map& map)
@@ -158,7 +168,6 @@ void EnemyManager::Render()
         {
             continue;
         }
-
         enemy->Render();
     }
 }
@@ -205,84 +214,83 @@ void EnemyManager::RemoveEnemy(Enemy* enemy)
         {
             return e.get() == enemy;
         });
-
     m_enemies.erase(it, m_enemies.end());
 }
 
-void EnemyManager::CreateRandomEnemy(Map& map, int x, int y)
+void EnemyManager::CreateRandomEnemy(Map& map,Party&party, int x, int y)
 {
     int type = GetRand(5);
 
     switch (type)
     {
     case 0:
-        CreateSlime(x, y, map,false,-1);
+        CreateSlime(x, y, map,false,-1,party);
         break;
 
     case 1:
-        CreateWolf(x, y, map, false, -1);
+        CreateWolf(x, y, map, false, -1, party);
         break;
 
     case 2:
-        CreateFairy(x, y, map, false, -1);
+        CreateFairy(x, y, map, false, -1, party);
         break;
 
     case 3:
-        CreateTurtle(x, y, map, false, -1);
+        CreateTurtle(x, y, map, false, -1, party);
         break;
 
     case 4:
-        CreateMole(x, y, map, false, -1);
+        CreateMole(x, y, map, false, -1, party);
         break;
 
     case 5:
-        CreateFox(x, y, map, false, -1);
+        CreateFox(x, y, map, false, -1, party);
         break;
     }
 }
-Enemy* EnemyManager::CreateBattleEnemy(Map& map,Enemy::EnemyType type)
+Enemy* EnemyManager::CreateBattleEnemy(Map& map, Party& party, Enemy::EnemyType type)
 {
     switch (type)
     {
     case Enemy::EnemyType::Slime:
-        CreateSlime(0, 0, map,false,-1);
+        CreateSlime(0, 0, map,false,-1,party);
         break;
 
     case Enemy::EnemyType::Wolf:
-        CreateWolf(0, 0, map, false, -1);
+        CreateWolf(0, 0, map, false, -1, party);
         break;
 
 
     case Enemy::EnemyType::Fairy:
-        CreateFairy(0, 0, map, false, -1);
+        CreateFairy(0, 0, map, false, -1, party);
         break;
 
     case Enemy::EnemyType::Turtle:
-        CreateTurtle(0, 0, map, false, -1);
+        CreateTurtle(0, 0, map, false, -1, party);
         break;
 
     case Enemy::EnemyType::Mole:
-        CreateMole(0, 0, map, false, -1);
+        CreateMole(0, 0, map, false, -1, party);
         break;
 
     case Enemy::EnemyType::Fox:
-        CreateFox(0, 0, map, false, -1);
+        CreateFox(0, 0, map, false, -1, party);
         break;
 
     case Enemy::EnemyType::Golem:
-        CreateGolem(0, 0, map, false, -1);
+        CreateGolem(0, 0, map, false, -1, party);
         break;
 
     case Enemy::EnemyType::Phoenix:
-        CreatePhoenix(0, 0, map, false, -1);
+        CreatePhoenix(0, 0, map, false, -1, party);
         break;
 
     case Enemy::EnemyType::Dragon:
-        CreateDragon(0, 0, map, false, -1);
+        CreateDragon(0, 0, map, false, -1, party);
         break;
 
     case Enemy::EnemyType::Daemon:
-        CreateDaemon(0, 0, map, false, -1);
+        CreateDaemon(0, 0, map, false, -1, party);
         break;
 
     default:
@@ -301,13 +309,13 @@ Enemy* EnemyManager::CreateBattleEnemy(Map& map,Enemy::EnemyType type)
 
     return enemy;
 }
-void EnemyManager::CreateSlime(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreateSlime(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
 {
     auto slime = std::make_unique<Slime>();
 
     slime->SetImage(m_image);
 
-    slime->Initialize(map, x, y, isBoss);
+    slime->Initialize(map, party, x, y, isBoss);
     if (isBoss)
     {
         slime->SetBoss(bossNo);
@@ -315,13 +323,13 @@ void EnemyManager::CreateSlime(int x, int y, Map& map, bool isBoss, int bossNo)
     m_enemies.push_back(std::move(slime));
 }
 
-void EnemyManager::CreateWolf(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreateWolf(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
 {
     auto wolf = std::make_unique<Wolf>();
 
     wolf->SetImage(m_image);
 
-    wolf->Initialize(map, x, y,isBoss);
+    wolf->Initialize(map,party, x, y,isBoss);
     if (isBoss)
     {
         wolf->SetBoss(bossNo);
@@ -330,13 +338,13 @@ void EnemyManager::CreateWolf(int x, int y, Map& map, bool isBoss, int bossNo)
 }
 
 
-void EnemyManager::CreateFairy(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreateFairy(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
 {
     auto fairy = std::make_unique<Fairy>();
 
     fairy->SetImage(m_image);
 
-    fairy->Initialize(map, x, y, isBoss);
+    fairy->Initialize(map, party, x, y, isBoss);
     if (isBoss)
     {
         fairy->SetBoss(bossNo);
@@ -344,13 +352,13 @@ void EnemyManager::CreateFairy(int x, int y, Map& map, bool isBoss, int bossNo)
     m_enemies.push_back(std::move(fairy));
 }
 
-void EnemyManager::CreateTurtle(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreateTurtle(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
 {
     auto turtle = std::make_unique<Turtle>();
 
     turtle->SetImage(m_image);
 
-    turtle->Initialize(map, x, y, isBoss);
+    turtle->Initialize(map, party, x, y, isBoss);
     if (isBoss)
     {
         turtle->SetBoss(bossNo);
@@ -358,13 +366,13 @@ void EnemyManager::CreateTurtle(int x, int y, Map& map, bool isBoss, int bossNo)
     m_enemies.push_back(std::move(turtle));
 }
 
-void EnemyManager::CreateMole(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreateMole(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
 {
     auto mole = std::make_unique<Mole>();
 
     mole->SetImage(m_image);
 
-    mole->Initialize(map, x, y, isBoss);
+    mole->Initialize(map, party, x, y, isBoss);
     if (isBoss)
     {
         mole->SetBoss(bossNo);
@@ -372,13 +380,13 @@ void EnemyManager::CreateMole(int x, int y, Map& map, bool isBoss, int bossNo)
     m_enemies.push_back(std::move(mole));
 }
 
-void EnemyManager::CreateFox(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreateFox(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
 {
     auto fox = std::make_unique<Fox>();
 
     fox->SetImage(m_image);
 
-    fox->Initialize(map, x, y, isBoss);
+    fox->Initialize(map, party, x, y, isBoss);
     if (isBoss)
     {
         fox->SetBoss(bossNo);
@@ -387,13 +395,13 @@ void EnemyManager::CreateFox(int x, int y, Map& map, bool isBoss, int bossNo)
 }
 
 
-void EnemyManager::CreateGolem(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreateGolem(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
 {
     auto golem = std::make_unique<Golem>();
 
     golem->SetImage(m_image);
 
-    golem->Initialize(map, x, y,isBoss);
+    golem->Initialize(map, party, x, y,isBoss);
     if (isBoss)
     {
         golem->SetBoss(bossNo);
@@ -401,13 +409,13 @@ void EnemyManager::CreateGolem(int x, int y, Map& map, bool isBoss, int bossNo)
     m_enemies.push_back(std::move(golem));
 }
 
-void EnemyManager::CreatePhoenix(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreatePhoenix(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
 {
     auto phoenix = std::make_unique<Phoenix>();
 
     phoenix->SetImage(m_image);
 
-    phoenix->Initialize(map, x, y, isBoss);
+    phoenix->Initialize(map, party, x, y, isBoss);
     if (isBoss)
     {
         phoenix->SetBoss(bossNo);
@@ -415,13 +423,13 @@ void EnemyManager::CreatePhoenix(int x, int y, Map& map, bool isBoss, int bossNo
     m_enemies.push_back(std::move(phoenix));
 }
 
-void EnemyManager::CreateDragon(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreateDragon(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
 {
     auto dragon = std::make_unique<Dragon>();
 
     dragon->SetImage(m_image);
 
-    dragon->Initialize(map, x, y, isBoss);
+    dragon->Initialize(map, party, x, y, isBoss);
 
     if (isBoss)
     {
@@ -430,13 +438,13 @@ void EnemyManager::CreateDragon(int x, int y, Map& map, bool isBoss, int bossNo)
     m_enemies.push_back(std::move(dragon));
 }
 
-void EnemyManager::CreateDaemon(int x, int y, Map& map, bool isBoss, int bossNo)
+void EnemyManager::CreateDaemon(int x, int y, Map& map, bool isBoss, int bossNo,Party&party)
 {
     auto daemon = std::make_unique<Daemon>();
 
     daemon->SetImage(m_image);
 
-    daemon->Initialize(map, x, y, isBoss);
+    daemon->Initialize(map, party, x, y, isBoss);
 
     if (isBoss)
     {

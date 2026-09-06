@@ -1,5 +1,8 @@
 ﻿#pragma once
+#include"Game/Maths/Vector2.h"
+
 class InputManager;
+class ImageManager;
 class FieldScene;
 class TextManager
 {
@@ -15,6 +18,10 @@ public:
 		textend,
 	};
 private:
+	ImageManager *m_image;
+	Vector2 drawTextBoxPosition;
+	Vector2 drawTextBoxSize;
+
 	TextType m_currentTextType;
 	int m_TextCount[TextType::textend];
 	bool m_display;
@@ -22,12 +29,15 @@ private:
 	int m_receptionTimer;
 	std::wstring m_displayText;
 
+	bool m_gameClear;
 public:
 	TextManager();
 	~TextManager();
+	void Initialize();
 	void Update(InputManager&inputManager,FieldScene&fieldScene);
 	void Render();
 
+	void SetImage(ImageManager* image);
 	void SetDisplayText();
 	bool SelectDisplayText()const;
 
@@ -38,5 +48,6 @@ public:
 	void SignBoard_4Text(int count);
 	void EndText(int count);
 
+	bool GameClear();
 };
 

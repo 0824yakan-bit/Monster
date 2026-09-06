@@ -4,6 +4,7 @@
 #include "Game/Party/Monster.h"
 
 class Map;
+class Party;
 class PlayerManager;
 class ImageManager;
 
@@ -74,12 +75,13 @@ public:
     int GetBossNo()const;
     // 敵を仲間の種類に変換
     Monster::Type GetMonsterType() const;
+    void SetEnemyStats(Map& map,Party&party, int power, int hp);
 
 public:
     Enemy();
     virtual ~Enemy() = default;
 
-    virtual void Initialize(Map& map,int x,int y,bool isBoss) = 0;
+    virtual void Initialize(Map& map,Party&party,int x,int y,bool isBoss) = 0;
     virtual void Update(Map&map) = 0;
     virtual void Render() = 0;//マップシーンでの描画
     virtual void Finalize() = 0;

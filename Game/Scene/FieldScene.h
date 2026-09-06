@@ -11,6 +11,8 @@
 #include "Game/Maths/Vector2.h"
 
 class TextManager;
+class ImageManager;
+class SEManager;
 class InputManager;
 class PlayerManager;
 class Enemy;
@@ -61,6 +63,8 @@ private:
     // 交換する現在のパーティメンバー
     int m_replaceSelect = 0;
     ImageManager* m_image = nullptr;
+    SEManager* m_sound = nullptr;
+
     BossManager& m_bossManager;
     Party* m_party;
     Enemy* m_hitEnemy;
@@ -128,7 +132,10 @@ public:
         Volcazation,
     };
     CooperatList m_cooperatList;
+    bool m_isSkillLearned = false;
+    int m_skillLearnTimer = 0;
 
+    CooperatList m_learnedSkill = CooperatList::None;
     // 取得済みの技属性
     std::set<CooperatList> m_unlockedSkills;
     // 現在表示する技一覧
@@ -156,7 +163,7 @@ public:
     FieldScene(BossManager& bossManager,Party&party);
     ~FieldScene();
 
-    void Initialize(InputManager& inputmanager,PlayerManager& playerManager,Map& map);
+    void Initialize(TextManager&textManager,InputManager& inputmanager,PlayerManager& playerManager,Map& map);
 
     void Update(TextManager& textManager, InputManager& inputManager,GameOver&gameOver,PlayerManager& playerManager,EnemyManager& enemyManager,Map& map,Battle& battle,Accessory& accessory,Party& party);
 
@@ -183,8 +190,9 @@ public:
     // 技属性を取得
     void LearnCompositeSkill(CooperatList skill);
 
-
     // Monsterが持っている技属性を取得
+    const wchar_t* GetSkillName(CooperatList skill);
+    bool TryLearnSkill(CooperatList skill);
     void LearnMonsterSkills(const Monster& monster);
 
     bool HasSkill(CooperatList skill) const;
@@ -196,6 +204,7 @@ public:
     void RenderTreasureOpen(Accessory& accessory);
 
     void SetImage(ImageManager* image);
+    void SetSound(SEManager* sound);
 
     bool IsBattleRequested() const;
 

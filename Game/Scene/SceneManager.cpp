@@ -3,12 +3,15 @@
 
 #include"Game/InputManager/InputManager.h"
 #include"Game/Scene/TextManager.h"
+#include"Game/SEManager/SEManager.h"
 SceneManager::SceneManager(BossManager&bossManager,Party&party)
-    :m_nextSceneID{}
-    ,m_currentSceneID{}
-    ,m_monsterCurrentDamge{}
-    ,m_fieldScene{bossManager,party}
-    ,m_battleScene{bossManager}
+    :m_nextSceneID          {}
+    ,m_currentSceneID       {}
+    ,m_previousSceneID      {}
+    ,m_monsterCurrentDamge  {}
+    ,m_transitionState      {}
+    ,m_fieldScene           {bossManager,party}
+    ,m_battleScene          {bossManager}
 {
 }
 
@@ -16,11 +19,13 @@ SceneManager::~SceneManager()
 {
 }
 
-void SceneManager::Initialize(TextManager& textManager, InputManager& inputmanager, SceneManager& sceneManager,PlayerManager&playerManager, Map&map,Party&party,ImageManager&image)
+void SceneManager::Initialize(TextManager& textManager, SEManager&sound,InputManager& inputmanager, SceneManager& sceneManager,PlayerManager&playerManager, Map&map,Party&party,ImageManager&image)
 {
 
     m_currentSceneID = SceneID::Title;
     m_nextSceneID = SceneID::None;
+
+    m_transitionState = TransitionStateSceneManager::None;
 
     m_image = &image;
     m_titleScene.SetImage(&image);
@@ -29,9 +34,15 @@ void SceneManager::Initialize(TextManager& textManager, InputManager& inputmanag
     textManager.SetDisplayText();
     m_battleScene.SetImage(&image);
 
-    m_gameOver.Initialize();
+    m_sound = &sound;
+    m_titleScene.SetSound(&sound);
+    m_fieldScene.SetSound(&sound);
+    m_battleScene.SetSound(&sound);
 
-    InitializeCurrentScene(inputmanager,sceneManager,playerManager, map,party);
+    m_gameOver.Initialize();
+    m_transitionManager.Initialize();
+
+    InitializeCurrentScene(textManager,inputmanager,sceneManager,playerManager, map,party);
 
     for (int i = 0;i < MAX_PARTY;i++)//現在のパーティのHP
     {
@@ -41,20 +52,47 @@ void SceneManager::Initialize(TextManager& textManager, InputManager& inputmanag
 
 void SceneManager::Update(TextManager& textManager, InputManager& inputmanager,SceneManager&sceneManager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory)
 {
-    // 現在シーン更新
-    UpdateCurrentScene(textManager, inputmanager,sceneManager,playerManager,enemyManager,map,party,battle,accessory);
-
-    // シーン切り替え要求があれば切り替える
-    if (m_nextSceneID != SceneID::None)
+    m_transitionManager.Update();
+    switch (m_transitionState)
     {
-        ChangeScene(inputmanager,sceneManager,playerManager,map,party);
+    case TransitionStateSceneManager::None:
+        // 現在シーン更新
+        UpdateCurrentScene(textManager, inputmanager, sceneManager, playerManager, enemyManager, map, party, battle, accessory);
+
+        // シーン切り替え要求があれば切り替える
+        if (m_nextSceneID != SceneID::None)
+        {
+            SetFadeOutRequest(map);
+            m_transitionManager.StartFadeOut();
+            m_transitionState = TransitionStateSceneManager::FadeOut;
+        }
+        break;
+    case TransitionStateSceneManager::FadeOut:
+        if (m_transitionManager.IsMax())
+        {
+            m_transitionState = TransitionStateSceneManager::ChangeScene;
+        }
+        break;
+    case TransitionStateSceneManager::ChangeScene:
+        ChangeScene(textManager,inputmanager, sceneManager, playerManager, map, party);
+
+        SetFadeInRequest(map);
+        m_transitionManager.StartFadeIn();
+        m_transitionState = TransitionStateSceneManager::FadeIn;
+        break;
+    case TransitionStateSceneManager::FadeIn:
+        if (m_transitionManager.IsNone())
+        {
+            m_transitionState = TransitionStateSceneManager::None;
+        }
+        break;
     }
 }
 
 void SceneManager::Render(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory)
 {
-    DrawFormatString(10, 100, GetColor(255, 255, 255), L"%d", m_currentSceneID);
     RenderCurrentScene(textManager, playerManager,enemyManager,map,party, accessory);
+    m_transitionManager.Render();
 }
 
 void SceneManager::Finalize()
@@ -69,26 +107,27 @@ void SceneManager::NextSceneID(SceneID requestSceneID)
     m_nextSceneID = requestSceneID;
 }
 
-void SceneManager::ChangeScene(InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party)
+void SceneManager::ChangeScene(TextManager&textManager,InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party)
 {
     // 現在シーンの終了処理
     FinalizeCurrentScene();
-
+    // 遷移前のSceneを保存
+    m_previousSceneID = m_currentSceneID;
     // シーンIDの更新
     m_currentSceneID = m_nextSceneID;
     m_nextSceneID = SceneID::None;
 
     // 次のシーンの初期化
-    InitializeCurrentScene(inputmanager,sceneManager,playerManager, map,party);
+    InitializeCurrentScene(textManager,inputmanager,sceneManager,playerManager, map,party);
 }
 
-void SceneManager::InitializeCurrentScene(InputManager& inputmanager,SceneManager&sceneManager,PlayerManager&playerManager,Map&map,Party&party)
+void SceneManager::InitializeCurrentScene(TextManager&textManager,InputManager& inputManager,SceneManager&sceneManager,PlayerManager&playerManager,Map&map,Party&party)
 {
     switch (m_currentSceneID)
     {
-    case SceneID::Title :   m_titleScene .Initialize(inputmanager);  break;
-    case SceneID::Field :   m_fieldScene .Initialize(inputmanager,playerManager,map);   break;
-    case SceneID::Battle:   m_battleScene.Initialize(inputmanager,sceneManager,map,party);   break;
+    case SceneID::Title :   m_titleScene .Initialize(inputManager);  break;
+    case SceneID::Field :   m_fieldScene .Initialize(textManager,inputManager,playerManager,map);   break;
+    case SceneID::Battle:   m_battleScene.Initialize(inputManager,sceneManager,map,party);   break;
     
     default:      assert(!"シーンIDが不正です");break;
     }
@@ -163,17 +202,92 @@ void SceneManager::FinalizeCurrentScene()
 {
     switch (m_currentSceneID)
     {
-    case SceneID::Title:   m_titleScene.Finalize();  break;
-    case SceneID::Field:    m_fieldScene.Finalize();   break;
-    case SceneID::Battle:   m_battleScene.Finalize();   break;
+    case SceneID::Title:   m_titleScene.Finalize();m_sound->SoundStop(SEManager::SoundList::TitleBGM);  break;
+    case SceneID::Field:    m_fieldScene.Finalize();m_sound->SoundStop(SEManager::SoundList::FieldBGM);   break;
+    case SceneID::Battle:   m_battleScene.Finalize();m_sound->SoundStop(SEManager::SoundList::BattleBGM_Normal_1);m_sound->SoundStop(SEManager::SoundList::BattleBGM_Normal_2);   break;
 
     default:      assert(!"シーンIDが不正です");break;
+    }
+}
+
+void SceneManager::SetFadeOutRequest(Map&map)////フェードアウト時
+{
+//TitletoPlay
+    if (m_currentSceneID == SceneID::Title &&m_nextSceneID == SceneID::Field)
+    { m_transitionManager.SetFadeType(TransitionManager::FadeType::TitletoPlayOut); };
+//PlaytoTitle//
+    //if
+//FieldtoBattle
+    if (m_currentSceneID == SceneID::Field &&m_nextSceneID == SceneID::Battle)
+    {
+        switch (map.GetBreakLevel())
+        {
+        case 0:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_1Out);
+            break;
+        case 1:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_2Out);
+            break;
+        case 2:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_3Out);
+            break;
+        case 3:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_4Out);
+            break;
+        case 4:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_5Out);
+            break;
+        }
+    }
+//BattletoField
+    if (m_currentSceneID == SceneID::Battle &&m_nextSceneID == SceneID::Field)
+    {
+        m_transitionManager.SetFadeType(TransitionManager::FadeType::BattletoField_1Out);
+        m_transitionManager.SetFadeType(TransitionManager::FadeType::BattletoField_2Out);
+    }
+}
+
+void SceneManager::SetFadeInRequest(Map&map)////フェードイン時
+{
+//TitletoPlay
+    if (m_previousSceneID == SceneID::Title &&m_currentSceneID == SceneID::Field)
+    { m_transitionManager.SetFadeType(TransitionManager::FadeType::TitletoPlayIn); };
+//PlaytoTitle//
+    //if
+//FieldtoBattle
+    if (m_previousSceneID == SceneID::Field &&m_currentSceneID == SceneID::Battle)
+    {
+        switch (map.GetBreakLevel())
+        {
+        case 0:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_1In);
+            break;
+        case 1:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_2In);
+            break;
+        case 2:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_3In);
+            break;
+        case 3:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_4In);
+            break;
+        case 4:
+            m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_5In);
+            break;
+        }
+    }
+//BattletoField
+    if (m_previousSceneID == SceneID::Battle &&m_currentSceneID == SceneID::Field)
+    {
+        m_transitionManager.SetFadeType(TransitionManager::FadeType::BattletoField_1In);
+        m_transitionManager.SetFadeType(TransitionManager::FadeType::BattletoField_2In);
     }
 }
 
 
 bool SceneManager::IsTitleRequested() const
 {
+
     return m_battleScene.IsTitleRequested()||m_gameOver.IsTitleRequest();
 }
 

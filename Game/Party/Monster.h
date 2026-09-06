@@ -78,5 +78,5 @@ public:
 
     void Damage(int value);
 
-
+    void Heal(int value);
 };

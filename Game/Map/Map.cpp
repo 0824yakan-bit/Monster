@@ -51,12 +51,18 @@ void Map::Initialize(const wchar_t* fileName)
 	m_isbossAreaOpen = false;
 	m_level = 0;
 	m_breakLevel = 0;
+	for (int i = 0; i < MAP_NUM; i++)
+	{
+		m_leftChangeX[i] = 0;
+		m_leftChangeY[i] = MAP_HEIGHT - 1;
 
-	m_changeX = MAP_WIDTH;
-	m_changeY = 22;
+		m_rightChangeX[i] = MAP_WIDTH - 1;
+		m_rightChangeY[i] = MAP_HEIGHT - 1;
+	}
 	m_changeMap = 9;
 
 	m_changeTimer = 0;
+	m_changeInterval = 5;
 
 	m_isTransition = false;
 	m_transition = 0;
@@ -374,46 +380,72 @@ void Map::LoadMapChip(const wchar_t* fileName, int mapData[MAP_NUM][MAP_HEIGHT][
 	}
 	ifs.close();
 }
+// 崩してはいけない範囲
+bool Map::IsSafeArea(int map, int x, int y)
+{
+	if (map == 0)
+	{
+		if (x >= 0 && x <= 15 &&y >= 0 && y <= 9)
+		{
+			return true;
+		}
+	}
 
+	return false;
+}
 void Map::LastBossDefeated()
 {
 	m_changeTimer++;
 
-	if (m_changeTimer < CHANGE_INTERVAL)
-		return;
-
+	if (m_changeTimer < m_changeInterval)return;
 	m_changeTimer = 0;
 
-	//printfDx(L"map=%d x=%d y=%d\n",m_changeMap,m_changeX,m_changeY);
+	int map = m_currentMap;
+	// 左側
+	int leftX = m_leftChangeX[map];
+	int leftY =m_leftChangeY[map] + GetRand(3) - 1;
 
-	m_basemap[m_changeMap][m_changeY][m_changeX] = TileType::Fall;
+	if (leftY < 0)leftY = 0;
+	if (leftY >= MAP_HEIGHT)leftY = MAP_HEIGHT - 1;
 
-	// 見た目をFallにする
-	m_workmap[m_changeMap][m_changeY][m_changeX] = 291;
-
-	// オブジェクトを消す
-	m_objectmap[m_changeMap][m_changeY][m_changeX] = -1;
-
-	// 次のマス
-	m_changeX--;
-
-	if (m_changeX < 0)
+	if (!IsSafeArea(map, leftX, leftY))
 	{
-		m_changeX = MAP_WIDTH;
-		m_changeY--;
+		m_basemap[map][leftY][leftX] = TileType::Fall;
+		m_workmap[map][leftY][leftX] = 291;
+		m_objectmap[map][leftY][leftX] = -1;
 	}
 
-	// 次のマップ
-	if (m_changeY < 0)
-	{
-		m_changeY = MAP_HEIGHT - 1;
-		m_changeMap--;
+	// 左側は1～3マス進む
+	m_leftChangeX[map] += GetRand(2) + 1;
+	// Yも少し変化
+	m_leftChangeY[map] += GetRand(3) - 1;
+	if (m_leftChangeY[map] < 0)m_leftChangeY[map] = 0;
+	if (m_leftChangeY[map] >= MAP_HEIGHT)m_leftChangeY[map] = MAP_HEIGHT - 1;
+	
+	// 右側
+	int rightX = m_rightChangeX[map];
+	int rightY =m_rightChangeY[map] + GetRand(3) - 1;
 
-		if (m_changeMap < 0)
-		{
-			m_changeMap = 9;
-		}
+	if (rightY < 0)rightY = 0;
+	if (rightY >= MAP_HEIGHT)rightY = MAP_HEIGHT - 1;
+
+	if (!IsSafeArea(map, rightX, rightY))
+	{
+		m_basemap[map][rightY][rightX] = TileType::Fall;
+		m_workmap[map][rightY][rightX] = 291;
+		m_objectmap[map][rightY][rightX] = -1;
 	}
+
+	// 右側も独立して進む
+	m_rightChangeX[map] -= GetRand(2) + 1;
+	// Yも左とは別に変化
+	m_rightChangeY[map] += GetRand(3) - 1;
+
+	if (m_rightChangeY[map] < 0)m_rightChangeY[map] = 0;
+	if (m_rightChangeY[map] >= MAP_HEIGHT)m_rightChangeY[map] = MAP_HEIGHT - 1;
+
+	// 崩壊タイミング
+	m_changeInterval = GetRand(20) + 10;
 }
 
 void Map::MapBreak()
@@ -814,7 +846,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakAreaByGroup(tx, ty, 0, 1, 0, 0, TileGroup::Darkness, 5);
+			BreakAreaByGroup(tx, ty, -6, 7, -6, 7, TileGroup::Darkness, 5);
 
 		}
 
@@ -825,7 +857,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx, ty, -6, 6, -6, 6, -1, 3, TileType::Floor, 5);
+			BreakArea(tx, ty, -2, 3, -2, 3, -1, 3, TileType::Floor, 5);
 		}
 
 		void Map::FloorBreak(PlayerManager& player)
@@ -834,7 +866,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx + 3, ty, -1, 1, -1, 1, -1, 200, TileType::NextFloor, 20);
+			BreakArea(tx , ty, -6, 7, -6, 7, -1, 291, TileType::Fall, 10);
+			BreakArea(tx, ty, -2, 3, -2, 3, -1, 1, TileType::Floor, 0);
 		}
 
 		void Map::WaterFlowsBreak(PlayerManager& player)
@@ -843,10 +876,10 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			{
 				for (int x = 0; x < MAP_WIDTH; ++x)
 				{
-					if (m_objectmap[m_currentMap][y][x] == 200)
+					if (m_objectmap[m_currentMap][y][x] == 134)
 					{
-						m_objectmap[m_currentMap][y][x] = 33;
-						m_basemap[m_currentMap][y][x] = TileType::Wall;
+						m_objectmap[m_currentMap][y][x] = 3;
+						m_basemap[m_currentMap][y][x] = TileType::Floor;
 					}
 				}
 			}
@@ -854,8 +887,18 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::GrowGrassBreak(PlayerManager& player)
 		{
+			Vector2 pos = player.GetPosition();
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
+
+			BreakArea(tx, ty, -2, 3, -2, 3, -1, 91, TileType::GrassLounge, 0);
 		}
 
 		void Map::VolcazationBreak(PlayerManager& player)
 		{
+			Vector2 pos = player.GetPosition();
+			int tx = static_cast<int>(pos.x) / m_chipSize;
+			int ty = static_cast<int>(pos.y) / m_chipSize;
+
+			BreakArea(tx, ty, -2, 3, -2, 3, 32, 3, TileType::Floor, 10);
 		}

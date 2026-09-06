@@ -3,6 +3,7 @@
 
 class InputManager;
 class ImageManager;
+class SEManager;
 class Vector2;
 class TitleScene
 {
@@ -11,6 +12,7 @@ private:
 	int m_Timer;
 	bool m_render;
 	ImageManager* m_image;
+	SEManager* m_sound;
 	Vector2 drawTitlePosition;
 	Vector2 drawTitleSize;
 	Vector2 drawBGTitlePosition;
@@ -30,5 +32,6 @@ public:
 
 	bool IsStartRequested()const;
 	void SetImage(ImageManager* image);
+	void SetSound(SEManager* sound);
 };
 

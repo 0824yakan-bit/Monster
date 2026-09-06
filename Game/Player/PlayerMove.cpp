@@ -3,6 +3,7 @@
 
 #include"Game/Scene/FieldScene.h"
 #include"Game/Player/PlayerManager.h"
+#include"Game/Enemy/BossManager.h"
 #include"Game/Map/Map.h"
 #include"Game/Battle/Battle.h"
 PlayerMove::PlayerMove()
@@ -48,7 +49,7 @@ void PlayerMove::Initialize(Map* map, PlayerManager& playermanager)
 	m_fallPosition = { 0,0 };
 }
 
-void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanager, Accessory* accessory,Party*party)
+void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanager,BossManager*bossManager, Accessory* accessory,Party*party)
 {
 	m_mapX = static_cast<int>(playermanager->m_position.x) / m_chipsize;
 	m_mapY = static_cast<int>(playermanager->m_position.y) / m_chipsize;
@@ -145,10 +146,10 @@ void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanage
 		case 4:
 			field->STtext.m_signboard_2 = true;
 			break;
-		case 5:
+		case 6:
 			field->STtext.m_signboard_3 = true;
 			break;
-		case 6:
+		case 8:
 			field->STtext.m_signboard_4 = true;
 			break;
 		}
@@ -198,7 +199,13 @@ void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanage
 		playermanager->m_size.y);
 	if (m_hitSlime&& (m_inputManager.IsTrigger(KEY_INPUT_RETURN) || m_inputManager.IsPadTrigger(PAD_INPUT_A)))
 	{
+		if (bossManager->IsBossDefeated(3))
+		{
+			field->STtext.m_end = true;
+			return;
+		}
 		field->STtext.m_start = true;
+		field->m_count = 5;
 		return;
 	}
 }

@@ -63,6 +63,9 @@
     <Filter Include="Game\ImageManager">
       <UniqueIdentifier>{944a9344-a37c-47d1-ba9b-ec5f5585e835}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Game\SEManager">
+      <UniqueIdentifier>{3bbd3216-64fa-4669-ad75-87b7c5978652}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <!-- ファイル -->
   <ItemGroup>
@@ -108,9 +111,6 @@
       <Filter>EmbeddedResources\Icon</Filter>
     </Image>
     <!-- リソースファイル -->
-    <None Include="Resources\Sounds\SE00.ogg">
-      <Filter>Resources\Sounds</Filter>
-    </None>
     <Image Include="Resources\Textures\TridentLogo.png">
       <Filter>Resources\Textures</Filter>
     </Image>
@@ -206,6 +206,15 @@
     </ClCompile>
     <ClCompile Include="Game\Scene\TextManager.cpp">
       <Filter>Game\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scene\Transition.cpp">
+      <Filter>Game\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\Scene\TransitionManager.cpp">
+      <Filter>Game\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\SEManager\SEManager.cpp">
+      <Filter>Game\SEManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -304,6 +313,15 @@
     </ClInclude>
     <ClInclude Include="Game\Scene\TextManager.h">
       <Filter>Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\Transition.h">
+      <Filter>Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\Scene\TransitionManager.h">
+      <Filter>Game\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\SEManager\SEManager.h">
+      <Filter>Game\SEManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

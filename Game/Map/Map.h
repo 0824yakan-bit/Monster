@@ -21,12 +21,33 @@ public:
 	};
 
 	MoveDir m_moveDir;
-
-
 public:
+	// マップデータ
+	static constexpr int GAME_CLEAR_MAP = 0;
+	static constexpr int GAME_CLEAR_X = 2;
+	static constexpr int GAME_CLEAR_Y = 2;
 	// マップサイズ
-	static constexpr int MAP_WIDTH	= 40;
+	static constexpr int MAP_WIDTH = 40;
 	static constexpr int MAP_HEIGHT = 25;
+	static constexpr int MAP_NUM = 10;
+
+	TileType	m_basemap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 当たり判定用
+	int			m_workmap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 地面描画用
+	int			m_objectmap[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// オブジェクト描画用
+	bool		m_fog[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 霧の有無
+
+	//ラスボス撃破時使用
+	int		m_beforChange[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//csv書き換え前
+	int		m_afterChange[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//csv書き換え後
+	bool	m_difference[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//変更されていた場所だけTRUE
+
+	int m_fogdensity;	// 霧濃度：薄い0 ～ 濃い400
+
+	int m_currentMap;	// 現在のマップ番号
+	int m_chipSize;		// マップチップのサイズ
+
+
+
 private:
 	static constexpr int GH_MAX		= 384;	// 24 * 16
 
@@ -60,12 +81,15 @@ private:
 	int m_level;		//ブレイクレベル
 
 	//段々崩れる
-	int m_changeX;
-	int m_changeY;
+	int m_leftChangeX[MAP_NUM];
+	int m_leftChangeY[MAP_NUM];
+
+	int m_rightChangeX[MAP_NUM];
+	int m_rightChangeY[MAP_NUM];
 	int m_changeMap;
 
 	int m_changeTimer;
-	static const int CHANGE_INTERVAL = 5;
+	int m_changeInterval;
 
 	// グラフィックハンドル
 	int m_ghChip[GH_MAX];
@@ -80,28 +104,6 @@ private:
 		TileType replaceType,int dangerAdd);//チップの状態判定変更:ブレイクカウント追加	// 指定範囲の地形を破壊・変更
 	void BreakAreaByGroup(int centerX, int centerY, int left, int right, int top, int bottom, TileGroup group, int dangerAdd);
 
-public:
-	// マップデータ
-	static constexpr int GAME_CLEAR_MAP = 0;
-	static constexpr int GAME_CLEAR_X = 2;
-	static constexpr int GAME_CLEAR_Y = 2;
-
-	static constexpr int MAP_NUM = 10;
-
-	TileType	m_basemap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 当たり判定用
-	int			m_workmap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 地面描画用
-	int			m_objectmap	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// オブジェクト描画用
-	bool		m_fog		[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];// 霧の有無
-
-	//ラスボス撃破時使用
-	int		m_beforChange	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//csv書き換え前
-	int		m_afterChange	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//csv書き換え後
-	bool	m_difference	[MAP_NUM][MAP_HEIGHT][MAP_WIDTH];//変更されていた場所だけTRUE
-
-	int m_fogdensity;	// 霧濃度：薄い0 ～ 濃い400
-
-	int m_currentMap;	// 現在のマップ番号
-	int m_chipSize;		// マップチップのサイズ
 
 public:
 	// コンストラクタ・デストラクタ
@@ -118,6 +120,7 @@ public:
 	void LoadMapChip(const wchar_t* fileName,int mapData[MAP_NUM][MAP_HEIGHT][MAP_WIDTH]);	// CSVからマップデータを読み込む
 
 	//ラスボス撃破後
+	bool IsSafeArea(int map, int x, int y);
 	void LastBossDefeated();//ラスボス撃破後常に呼ぶ
 	void MapBreak();//撃破後一回だけ呼ぶ
 

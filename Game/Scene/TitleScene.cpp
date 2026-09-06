@@ -3,6 +3,7 @@
 
 #include"Game/InputManager/InputManager.h"
 #include"Game/ImageManager/ImageManager.h"
+#include"Game/SEManager/SEManager.h"
 TitleScene::TitleScene()
 	:m_isStartRequested{}
 {
@@ -26,6 +27,7 @@ void TitleScene::Initialize(InputManager&inputmanager)
 	drawCommandSize = { 550,200 };
 	drawCurrentCommandPosition = { 400,550 };
 	drawCurrentCommandSize = { 50,50 };
+	m_sound->PlayTypeLoopStart(SEManager::SoundList::TitleBGM);
 }
 
 void TitleScene::Update(InputManager& inputmanager)
@@ -39,6 +41,7 @@ void TitleScene::Update(InputManager& inputmanager)
 	if (inputmanager.IsTrigger(KEY_INPUT_RETURN)||inputmanager.IsPadTrigger(PAD_INPUT_A))
 	{
 		m_isStartRequested = true;
+		m_sound->PlayTypeBackStart(SEManager::SoundList::Decision);
 	}
 }
 
@@ -72,4 +75,9 @@ bool TitleScene::IsStartRequested()const
 void TitleScene::SetImage(ImageManager* image)
 {
 	m_image = image;
+}
+
+void TitleScene::SetSound(SEManager* sound)
+{
+	m_sound = sound;
 }

@@ -41,10 +41,10 @@ void PlayerManager::Initialize(Map*map)
 
 }
 
-void PlayerManager::Update(FieldScene* field, Map*map,Accessory*accessory,Party&party)
+void PlayerManager::Update(FieldScene* field, Map*map,BossManager*bossManager,Accessory*accessory,Party&party)
 {
 
-	m_playerMove.Update(field, map,this,accessory,&party);
+	m_playerMove.Update(field, map,this,bossManager,accessory,&party);
 
 }
 

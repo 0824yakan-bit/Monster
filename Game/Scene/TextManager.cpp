@@ -2,6 +2,7 @@
 #include "Game/Scene/TextManager.h"
 
 #include"Game/InputManager/InputManager.h"
+#include"Game/ImageManager/ImageManager.h"
 #include"Game/Scene/FieldScene.h"
 
 TextManager::TextManager()
@@ -10,17 +11,35 @@ TextManager::TextManager()
 	,m_displayText{}
 	,m_receptionTimer{}
 	,m_currentTextType{}
+	,m_image{}
+	,m_gameClear{}
 {
-	m_TextCount[Start]			= 5;
-	m_TextCount[Signboard_1]	= 5;
-	m_TextCount[Signboard_2]	= 5;
-	m_TextCount[Signboard_3]	= 5;
-	m_TextCount[Signboard_4]	= 5;
+	////本文
+	m_TextCount[Start]			= 7;
+	m_TextCount[Signboard_1]	= 2;
+	m_TextCount[Signboard_2]	= 2;
+	m_TextCount[Signboard_3]	= 1;
+	m_TextCount[Signboard_4]	= 4;
 	m_TextCount[End]			= 5;
 }
 
 TextManager::~TextManager()
 {
+}
+
+void TextManager::Initialize()
+{
+	m_gameClear = false;
+	//本文
+	m_TextCount[Start]			= 7;
+	m_TextCount[Signboard_1]	= 2;
+	m_TextCount[Signboard_2]	= 2;
+	m_TextCount[Signboard_3]	= 5;
+	m_TextCount[Signboard_4]	= 5;
+	m_TextCount[End]			= 5;
+
+	drawTextBoxPosition = {20,500};
+	drawTextBoxSize = {1240,180};
 }
 
 void TextManager::Update(InputManager& inputManager,FieldScene&fieldScene)
@@ -65,8 +84,14 @@ void TextManager::Render()
 	}
 
 	DrawBox(100, 500, 1180, 680,GetColor(0, 0, 0), TRUE);
-
-	DrawString(150,550,m_displayText.c_str(), GetColor(255, 255, 255), TRUE);
+	m_image->DrawCommandbox1(drawTextBoxPosition, drawTextBoxSize);
+	SetFontSize(40);
+	DrawString(120,550,m_displayText.c_str(), GetColor(255, 255, 255), TRUE);
+	SetFontSize(30);
+}
+void TextManager::SetImage(ImageManager* image)
+{
+	m_image = image;
 }
 void TextManager::SetDisplayText()
 {
@@ -84,7 +109,25 @@ void TextManager::StartText(int count)
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"初めまして";
+		m_displayText = L"ようやく起きたか。僕はスライム、よろしく！";
+		break;
+	case 1:
+		m_displayText = L"なんで、閉じ込められているかって？\nあの悪魔のせいさ。";
+		break;
+	case 2:
+		m_displayText = L"奴のせいで、この森は住めない場所になっちまった。";
+			break;
+	case 3:
+		m_displayText = L"だから頼む、あの悪魔を倒して、\n森を平和な場所に戻してくれ！";
+			break;
+	case 4:
+		m_displayText = L"君一人だと心配だから、僕もついていくよ。\n僕は無属性と水属性なら扱えるよ、覚えておいてね。";
+			break;
+	case 5:
+		m_displayText = L"...まずはここから出ないとね。この壁の近くでなら、\nYでメニューを開いて、技の無属性で壊せると思うよ。";
+			break;
+	case 6:
+		m_displayText = L"もし危なくなったら、すぐに個々の場所に戻ってきてね\nここなら安全だからさ。";
 		break;
 	}
 }
@@ -97,7 +140,10 @@ void TextManager::SignBoard_1Text(int count)
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"ボード１";
+		m_displayText = L"看板があるね、読んでみるよ\n「落ち葉が邪魔なら風属性の技でどかせます」";
+		break;
+	case 1:
+		m_displayText = L"だって、\nでも僕は風属性の技は持っていないよ？";
 		break;
 	}
 }
@@ -110,8 +156,10 @@ void TextManager::SignBoard_2Text(int count)
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"ボード２";
+		m_displayText = L"「水は穴に流し込めます、土は水の上に置けます」\nだって、前は風で落ち葉を飛ばせたし";
 		break;
+	case 1:
+		m_displayText = L"属性ごとにできることが違うのかもね。";
 	}
 }
 
@@ -123,7 +171,7 @@ void TextManager::SignBoard_3Text(int count)
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"ボード3";
+		m_displayText = L"「複数の技を組み合わせることで\n強力な攻撃ができます";
 		break;
 	}
 }
@@ -136,7 +184,16 @@ void TextManager::SignBoard_4Text(int count)
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"ボード4";
+		m_displayText = L"この看板は、あの悪魔がかいたみたいだよ\n一応読んでみようか";
+		break;
+	case 1:
+		m_displayText = L"「我に謁見を望む……ならば、\n岩と鳥と竜を打ち倒してみせよ";
+		break;
+	case 2:
+		m_displayText=L"見事、すべてを屠った暁には\n貴様に我が魔城へ立ち入る権利を授けてやろう」";
+		break;
+	case 3:
+		m_displayText = L"岩？鳥？竜？わからないけど、とにかく探すしかないね。";
 		break;
 	}
 }
@@ -149,7 +206,24 @@ void TextManager::EndText(int count)
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"終わり";
+		m_displayText = L"...酷い有様になっちゃったね。\nでも、もうあの悪魔はいない。";
+		break;
+	case 1:
+		m_displayText = L"じゃあ次は僕たちの番だ。壊れてしまったものは多い\nけれど、また住みやすい場所に戻していくよ。";
+		break;
+	case 2:
+		m_displayText = L"きっと、前よりももっといい場所にできる。\nここまで一緒に戦ってきてくれて、本当にありがとう。";
+		break;
+	case 3:
+		m_displayText = L"またいつか、遊びに来てよ。じゃあね";
+		break;
+	case 4:
+		m_gameClear = true;
 		break;
 	}
+}
+
+bool TextManager::GameClear()
+{
+	return m_gameClear;
 }

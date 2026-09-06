@@ -1,4 +1,6 @@
 #include"Game/Enemy/Enemy.h"
+#include"Game/Map/Map.h"
+#include "Game/Party/Party.h"
 
 Enemy::Enemy()
     :m_image    {}
@@ -113,4 +115,12 @@ Monster::Type Enemy::GetMonsterType() const
     }
 
     return Monster::Type::Slime;
+}
+
+void Enemy::SetEnemyStats(Map& map,Party&party, int basePower, int baseHp)
+{
+    int level = map.GetBreakLevel();
+    int partycount = party.GetMonsterCount();
+    hp = baseHp+5*(level)+10*(partycount-1);
+    power = basePower + 2 * (level+partycount-1);
 }

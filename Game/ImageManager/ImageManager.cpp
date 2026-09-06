@@ -41,6 +41,7 @@ void ImageManager::LoadTextures()
 	textures.push_back({ L"commandbox1",LoadGraph(L"Resources/Textures/commandbox1.png") });
 	textures.push_back({ L"commandbox2",LoadGraph(L"Resources/Textures/commandbox2.png") });
 	
+	textures.push_back({ L"normal",LoadGraph(L"Resources/Textures/normal.png") });
 	textures.push_back({ L"fire",LoadGraph(L"Resources/Textures/fire.png") });
 	textures.push_back({ L"water",LoadGraph(L"Resources/Textures/water.png") });
 	textures.push_back({ L"grass",LoadGraph(L"Resources/Textures/grass.png") });
@@ -268,6 +269,12 @@ void ImageManager::DrawCommandbox2(Vector2 position, Vector2 size)
 }
 
 //バトルシーンエフェクト画像
+void ImageManager::DrawNormal(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"normal");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
 void ImageManager::DrawFire(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"fire");

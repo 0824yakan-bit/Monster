@@ -14,7 +14,7 @@ Monster::Monster(Type type)
         m_name= L"スライム" ;
         m_maxHitPoint = 20;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"たいあたり", 1,CharacteRistics::Normal });
+        m_attacks.push_back({ L"たいあたり", 5,CharacteRistics::Normal });
         m_attacks.push_back({ L"スライム液", 5,CharacteRistics::Water });
         m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
         break;
@@ -23,17 +23,17 @@ Monster::Monster(Type type)
         m_name = L"ガル";
         m_maxHitPoint = 30;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"かみつく", 2 ,CharacteRistics::Normal });
-        m_attacks.push_back({ L"かぜおこし", 5 ,CharacteRistics::Wind });
+        m_attacks.push_back({ L"かみつく", 6 ,CharacteRistics::Normal });
+        m_attacks.push_back({ L"かぜおこし", 4 ,CharacteRistics::Wind });
         m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
         break;
 
     case Type::Fairy:
         m_name = L"リーフ";
-        m_maxHitPoint = 50;
+        m_maxHitPoint = 30;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"とっしん",2 ,CharacteRistics::Fire });
-        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
+        m_attacks.push_back({ L"リーフスラッシュ",2 ,CharacteRistics::Grass});
+        m_attacks.push_back({ L"フラワーヒール",10 ,CharacteRistics::GrawGrass});
         m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
         break;
 
@@ -41,64 +41,63 @@ Monster::Monster(Type type)
         m_name = L"タート";
         m_maxHitPoint = 50;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"とっしん",2 ,CharacteRistics::Fire });
-        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
-        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+        m_attacks.push_back({ L"マッドブラスト",10 ,CharacteRistics::Soil });
+        m_attacks.push_back({ L"アクアショット",5 ,CharacteRistics::Water });
+        m_attacks.push_back({ L"ぼうぎょ",20,CharacteRistics::Defense });
         break;
 
     case Type::Mole:
         m_name = L"モグラード";
-        m_maxHitPoint = 50;
+        m_maxHitPoint = 20;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"とっしん",2 ,CharacteRistics::Fire });
-        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
-        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+        m_attacks.push_back({ L"とっしん",10,CharacteRistics::Normal });
+        m_attacks.push_back({ L"じならし",15,CharacteRistics::Soil });
+        m_attacks.push_back({ L"ぼうぎょ",10,CharacteRistics::Defense });
         break;
 
     case Type::Fox:
         m_name = L"ホムラ";
-        m_maxHitPoint = 50;
+        m_maxHitPoint = 30;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"とっしん",2 ,CharacteRistics::Fire });
-        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
-        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+        m_attacks.push_back({ L"ファイアブレス",10 ,CharacteRistics::Fire });
+        m_attacks.push_back({ L"たいあたり",20 ,CharacteRistics::Normal });
+        m_attacks.push_back({ L"ぼうぎょ",10,CharacteRistics::Defense });
         break;
 
-
     case Type::Golem:
-        m_name = L"ガルム";
+        m_name = L"ゴーレム";
         m_maxHitPoint = 50;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"とっしん",2 ,CharacteRistics::Fire });
-        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
-        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+        m_attacks.push_back({ L"ロックバレット",8 ,CharacteRistics::Soil });
+        m_attacks.push_back({ L"しぜんのいかり",15 ,CharacteRistics::Grass});
+        m_attacks.push_back({ L"ぼうぎょ",10,CharacteRistics::Defense });
         break;
 
     case Type::Phoenix:
         m_name = L"スザク";
-        m_maxHitPoint = 50;
+        m_maxHitPoint = 80;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"とっしん",2 ,CharacteRistics::Fire });
-        m_attacks.push_back({ L"じならし",15 ,CharacteRistics::Soil });
-        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+        m_attacks.push_back({ L"かぜおこし",5 ,CharacteRistics::Wind });
+        m_attacks.push_back({ L"ねっぷう",10 ,CharacteRistics::Fire });
+        m_attacks.push_back({ L"ぼうぎょ",25,CharacteRistics::Defense });
         break;
 
     case Type::Dragon:
         m_name = L"マグナ";
         m_maxHitPoint = 50;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"ひのこ",2 ,CharacteRistics::Fire });
-        m_attacks.push_back({ L"じならし",3 ,CharacteRistics::Soil });
+        m_attacks.push_back({ L"ファングバイト",25 ,CharacteRistics::Normal });
+        m_attacks.push_back({ L"アースブレイカー",15 ,CharacteRistics::Soil });
         m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
         break;
 
     case Type::Daemon:
         m_name = L"ディアボロ";
-        m_maxHitPoint = 50;
+        m_maxHitPoint = 99;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"ひのこ",2 ,CharacteRistics::Fire });
-        m_attacks.push_back({ L"じならし",3 ,CharacteRistics::Soil });
-        m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
+        m_attacks.push_back({ L"ソウルイーター",40 ,CharacteRistics::Darkness });
+        m_attacks.push_back({ L"ナイトメア",10 ,CharacteRistics::Darkness});
+        m_attacks.push_back({ L"ぼうぎょ"  ,15,CharacteRistics::Defense });
         break;
     }
 }
@@ -134,3 +133,8 @@ void Monster::Damage(int value)
     if (m_currentHitPoint < 0) m_currentHitPoint = 0;
 }
 
+void Monster::Heal(int value)
+{
+    m_currentHitPoint += value;
+    if (m_currentHitPoint >= m_maxHitPoint)m_currentHitPoint = m_maxHitPoint;
+}

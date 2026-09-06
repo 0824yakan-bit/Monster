@@ -12,7 +12,7 @@ Wolf::~Wolf()
 {
 
 }
-void Wolf::Initialize(Map& map, int x, int y, bool isBoss)
+void Wolf::Initialize(Map& map, Party& party, int x, int y, bool isBoss)
 {
 	type = EnemyType::Wolf;
 
@@ -38,8 +38,12 @@ void Wolf::Initialize(Map& map, int x, int y, bool isBoss)
 	renderSize.x = 200;
 	renderSize.y = 200;
 
-	power = 5;
-	hp = 10;
+	SetEnemyStats(map, party, 4, 10);
+	if (map.GetCurrentMap() == 8)
+	{
+		SetEnemyStats(map, party, 10, 30);
+
+	}
 }
 
 void Wolf::Update(Map& map)

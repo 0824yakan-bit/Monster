@@ -42,7 +42,7 @@ public:
 	~PlayerMove();
 
 	void Initialize(Map*map,PlayerManager& palayermanager);
-	void Update(FieldScene* field,Map*map, PlayerManager* playermanager,Accessory*accessory,Party*party);
+	void Update(FieldScene* field,Map*map, PlayerManager* playermanager,BossManager*bossManager,Accessory*accessory,Party*party);
 	void Render(FieldScene* field, Map*map, PlayerManager* playermanager,Accessory*accessory);
 	void Finalize();
 

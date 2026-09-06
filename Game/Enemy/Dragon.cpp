@@ -12,7 +12,7 @@ Dragon::~Dragon()
 
 }
 
-void Dragon::Initialize(Map& map, int x, int y,bool isBoss)
+void Dragon::Initialize(Map& map, Party& party, int x, int y,bool isBoss)
 {
 	type = EnemyType::Dragon;
 
@@ -36,8 +36,8 @@ void Dragon::Initialize(Map& map, int x, int y,bool isBoss)
 	renderSize.x = 200;
 	renderSize.y = 200;
 
-	power = 10;
-	hp = 10;
+	SetEnemyStats(map, party, 8, 20);
+
 }
 
 void Dragon::Update(Map& map)

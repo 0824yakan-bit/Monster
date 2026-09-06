@@ -53,6 +53,7 @@ public:
 	void DrawCommandbox1(Vector2 position, Vector2 size);
 	void DrawCommandbox2(Vector2 position, Vector2 size);
 
+	void DrawNormal(Vector2 position, Vector2 size);
 	void DrawFire(Vector2 position, Vector2 size);
 	void DrawWater(Vector2 position, Vector2 size);
 	void DrawGrass(Vector2 position, Vector2 size);
