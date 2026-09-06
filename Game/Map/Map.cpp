@@ -599,15 +599,10 @@ void Map::OpenBossArea()
 {
 	if (!m_isbossAreaOpen)//マップチップを変更したか
 	{
-		m_objectmap	[8][Y_TOP][X_LEFT]		= 288;
-		m_objectmap	[8][Y_BOTTOM][X_RIGHT]	= 288;
-		m_objectmap	[8][Y_TOP][X_RIGHT]		= 288;
-		m_objectmap	[8][Y_BOTTOM][X_LEFT]	= 288;
-
-		m_basemap	[8][Y_TOP][X_LEFT]		= TileType::NextFloor;
-		m_basemap	[8][Y_BOTTOM][X_RIGHT]	= TileType::NextFloor;
-		m_basemap	[8][Y_TOP][X_RIGHT]		= TileType::NextFloor;
-		m_basemap	[8][Y_BOTTOM][X_LEFT]	= TileType::NextFloor;
+		m_objectmap	[8][Y_1][X]	= 6;
+		m_objectmap	[8][Y_2][X]	= 6;
+		m_basemap	[8][Y_1][X]	= TileType::Floor;
+		m_basemap	[8][Y_2][X]	= TileType::Floor;
 
 		m_isbossAreaOpen = true;//変更済みにする
 	}

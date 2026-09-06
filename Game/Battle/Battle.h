@@ -255,19 +255,6 @@ public:
 	void EndTurn();											// ターン終了処理
 	void ResetRunSuccess();									//にげる状態リセット
 
-	// 仲間加入確認
-	void RequestJoinEnemy(Enemy* enemy);
-	void UpdateJoinWindow();
-	void RenderJoinWindow();
-
-	// 仲間追加
-	void AddJoinEnemy();
-
-	// 仲間入れ替え
-	void UpdateJoinReplace(InputManager& inputManager);
-	void RenderJoinReplace();
-	void ReplaceMonster();
-
 	// 仲間加入状態
 	bool IsJoinWindow() const;
 	bool IsJoinReplace() const;

@@ -35,6 +35,8 @@ void TileRole::Initialize()////タイル効果未追加
     m_roles[305] = TileType::NextFloor;
     m_roles[320] = TileType::NextFloor;
     m_roles[321] = TileType::NextFloor;
+    m_roles[322] = TileType::NextFloor;
+    m_roles[323] = TileType::NextFloor;
     m_roles[336] = TileType::NextFloor;
     m_roles[337] = TileType::NextFloor;
     m_roles[352] = TileType::NextFloor;

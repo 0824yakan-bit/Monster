@@ -27,6 +27,7 @@ void TitleScene::Initialize(InputManager&inputmanager)
 	drawCommandSize = { 550,200 };
 	drawCurrentCommandPosition = { 400,550 };
 	drawCurrentCommandSize = { 50,50 };
+	m_sound->SoundStop(SEManager::SoundList::FieldBGM);
 	m_sound->PlayTypeLoopStart(SEManager::SoundList::TitleBGM);
 }
 

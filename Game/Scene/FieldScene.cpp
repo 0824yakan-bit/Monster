@@ -162,6 +162,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		if (inputManager.IsTrigger(KEY_INPUT_RETURN)||inputManager.IsPadTrigger(PAD_INPUT_A))
 		{
 			m_count++;
+			m_sound->PlayTypeBackStart(SEManager::SoundList::Decision);
 		}
 		textManager.Update(inputManager,*this);
 		return;
@@ -728,7 +729,6 @@ void FieldScene::RenderCooperativeMove()
 			}
 		};
 
-
 	AddSkill(CooperatList::None);
 	AddSkill(CooperatList::Fire);
 	AddSkill(CooperatList::Water);
@@ -851,7 +851,6 @@ void FieldScene::RenderPartyCheck(Party& party)
 
 		//名前
 		DrawString(350, y, monster->GetName().c_str(), GetColor(255,255,255), TRUE);
-
 		//HP
 		DrawFormatString(650, y, GetColor(255,255,255), L"HP%d/%d", monster->GetCurrentHitPoint(), monster->GetMaxHitPoint());
 		y += 80;
@@ -927,7 +926,7 @@ const wchar_t* FieldScene::GetSkillName(CooperatList skill)
 	switch (skill)
 	{
 	case CooperatList::Fire:
-		return L"炎属性";
+		return L"火属性";
 
 	case CooperatList::Water:
 		return L"水属性";
@@ -1075,7 +1074,6 @@ void FieldScene::RenderTreasureOpen(Accessory& accessory)
 	}
 }
 
-
 //各種
 void FieldScene::SetImage(ImageManager* image)
 {
@@ -1154,43 +1152,39 @@ void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 	if (inputManager.IsTrigger(KEY_INPUT_UP) || inputManager.IsPadTrigger(PAD_INPUT_UP))
 	{
 		m_replaceSelect--;
-
 		if (m_replaceSelect < 0)
 		{
 			m_replaceSelect = count - 1;
 		}
+		m_sound->PlayTypeBackStart(SEManager::SoundList::Cursor);
 	}
 
 	//下
 	if (inputManager.IsTrigger(KEY_INPUT_DOWN) || inputManager.IsPadTrigger(PAD_INPUT_DOWN))
 	{
 		m_replaceSelect++;
-
 		if (m_replaceSelect >= count)
 		{
 			m_replaceSelect = 0;
 		}
+		m_sound->PlayTypeBackStart(SEManager::SoundList::Cursor);
 	}
 
 	//決定
 	if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A))
 	{
+		m_sound->PlayTypeBackStart(SEManager::SoundList::Decision);
 		Monster* oldMonster = m_party->GetMonster(m_replaceSelect);
-
 		if (oldMonster == nullptr)
 		{
 			return;
 		}
-
 		//新しいモンスターの技を解放
 		LearnMonsterSkills(*m_pendingJoinedMonster);
-
 		//古いモンスターを削除
 		m_party->RemoveMonster(m_replaceSelect);
-
 		//新しいモンスターを追加
 		m_party->AddMonster(std::move(m_pendingJoinedMonster));
-
 		m_isMonsterReplaceSelect = false;
 		m_replaceSelect = 0;
 	}
@@ -1198,48 +1192,47 @@ void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 	//キャンセル
 	if (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B))
 	{
+		m_sound->PlayTypeBackStart(SEManager::SoundList::Cancel);
 		//仲間にするのをキャンセル
 		m_pendingJoinedMonster.reset();
-
 		m_isMonsterReplaceSelect = false;
 		m_replaceSelect = 0;
 	}
 }
 void FieldScene::RenderMonsterReplaceSelect()
 {
-	DrawBox(100, 80, 1180, 650, GetColor(255, 255, 255), TRUE);
-
-	DrawString(180, 120, L"パーティがいっぱいです", GetColor(0, 0, 0), TRUE);
-
-	DrawString(180, 170, L"入れ替える仲間を選んでください", GetColor(0, 0, 0), TRUE);
-
+	Vector2 drawJoinPosition = {100,80};
+	Vector2 drawJoinSize = {1080,640};
+	m_image->DrawCommandbox1(drawJoinPosition, drawJoinSize);
+	SetFontSize(40);
+	DrawString(220, 120, L"パーティがいっぱいです", GetColor(255,255,255), TRUE);
+	DrawString(220, 170, L"入れ替える仲間を選んでください", GetColor(255, 255, 255), TRUE);
 	//現在の4体
 	for (int i = 0;i < m_party->GetMonsterCount();i++)
 	{
 		Monster* monster = m_party->GetMonster(i);
-
 		if (monster == nullptr)
 		{
 			continue;
 		}
 
 		int y = 250 + i * 70;
-
 		if (i == m_replaceSelect)
 		{
-			DrawString(150, y, L"▶", GetColor(255, 0, 0), TRUE);////
+			Vector2 drawJoinCommandPosition = { 150,y };
+			Vector2 drawJoinCommandSize = {30,30};
+			m_image->DrawCommandCursor(drawJoinCommandPosition, drawJoinCommandSize);
 		}
-
-		DrawString(200, y, monster->GetName().c_str(), GetColor(0, 0, 0), TRUE);
+		DrawString(200, y, monster->GetName().c_str(), GetColor(255, 255, 255), TRUE);
 	}
 
 	//新しく加入するモンスター
 	if (m_pendingJoinedMonster != nullptr)
 	{
-		DrawString(700, 250, L"加入するモンスター", GetColor(0, 0, 0), TRUE);
-
-		DrawString(700, 320, m_pendingJoinedMonster->GetName().c_str(), GetColor(0, 0, 255), TRUE);
+		DrawString(700, 250, L"加入するモンスター", GetColor(255, 255, 255), TRUE);
+		DrawString(700, 320, m_pendingJoinedMonster->GetName().c_str(), GetColor(255, 255, 255), TRUE);
 	}
 
-	DrawString(180, 580, L"↑↓：選択　Enter：交換　Back：やめる", GetColor(0, 0, 0), TRUE);
+	DrawString(180, 580, L"↑↓：選択　Enter：交換　Back：やめる", GetColor(255, 255, 255), TRUE);
+	SetFontSize(30);
 }

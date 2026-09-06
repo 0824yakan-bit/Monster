@@ -208,7 +208,6 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 	if (m_isJoinRequested)
 	{
 		m_battle->SetJoinWindow(true);
-
 		if (m_receponsTimer > 30)
 		{
 			// 左右選択
@@ -298,6 +297,8 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 					// Fieldへ戻る
 					m_isFieldRequested = true;
 					m_receponsTimer = 0;
+					m_sound->PlayTypeBackStart(SEManager::SoundList::Win);
+
 					return;
 				}
 

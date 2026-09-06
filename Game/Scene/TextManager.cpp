@@ -7,7 +7,8 @@
 
 TextManager::TextManager()
 	:m_display{false}
-	,m_displayTimer{}
+	,m_blinking{false}
+	,m_displayTimer{0}
 	,m_displayText{}
 	,m_receptionTimer{}
 	,m_currentTextType{}
@@ -29,6 +30,7 @@ TextManager::~TextManager()
 
 void TextManager::Initialize()
 {
+	m_displayTimer = 0;
 	m_gameClear = false;
 	//本文
 	m_TextCount[Start]			= 7;
@@ -48,7 +50,11 @@ void TextManager::Update(InputManager& inputManager,FieldScene&fieldScene)
 	{
 		return;
 	}
-
+	m_displayTimer++;
+	if (m_displayTimer % 20 == 0)
+	{
+		m_blinking = !m_blinking;
+	}
 	// Enterでテキストを閉じる
 	if (fieldScene.m_count==m_TextCount[m_currentTextType])
 	{
@@ -83,11 +89,13 @@ void TextManager::Render()
 		return;
 	}
 
-	DrawBox(100, 500, 1180, 680,GetColor(0, 0, 0), TRUE);
-	m_image->DrawCommandbox1(drawTextBoxPosition, drawTextBoxSize);
+	m_image->DrawCommandbox2(drawTextBoxPosition, drawTextBoxSize);
 	SetFontSize(40);
 	DrawString(120,550,m_displayText.c_str(), GetColor(255, 255, 255), TRUE);
 	SetFontSize(30);
+	Vector2 drawNextTextPosition = { 1100,630 };
+	Vector2 drawNextTextSize = { 30,30 };
+	if(m_blinking)m_image->DrawCommandCursor(drawNextTextPosition, drawNextTextSize);
 }
 void TextManager::SetImage(ImageManager* image)
 {
