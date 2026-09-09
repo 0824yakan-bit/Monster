@@ -546,11 +546,11 @@ void BattleScene::SetBattleEnemyPositions()
 
 		if (enemy->type == Enemy::EnemyType::Golem)
 		{
-			enemy->renderPosition.x = positions[positionIndex] - 300;
-			enemy->renderPosition.y = y - 400;
+			enemy->renderPosition.x = positions[positionIndex] - 100;
+			enemy->renderPosition.y = y - 200;
 
-			enemy->renderSize.x = 1000;
-			enemy->renderSize.y = 1000;
+			enemy->renderSize.x = 700;
+			enemy->renderSize.y = 700;
 		}
 		else if (enemy->type == Enemy::EnemyType::Phoenix)
 		{

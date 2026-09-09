@@ -47,14 +47,15 @@ public:
 	int m_chipSize;		// マップチップのサイズ
 
 
-
+public:
+	//マップ移動
+	bool m_isTransition;
+	int	 m_transition;
 private:
 	static constexpr int GH_MAX		= 384;	// 24 * 16
 
 	// マップ移動
-	bool m_isTransition;
 	int	 m_nextmap;
-	int	 m_transition;
 
 	Accessory	& m_accessory;
 	BossManager	& m_bossManager;
@@ -155,6 +156,7 @@ public:
 	// マップ描画
 	void	DrawCurrentMap	(int offsetX, int offsetY);		// 現在のマップを描画
 	void	DrawNextMap		(int offsetX, int offsetY);		// 次のマップを描画
+	void	DrawFog			(int offsetX, int offsetY);		//霧描画
 
 	// ブレイクレベル
 	int	GetBreakLevel() const;	// 地形破壊回数を取得

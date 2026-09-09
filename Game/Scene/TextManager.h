@@ -1,9 +1,10 @@
 ﻿#pragma once
 #include"Game/Maths/Vector2.h"
-
+#include"Game/Scene/CooperatList.h"
 class InputManager;
 class ImageManager;
 class FieldScene;
+
 class TextManager
 {
 public:
@@ -48,6 +49,9 @@ public:
 	void SignBoard_3Text(int count);
 	void SignBoard_4Text(int count);
 	void EndText(int count);
+
+	void DrawCooperatText();
+	void CooperatText(CooperatList skill);
 
 	bool GameClear();
 };

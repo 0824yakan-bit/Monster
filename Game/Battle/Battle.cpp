@@ -289,7 +289,7 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 						break;
 
 					case 2:
-						// 応援
+						// 仲間
 						m_windowWidth = 0;
 						m_windowWidthFront = 0;
 						m_state = BattleState::Party;
@@ -442,7 +442,7 @@ void Battle::Render(GameOver& gameOver, Map& map)
 			m_image->DrawDarkness(drawEffectPosition, drawEffectSize);
 			break;
 
-		case Monster::CharacteRistics::SteamExplpsion:
+		case Monster::CharacteRistics::SteamExplosion:
 			m_image->DrawSteamexplosion(drawEffectPosition, drawEffectSize);
 			break;
 
@@ -862,10 +862,24 @@ void Battle::RenderAttackSelect()
 	std::wstring name = monster->GetName();
 	auto& attacks = monster->GetAttacks();
 
+	int color;
 	// 仲間の名前
-	DrawString(160,470,name.c_str(),GetColor(0, 0, 255));
+	float hpRate =static_cast<float>(m_monsterhp[m_monsterSelect]) /static_cast<float>(monster->GetMaxHitPoint());
+	if (hpRate >= 0.7f)
+	{
+		color = GetColor(0, 255, 0);
+	}
+	else if (hpRate >= 0.4f)
+	{
+		color = GetColor(255, 255, 0);
+	}
+	else
+	{
+		color = GetColor(255, 0, 0);
+	}
+	DrawString(160,470,name.c_str(),GetColor(255,255,255));
 	// HP
-	DrawFormatString(300,520,GetColor(0, 255, 255),L"HP : %d / %d",	m_monsterhp[m_monsterSelect],monster->GetMaxHitPoint());
+	DrawFormatString(300,520,color,L"HP : %d / %d",	m_monsterhp[m_monsterSelect],monster->GetMaxHitPoint());
 
 	// 技一覧
 	for (int i = 0; i < attacks.size(); i++)
@@ -1178,7 +1192,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 		if (!isDefense && !isComboMember)
 		{
-			AddDisplayMessage(DisplayMessageType::Normal,monster->GetName() + L"の" + attacks[index].name + L"！");
+			AddDisplayMessage(DisplayMessageType::Normal,monster->GetName() + L"の\n" + attacks[index].name + L"！");
 			Enemy* target = GetSelectedTargetEnemy();
 			if (target != nullptr)
 			{
@@ -1958,10 +1972,10 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		}
 		AddDisplayMessage(DisplayMessageType::Combo,L"蒸気爆発が発動した！");
 		UsedAttackInfo info;
-		info.element =Monster::CharacteRistics::SteamExplpsion;
+		info.element =Monster::CharacteRistics::SteamExplosion;
 		info.attackName = L"蒸気爆発！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::SteamExplpsion);
+		m_fieldScene->LearnCompositeSkill(CooperatList::SteamExplpsion);
 	}
 
 	// 水 + 土
@@ -1978,7 +1992,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		info.element =Monster::CharacteRistics::FloorBreak;
 		info.attackName = L"泥流生成！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::FloorBreak);
+		m_fieldScene->LearnCompositeSkill(CooperatList::FloorBreak);
 	}
 
 	// 水 + 風
@@ -1995,7 +2009,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		info.element =Monster::CharacteRistics::WaterFlows;
 		info.attackName = L"激流！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::WaterFlows);
+		m_fieldScene->LearnCompositeSkill(CooperatList::WaterFlows);
 	}
 	////水＋草
 	if (growGrassCombo)
@@ -2019,7 +2033,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		info.element = Monster::CharacteRistics::GrawGrass;
 		info.attackName = L"草！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::GrawGrass);
+		m_fieldScene->LearnCompositeSkill(CooperatList::GrawGrass);
 	}
 	////火＋土
 	if (volcazationCombo)
@@ -2035,7 +2049,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		info.element = Monster::CharacteRistics::Volcazation;
 		info.attackName = L"火山！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::Volcazation);
+		m_fieldScene->LearnCompositeSkill(CooperatList::Volcazation);
 	}
 
 	// 敵ごとの合計ダメージ表示を作成

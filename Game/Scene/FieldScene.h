@@ -3,12 +3,12 @@
 #include <iostream>
 #include <vector>
 #include <random>
-#include <set>
 #include <algorithm>
 #include <iterator>
 
 #include "Game/Battle/Battle.h"
 #include "Game/Maths/Vector2.h"
+#include "Game/Scene/CooperatList.h"
 
 class TextManager;
 class ImageManager;
@@ -115,29 +115,16 @@ private:
     int m_CooperatDetailSelect;
 
 public:
-    enum class CooperatList
-    {
-        Empty,
-        None,
-        Fire,
-        Water,
-        Grass,
-        Soil,
-        Wind,
-        Darkness,
-        SteamExplpsion,
-        FloorBreak,
-        WaterFlows,
-        GrawGrass,
-        Volcazation,
-    };
+    Vector2 drawCooperatDetailActivePosition;
+    Vector2 drawCooperatDetailActiveSize;
+    int m_skillsPerPage = 6;
     CooperatList m_cooperatList;
     bool m_isSkillLearned = false;
     int m_skillLearnTimer = 0;
 
     CooperatList m_learnedSkill = CooperatList::None;
     // 取得済みの技属性
-    std::set<CooperatList> m_unlockedSkills;
+    std::vector<CooperatList> m_unlockedSkills;
     // 現在表示する技一覧
     std::vector<CooperatList> m_visibleSkills;
 
@@ -176,7 +163,7 @@ public:
     void UpdateToolCheck();
     void UpdateOperationInstructions();
 
-    void RenderCooperativeMove();
+    void RenderCooperativeMove(TextManager&textManager);
     void RenderPartyCheck(Party& party);
     void RenderToolCheck();
     void RenderOperationInstructions();

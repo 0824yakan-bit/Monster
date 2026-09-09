@@ -4,6 +4,10 @@ class SEManager
 public:
 	enum class SoundList
 	{
+		//Attack
+		Fire,Water,Grass,Wind,Darkness,
+		SteamExplosion,FloorBreak,WaterFlows,GrawGrass,Volcazation,Defense,
+
 		Decision,Cancel,Cursor,
 		Lose,/*GameOver*/Break,/*Map->Break*/
 

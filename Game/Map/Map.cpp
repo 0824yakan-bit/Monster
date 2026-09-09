@@ -288,13 +288,7 @@ void Map::DrawCurrentMap(int offsetX, int offsetY)
 			{
 				DrawGraph(x * m_chipSize + offsetX,y * m_chipSize + offsetY,m_ghChip[objectNo],	TRUE);
 			}
-		///霧描画
-			if (m_fog[m_currentMap][y][x])
-			{
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, m_fogdensity);
-				DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-			}
+
 		}
 	}
 
@@ -315,9 +309,18 @@ void Map::DrawNextMap(int offsetX, int offsetY)
 			{
 				DrawGraph(x * m_chipSize + offsetX,y * m_chipSize + offsetY,m_ghChip[objectNo],	TRUE);
 			}
+		}
+	}
+}
 
-		///霧描画
-			if (m_fog[m_nextmap][y][x])
+void Map::DrawFog(int offsetX, int offsetY)
+{
+	for (int y = 0; y < MAP_HEIGHT; y++)
+	{
+		for (int x = 0; x < MAP_WIDTH; x++)
+		{
+			///霧描画
+			if (m_fog[m_currentMap][y][x])
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, m_fogdensity);
 				DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
@@ -436,9 +439,9 @@ void Map::LastBossDefeated()
 		m_objectmap[map][rightY][rightX] = -1;
 	}
 
-	// 右側も独立して進む
+	// 右側
 	m_rightChangeX[map] -= GetRand(2) + 1;
-	// Yも左とは別に変化
+	// 左とは別に変化
 	m_rightChangeY[map] += GetRand(3) - 1;
 
 	if (m_rightChangeY[map] < 0)m_rightChangeY[map] = 0;

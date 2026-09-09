@@ -235,3 +235,68 @@ bool TextManager::GameClear()
 {
 	return m_gameClear;
 }
+
+void TextManager::DrawCooperatText()
+{
+	SetFontSize(25);
+	DrawString(650,150,m_displayText.c_str(),GetColor(255, 255, 255),TRUE);
+	SetFontSize(10);
+}
+
+void TextManager::CooperatText(CooperatList skill)
+{
+	switch (skill)
+	{
+	case CooperatList::None:
+		m_displayText = L"無属性\n属性を持たない基本的な連携技。";
+		break;
+
+	case CooperatList::Fire:
+		m_displayText = L"火属性\n炎の力を利用した連携技。";
+		break;
+
+	case CooperatList::Water:
+		m_displayText = L"水属性\n水の力を利用した連携技。";
+		break;
+
+	case CooperatList::Grass:
+		m_displayText = L"草属性\n植物や自然の力を利用した連携技。";
+		break;
+
+	case CooperatList::Soil:
+		m_displayText = L"土属性\n大地の力を利用した連携技。";
+		break;
+
+	case CooperatList::Wind:
+		m_displayText = L"風属性\n風の力を利用した連携技。";
+		break;
+
+	case CooperatList::Darkness:
+		m_displayText = L"闇属性\n闇の力を利用した連携技。";
+		break;
+
+	case CooperatList::SteamExplpsion:
+		m_displayText = L"蒸界爆砕\n蒸気の力を利用した強力な連携技。";
+		break;
+
+	case CooperatList::FloorBreak:
+		m_displayText = L"地殻崩壊\n大地を砕く強力な連携技。";
+		break;
+
+	case CooperatList::WaterFlows:
+		m_displayText = L"蒼波\n激しい水流を発生させる連携技。";
+		break;
+
+	case CooperatList::GrawGrass:
+		m_displayText = L"大地の恵み\n自然の力を利用した連携技。";
+		break;
+
+	case CooperatList::Volcazation:
+		m_displayText = L"灼界\n灼熱の力を利用した強力な連携技。";
+		break;
+
+	default:
+		m_displayText = L"";
+		break;
+	}
+}
