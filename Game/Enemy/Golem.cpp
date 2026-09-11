@@ -53,8 +53,12 @@ void Golem::Update(Map& map)
 
 void Golem::Render()
 {
-	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
-	m_image->DrawGolem(position, size);
+	Vector2 drawSize;
+
+	drawSize.x = size.x * m_drawScale;
+	drawSize.y = size.y * m_drawScale;
+
+	m_image->DrawGolem(position, drawSize);
 }
 
 void Golem::Finalize()

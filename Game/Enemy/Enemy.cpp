@@ -52,6 +52,10 @@ Vector2 Enemy::GetPosition()
     return Vector2(position.x,position.y);
 }
 
+Vector2 Enemy::GetSize()
+{
+    return Vector2(size.x, size.y);
+}
 void Enemy::SetBattleEnemy(bool battleEnemy)
 {
     m_isBattleEnemy = battleEnemy;
@@ -71,6 +75,11 @@ void Enemy::SetBoss(int bossNo)
 bool Enemy::IsBoss() const
 {
     return m_isBoss;
+}
+
+bool Enemy::IsFalling() const
+{
+    return m_isFalling;
 }
 
 int Enemy::GetBossNo() const

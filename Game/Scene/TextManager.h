@@ -26,11 +26,15 @@ private:
 	TextType m_currentTextType;
 	int m_TextCount[TextType::textend];
 	bool m_display;
+	int m_fpsCounter;
+	int m_displaytextLength;
+	int m_displaySpeed;
+	bool m_isTyping;
 	bool m_blinking;
 	int m_displayTimer;
 	int m_receptionTimer;
 	std::wstring m_displayText;
-
+	std::wstring m_currentdisplayText;
 	bool m_gameClear;
 public:
 	TextManager();
@@ -54,5 +58,10 @@ public:
 	void CooperatText(CooperatList skill);
 
 	bool GameClear();
+
+	void TypeWriter(InputManager&inputManager);
+	void SetTyping();
+	bool GetTyping()const;
+	void SetDisplayTextLength();
 };
 

@@ -54,6 +54,13 @@ public:
 
     int moveTimer;
     int moveCounter;
+    // 描画倍率
+    float m_drawScale = 1.0f;
+
+    // 落下状態
+    bool m_isFalling = false;
+    int m_fallTimer = 0;
+    float m_fallScale = 1.0f;
 private:
     bool m_isBattleEnemy = false;
     bool m_isBoss = false;
@@ -65,6 +72,7 @@ public:
     const wchar_t* GetName() const;
     void SetImage(ImageManager* image);
     Vector2 GetPosition();
+    Vector2 GetSize();
 
     void SetBattleEnemy(bool battleEnemy);
 
@@ -72,6 +80,7 @@ public:
 
     void SetBoss(int bossNo);
     bool IsBoss() const;
+    bool IsFalling() const;
     int GetBossNo()const;
     // 敵を仲間の種類に変換
     Monster::Type GetMonsterType() const;
@@ -87,7 +96,6 @@ public:
     virtual void Finalize() = 0;
 
     virtual void OnHit(PlayerManager& player) = 0;
-
     virtual void RenderBattle() = 0;//バトルシーンでの描画
 
 

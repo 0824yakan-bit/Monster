@@ -57,4 +57,6 @@ public:
     void CreatePhoenix  (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
     void CreateDragon   (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
     void CreateDaemon   (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+
+    bool ReductionEnemy(Enemy& enemy);
 };

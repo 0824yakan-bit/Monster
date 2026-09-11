@@ -164,9 +164,11 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 
 	if (textManager.SelectDisplayText() == true)
 	{
-		if (inputManager.IsTrigger(KEY_INPUT_RETURN)||inputManager.IsPadTrigger(PAD_INPUT_1))
+		if ((inputManager.IsTrigger(KEY_INPUT_RETURN)||inputManager.IsPadTrigger(PAD_INPUT_1))&&textManager.GetTyping()==false)
 		{
 			m_count++;
+			textManager.SetTyping();
+			textManager.SetDisplayTextLength();
 			m_sound->PlayTypeBackStart(SEManager::SoundList::Decision);
 		}
 		textManager.Update(inputManager,*this);

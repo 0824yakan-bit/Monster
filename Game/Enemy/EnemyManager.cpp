@@ -149,14 +149,55 @@ void EnemyManager::Initialize(Map& map,Party&party)
 
 void EnemyManager::Update(Map& map)
 {
-    for (auto& enemy : m_enemies)
+    for (auto it = m_enemies.begin(); it != m_enemies.end(); )
     {
+        Enemy* enemy = it->get();
+
+        // バトル中の敵は処理しない
         if (enemy->IsBattleEnemy())
         {
+            ++it;
             continue;
         }
 
+        // Bossは絶対に落ちない
+        if (enemy->IsBoss())
+        {
+            enemy->Update(map);
+
+            ++it;
+            continue;
+        }
+
+        // すでに落下中の場合
+        if (enemy->IsFalling())
+        {
+            if (ReductionEnemy(*enemy))
+            {
+                it = m_enemies.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+
+            continue;
+        }
+
+        // 通常の敵を更新
         enemy->Update(map);
+
+        // Fallが1マスでもあれば落下開始
+        if (map.IsFallRect(
+            enemy->GetPosition().x,
+            enemy->GetPosition().y,
+            enemy->GetSize().x,
+            enemy->GetSize().y))
+        {
+            ReductionEnemy(*enemy);
+        }
+
+        ++it;
     }
 }
 void EnemyManager::Render()
@@ -453,3 +494,37 @@ void EnemyManager::CreateDaemon(int x, int y, Map& map, bool isBoss, int bossNo,
     m_enemies.push_back(std::move(daemon));
 }
 
+bool EnemyManager::ReductionEnemy(Enemy& enemy)
+{
+    // 初めて落下した瞬間
+    if (!enemy.m_isFalling)
+    {
+        enemy.m_isFalling = true;
+        enemy.m_fallTimer = 0;
+        enemy.m_fallScale = 1.0f;
+    }
+
+    enemy.m_fallTimer++;
+
+    // 徐々に小さくする
+    enemy.m_fallScale -= 0.03f;
+
+    if (enemy.m_fallScale < 0.0f)
+    {
+        enemy.m_fallScale = 0.0f;
+    }
+
+    // 描画倍率
+    enemy.m_drawScale = enemy.m_fallScale;
+
+    // 下に落ちる
+    enemy.position.y += 2;
+
+    // 30フレーム後に削除する
+    if (enemy.m_fallTimer >= 30)
+    {
+        return true;
+    }
+
+    return false;
+}

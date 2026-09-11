@@ -46,7 +46,12 @@ void Dragon::Update(Map& map)
 
 void Dragon::Render()
 {
-	m_image->DrawDragon(position, size);
+	Vector2 drawSize;
+
+	drawSize.x = size.x * m_drawScale;
+	drawSize.y = size.y * m_drawScale;
+
+	m_image->DrawDragon(position, drawSize);
 }
 
 void Dragon::Finalize()

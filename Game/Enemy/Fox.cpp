@@ -54,8 +54,12 @@ void Fox::Update(Map& map)
 
 void Fox::Render()
 {
-	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
-	m_image->DrawFox(position, size);
+	Vector2 drawSize;
+
+	drawSize.x = size.x * m_drawScale;
+	drawSize.y = size.y * m_drawScale;
+
+	m_image->DrawFox(position, drawSize);
 }
 
 void Fox::Finalize()

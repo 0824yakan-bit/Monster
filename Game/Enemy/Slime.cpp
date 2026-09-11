@@ -52,8 +52,12 @@ void Slime::Update(Map&map)
 
 void Slime::Render()
 {
-   // DrawBox(position.x,position.y,position.x + size.x,position.y + size.y,GetColor(0, 0, 0),TRUE);
-	m_image->DrawSlime(position, size);
+	Vector2 drawSize;
+
+	drawSize.x = size.x * m_drawScale;
+	drawSize.y = size.y * m_drawScale;
+
+	m_image->DrawSlime(position, drawSize);
 }
 
 void Slime::Finalize()

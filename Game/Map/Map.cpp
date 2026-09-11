@@ -874,9 +874,9 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			{
 				for (int x = 0; x < MAP_WIDTH; ++x)
 				{
-					if (m_objectmap[m_currentMap][y][x] == 134)
+					if (m_objectmap[m_currentMap][y][x] == 291)
 					{
-						m_objectmap[m_currentMap][y][x] = 3;
+						m_objectmap[m_currentMap][y][x] = 134;
 						m_basemap[m_currentMap][y][x] = TileType::Floor;
 					}
 				}
