@@ -14,7 +14,7 @@ Monster::Monster(Type type)
         m_name= L"スライム" ;
         m_maxHitPoint = 20;
         m_currentHitPoint = m_maxHitPoint;
-        m_attacks.push_back({ L"たいあたり", 5,CharacteRistics::Normal });
+        m_attacks.push_back({ L"たいあたり", 8,CharacteRistics::Normal });
         m_attacks.push_back({ L"スライム液", 5,CharacteRistics::Water });
         m_attacks.push_back({ L"ぼうぎょ"  ,10,CharacteRistics::Defense });
         break;

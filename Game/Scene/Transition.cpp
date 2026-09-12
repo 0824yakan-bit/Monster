@@ -102,19 +102,64 @@ float CenterToTop = m_posY.Center - (m_posY.Center * faderate);
 
 void Transition::FieldtoBattle_2Out(float faderate)
 {
-
+	int center = Screen::WIDTH / 2;
+	int width = static_cast<int>(center * (1.0-faderate));
+	DrawBox(0, 0,center - width,Screen::HEIGHT,GetColor(0, 0, 0),TRUE);
+	DrawBox(center + width, 0,Screen::WIDTH,Screen::HEIGHT,GetColor(0, 0, 0),TRUE);
 }
 
 void Transition::FieldtoBattle_3Out(float faderate)
 {
+	int height = static_cast<int>(Screen::HEIGHT * faderate);
+	DrawBox(0,0,Screen::WIDTH,height,GetColor(0, 0, 0),TRUE);
 }
 
 void Transition::FieldtoBattle_4Out(float faderate)
 {
+	int w = Screen::WIDTH;
+	int h = Screen::HEIGHT;
+
+	int offset = static_cast<int>((w + h) * faderate);
+
+	for (int y = 0; y < h; y++)
+	{
+		int x = offset - y;
+
+		if (x <= 0)
+		{
+			DrawBox(0, y,w, y + 1,GetColor(0, 0, 0),TRUE);
+		}
+		else if (x < w)
+		{
+			DrawBox(0, y,x, y + 1,GetColor(0, 0, 0),TRUE);
+		}
+	}
 }
 
 void Transition::FieldtoBattle_5Out(float faderate)
 {
+	int cx = Screen::WIDTH / 2;
+	int cy = Screen::HEIGHT / 2;
+
+	int halfW = static_cast<int>((Screen::WIDTH / 2) * (1.0f - faderate));
+	int halfH = static_cast<int>((Screen::HEIGHT / 2) * (1.0f - faderate));
+
+	int left = cx - halfW;
+	int right = cx + halfW;
+	int top = cy - halfH;
+	int bottom = cy + halfH;
+
+	// 上
+	DrawBox(0, 0,Screen::WIDTH, top,GetColor(0, 0, 0),TRUE);
+
+	// 下
+	DrawBox(0, bottom,Screen::WIDTH, Screen::HEIGHT,GetColor(0, 0, 0),TRUE);
+
+	// 左
+	DrawBox(0, top,left, bottom,GetColor(0, 0, 0),TRUE);
+
+	// 右
+	DrawBox(right, top,Screen::WIDTH, bottom,GetColor(0, 0, 0),TRUE);
 }
 
 void Transition::FieldtoBattle_1In(float faderate)
@@ -123,46 +168,148 @@ void Transition::FieldtoBattle_1In(float faderate)
 
 	float t = 1.0f - faderate;
 
-	// イージング
+	// SmoothStep
 	float ease = t * t * (3.0f - 2.0f * t);
 
 	float cx = m_posX.Center;
 	float cy = m_posY.Center;
 
-	float w = m_posX.Right - m_posX.Left;
-	float h = m_posY.Bottom - m_posY.Top;
+	float w = Screen::WIDTH;
+	float h = Screen::HEIGHT;
 
-	// 画面を覆う量
 	float moveX = w * ease;
 	float moveY = h * ease;
 
-	// 左
-	DrawBox(m_posX.Left,m_posY.Top,cx - moveX,m_posY.Bottom,color,TRUE);
+	DrawBox(
+		0,
+		0,
+		static_cast<int>(cx - moveX / 2),
+		Screen::HEIGHT,
+		color,
+		TRUE
+	);
 
-	// 右
-	DrawBox(cx + moveX,m_posY.Top,m_posX.Right,m_posY.Bottom,color,TRUE);
-
-	// 上
-	DrawBox(m_posX.Left,m_posY.Top,m_posX.Right,cy - moveY,color,TRUE);
-
-	// 下
-	DrawBox(m_posX.Left,cy + moveY,m_posX.Right,m_posY.Bottom,color,TRUE);
+	DrawBox(
+		static_cast<int>(cx + moveX / 2),
+		0,
+		Screen::WIDTH,
+		Screen::HEIGHT,
+		color,
+		TRUE
+	);
 }
 
 void Transition::FieldtoBattle_2In(float faderate)
 {
+	int center = Screen::WIDTH / 2;
+
+	int width = static_cast<int>(center * (1.0f - faderate));
+
+	// 左側
+	DrawBox(0,0,center - width,Screen::HEIGHT,GetColor(0, 0, 0),TRUE);
+
+	// 右側
+	DrawBox(center + width,0,Screen::WIDTH,Screen::HEIGHT,GetColor(0, 0, 0),TRUE);
 }
 
 void Transition::FieldtoBattle_3In(float faderate)
 {
+	int height = static_cast<int>(Screen::HEIGHT * faderate);
+
+	DrawBox(0,0,Screen::WIDTH,height,GetColor(0, 0, 0),TRUE);
 }
 
 void Transition::FieldtoBattle_4In(float faderate)
 {
+	int w = Screen::WIDTH;
+	int h = Screen::HEIGHT;
+
+	int offset = static_cast<int>(
+		(w + h) * (1.0f - faderate)
+		);
+
+	for (int y = 0; y < h; y++)
+	{
+		int x = offset - y;
+
+		if (x <= 0)
+		{
+			continue;
+		}
+		else if (x < w)
+		{
+			DrawBox(
+				0,
+				y,
+				x,
+				y + 1,
+				GetColor(0, 0, 0),
+				TRUE
+			);
+		}
+		else
+		{
+			DrawBox(
+				0,
+				y,
+				w,
+				y + 1,
+				GetColor(0, 0, 0),
+				TRUE
+			);
+		}
+	}
 }
 
 void Transition::FieldtoBattle_5In(float faderate)
 {
+	int cx = Screen::WIDTH / 2;
+	int cy = Screen::HEIGHT / 2;
+
+	int halfW = static_cast<int>(
+		(Screen::WIDTH / 2) * faderate
+		);
+
+	int halfH = static_cast<int>(
+		(Screen::HEIGHT / 2) * faderate
+		);
+
+	int left = cx - halfW;
+	int right = cx + halfW;
+	int top = cy - halfH;
+	int bottom = cy + halfH;
+
+	// 上
+	DrawBox(
+		0, 0,
+		Screen::WIDTH, top,
+		GetColor(0, 0, 0),
+		TRUE
+	);
+
+	// 下
+	DrawBox(
+		0, bottom,
+		Screen::WIDTH, Screen::HEIGHT,
+		GetColor(0, 0, 0),
+		TRUE
+	);
+
+	// 左
+	DrawBox(
+		0, top,
+		left, bottom,
+		GetColor(0, 0, 0),
+		TRUE
+	);
+
+	// 右
+	DrawBox(
+		right, top,
+		Screen::WIDTH, bottom,
+		GetColor(0, 0, 0),
+		TRUE
+	);
 }
 
 void Transition::BattletoField_1Out(float faderate)

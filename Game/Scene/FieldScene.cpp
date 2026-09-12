@@ -24,7 +24,7 @@ static std::vector<Battle::UsedAttackInfo>MakeFieldEffect(Monster::CharacteRisti
 
 FieldScene::FieldScene(BossManager& bossManager, Party& party)
 	: m_hitEnemy				{ nullptr }
-	, STtext					{false,false,false,false,false}
+	, STtext					{false,false,false,false,false,false}
 	, m_isBattleRequested		{false}
 	, m_isMapActive				{ false }
 	, m_isMenuActive			{ false }
@@ -58,8 +58,11 @@ void FieldScene::Initialize(TextManager&textManager,InputManager& inputmanager, 
 	STtext.m_signboard_2 = false;
 	STtext.m_signboard_3 = false;
 	STtext.m_signboard_4 = false;
+	STtext.m_lastBoss = false;
 	STtext.m_end = false;
 
+	m_hasShownLastBossText = false;
+	m_hasShownStairOpened = false;
 	//初回だけ登録
 	if (m_unlockedSkills.empty())
 	{
@@ -160,7 +163,8 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 	if (STtext.m_signboard_2)textManager.SignBoard_2Text(m_count);
 	if (STtext.m_signboard_3)textManager.SignBoard_3Text(m_count);
 	if (STtext.m_signboard_4)textManager.SignBoard_4Text(m_count);
-	if (STtext.m_end)textManager.EndText(m_count);
+	if (STtext.m_lastBoss	)textManager.LastBossText	(m_count);
+	if (STtext.m_end		)textManager.EndText		(m_count);
 
 	if (textManager.SelectDisplayText())
 	{
@@ -194,7 +198,25 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		textManager.Update(inputManager,*this);
 		return;
 	}
+	// 階段解放状態管理
+	if (m_isStairOpened)
+	{
+		if (inputManager.IsTrigger(KEY_INPUT_RETURN) ||inputManager.IsPadTrigger(PAD_INPUT_1))
+		{
+			m_stairOpenTimer = 0;
+			m_isStairOpened = false;
+		}
+		else
+		{
+			m_stairOpenTimer--;
 
+			if (m_stairOpenTimer <= 0)
+			{
+				m_stairOpenTimer = 0;
+				m_isStairOpened = false;
+			}
+		}
+	}
 	if (m_isMonsterReplaceSelect)
 	{
 		UpdateMonsterReplaceSelect(inputManager);
@@ -214,6 +236,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 			m_isSkillLearned = false;
 		}
 	}
+
 	//マップ表示・メニュー表示状態管理
 	if ((inputManager.IsTrigger(KEY_INPUT_X)||inputManager.IsPadTrigger(PAD_INPUT_3)) && !m_isMapActive && !m_isMenuActive)
 	{
@@ -529,7 +552,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 
 	m_breakEffects.erase(std::remove_if(m_breakEffects.begin(),m_breakEffects.end(),[](const FieldBreakEffect& effect){return effect.timer <= 0;}),	m_breakEffects.end());
 	//ブレイクレベル管理
-	int m_level = m_breakLevel / 10;
+	int m_level = map.GetBreakLevel();
 
 	switch (m_level)
 	{
@@ -554,9 +577,16 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		break;
 	}
 
-	//LastBoss状態管理
+	//Boss状態管理
 	if (m_bossManager.IsAllBossDefeated())
 	{
+		if (!m_hasShownStairOpened)
+		{
+			m_hasShownStairOpened = true;
+
+			m_isStairOpened = true;
+			m_stairOpenTimer = 120;
+		}
 	}
 
 	if (m_bossManager.IsBossDefeated(3))//ラスボス撃破後
@@ -747,21 +777,118 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 		return;
 	}
 
-	//m_image->DrawM(Mposition, size);
-	//m_image->DrawN(Nposition, size);
-
-	//LastBoss状態管理
-	if (m_bossManager.IsAllBossDefeated())
+// LastBoss撃破後：階段解放演出
+	if (m_isStairOpened)
 	{
-		DrawString(500, 350, L"どこかの階段が開いたようだ", GetColor(255, 255, 255), TRUE);
+		// フェードイン
+		int elapsed = 120 - m_stairOpenTimer;
+		int alpha = elapsed * 6;
+		
+		if (alpha > 150)
+			alpha = 150;
+		if (alpha < 0)
+			alpha = 0;
+
+		// 背景暗転
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+		DrawBox(0, 0,1920, 1080,GetColor(0, 0, 0),TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+		// パネル
+		// 外側の影
+		DrawBox(480, 310,1440, 530,GetColor(0, 0, 0),TRUE);
+
+		// メインパネル
+		DrawBox(500, 290,1420, 510,GetColor(18, 22, 32),TRUE);
+
+		// 外枠
+		DrawBox(500, 290,1420, 510,GetColor(100, 180, 255),FALSE);
+
+		// 内側の枠
+		DrawBox(515, 305,1405, 495,GetColor(50, 70, 100),FALSE);
+
+		// タイトル
+		SetFontSize(42);
+		const wchar_t* title =L"◆ 新たな道が開かれた ◆";
+		int titleWidth =GetDrawStringWidth(title, -1);
+		DrawString(960 - titleWidth / 2,335,title,GetColor(120, 210, 255),TRUE);
+
+		// 区切り線
+		DrawLine(600, 410,1320, 410,GetColor(100, 130, 160));
+
+		// メインメッセージ
+		SetFontSize(34);
+		const wchar_t* message =L"どこかの階段が開いたようだ";
+		int messageWidth = GetDrawStringWidth(message, -1);
+		DrawString(960 - messageWidth / 2,435,message,GetColor(255, 255, 255),TRUE);
+
+		// サブメッセージ
+		SetFontSize(24);
+		const wchar_t* subMessage =L"新たな場所へ進めるようになった";
+		int subWidth =GetDrawStringWidth(subMessage, -1);
+
+		DrawString(960 - subWidth / 2,485,subMessage,GetColor(170, 180, 195),TRUE);
+
+		// 決定ボタン表示
+		SetFontSize(22);
+		const wchar_t* button =	L"ENTER  /  A  で閉じる";
+		int buttonWidth =GetDrawStringWidth(button, -1);
+
+		DrawString(960 - buttonWidth / 2,550,button,GetColor(120, 210, 255),TRUE);
+		SetFontSize(30);
 	}
-	// スキル習得表示
+	// スキル習得演出
 	if (m_isSkillLearned)
 	{
-		DrawBox(500, 300,1420, 500,GetColor(0, 0, 0),TRUE);
-		SetFontSize(40);
-		DrawString(800, 330,L"スキル習得！",GetColor(255, 255, 0));
-		DrawFormatString(730, 400,GetColor(255, 255, 255),L"%lsを習得しました！",GetSkillName(m_learnedSkill));
+		int elapsed = 120 - m_skillLearnTimer;
+
+		int alpha = 0;
+
+		// フェードイン：30フレーム
+		if (elapsed < 30)
+		{
+			alpha = elapsed * 180 / 30;
+		}
+		// 表示維持：30～90フレーム
+		else if (elapsed < 90)
+		{
+			alpha = 180;
+		}
+		// フェードアウト：90～120フレーム
+		else
+		{
+			alpha = (120 - elapsed) * 180 / 30;
+		}
+
+		if (alpha < 0)
+			alpha = 0;
+
+		if (alpha > 180)
+			alpha = 180;
+
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+		DrawBox(0,0,Screen::WIDTH,Screen::HEIGHT,GetColor(0, 0, 0),TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND,0);
+
+		// パネル
+		DrawBox(500, 300,1420, 520,GetColor(25, 25, 35),TRUE);
+
+		// 金色の枠
+		DrawBox(500, 300,1420, 520,GetColor(255, 215, 0),FALSE);
+
+		// タイトル
+		SetFontSize(50);
+
+		DrawString(760, 325,L"★ スキル習得！ ★",GetColor(255, 220, 50),TRUE);
+
+		// スキル名
+		SetFontSize(45);
+
+		const wchar_t* skillName =GetSkillName(m_learnedSkill);
+		int width =GetDrawStringWidth(skillName, -1);
+
+		DrawString(960 - width / 2,420,skillName,GetColor(255, 255, 255),TRUE);
+
 		SetFontSize(30);
 	}
 }
@@ -806,7 +933,7 @@ void FieldScene::RenderCooperativeMove(TextManager&textManager)
 	// 背景
 	m_image->DrawCommandbox1(drawMenuBoxPosition_1,drawMenuBoxSize_1);
 
-	int positionx = 250;
+	int positionx = 280;
 	int positiony = 200;
 
 	// カーソル
@@ -885,7 +1012,7 @@ void FieldScene::RenderCooperativeMove(TextManager&textManager)
 			name = L"灼界";
 			break;
 		}
-		DrawString(300,y,name,GetColor(255, 255, 255),TRUE);
+		DrawString(330,y,name,GetColor(255, 255, 255),TRUE);
 		y += 50;
 	}
 
@@ -985,7 +1112,11 @@ enemyManager.Update(map);
 
 void FieldScene::LastBossDefeat()
 {
-	//printfDx(L"CollLastBossDefeat");
+	if (!m_hasShownLastBossText)
+	{
+		STtext.m_lastBoss = true;
+		m_hasShownLastBossText = true;
+	}
 }
 
 //技属性を1つ取得

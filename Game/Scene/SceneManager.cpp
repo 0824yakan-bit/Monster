@@ -224,18 +224,23 @@ void SceneManager::SetFadeOutRequest(Map&map)////フェードアウト時
         {
         case 0:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_1Out);
+            printfDx(L"call_1Out");
             break;
         case 1:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_2Out);
+            printfDx(L"call_2Out");
             break;
         case 2:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_3Out);
+            printfDx(L"call_3Out");
             break;
         case 3:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_4Out);
+            printfDx(L"call_4Out");
             break;
         case 4:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_5Out);
+            printfDx(L"call_5Out");
             break;
         }
     }
@@ -261,18 +266,23 @@ void SceneManager::SetFadeInRequest(Map&map)////フェードイン時
         {
         case 0:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_1In);
+            printfDx(L"call_1In");
             break;
         case 1:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_2In);
+            printfDx(L"call_2In");
             break;
         case 2:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_3In);
+            printfDx(L"call_3In");
             break;
         case 3:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_4In);
+            printfDx(L"call_4In");
             break;
         case 4:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_5In);
+            printfDx(L"call_5In");
             break;
         }
     }

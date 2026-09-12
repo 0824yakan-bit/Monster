@@ -88,6 +88,7 @@ private:
 	std::vector<BreakEffectPosition>m_breakEffectPositions;
 
 	//段々崩れる
+	int m_speedrand;
 	int m_leftChangeX[MAP_NUM];
 	int m_leftChangeY[MAP_NUM];
 
@@ -170,7 +171,8 @@ public:
 
 	// 霧
 	void RevealArea(int centerX,int centerY,int radius);	// 指定範囲の霧を晴らす
-
+	//階段は消さない
+	bool NextMapSearch(int map, int x, int y);
 	// 宝箱
 	void UsedTreasure		(PlayerManager& player);	// 宝箱を使用済みにする
 

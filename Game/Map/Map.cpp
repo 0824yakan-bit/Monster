@@ -49,6 +49,7 @@ void Map::Initialize(const wchar_t* fileName)
 	m_moveDir = MoveDir::None;
 	m_stageNo = 0;
 	m_isbossAreaOpen = false;
+	m_fogdensity = 0;
 	m_level = 0;
 	m_breakLevel = 0;
 	for (int i = 0; i < MAP_NUM; i++)
@@ -61,6 +62,7 @@ void Map::Initialize(const wchar_t* fileName)
 	}
 	m_changeMap = 9;
 
+	m_speedrand = 10;
 	m_changeTimer = 0;
 	m_changeInterval = 5;
 
@@ -393,7 +395,10 @@ bool Map::IsSafeArea(int map, int x, int y)
 			return true;
 		}
 	}
-
+	if (NextMapSearch(map,x,y))
+	{
+		return true;
+	}
 	return false;
 }
 void Map::LastBossDefeated()
@@ -448,7 +453,7 @@ void Map::LastBossDefeated()
 	if (m_rightChangeY[map] >= MAP_HEIGHT)m_rightChangeY[map] = MAP_HEIGHT - 1;
 
 	// 崩壊タイミング
-	m_changeInterval = GetRand(20) + 10;
+	m_changeInterval = GetRand(m_speedrand) + 5;
 }
 
 void Map::MapBreak()
@@ -680,9 +685,15 @@ void Map::BreakArea(
 			{
 				continue;
 			}
-
-			if (targetObject < 0 ||
-				m_objectmap[m_currentMap][ty][tx] == targetObject)
+			if (NextMapSearch(m_currentMap,tx,ty))
+			{
+				continue;
+			}
+			if (m_objectmap[m_currentMap][ty][tx] == 41)
+			{
+				continue;
+			}
+			if (targetObject < 0 ||m_objectmap[m_currentMap][ty][tx] == targetObject)
 			{
 				// オブジェクトまたは地形が実際に変わる場合だけ
 				if (m_objectmap[m_currentMap][ty][tx] != replaceObject ||
@@ -694,12 +705,7 @@ void Map::BreakArea(
 					isChanged = true;
 
 					// 実際に変更された場所を記録
-					m_breakEffectPositions.push_back(
-						BreakEffectPosition{
-							tx * m_chipSize,
-							ty * m_chipSize
-						}
-					);
+					m_breakEffectPositions.push_back(BreakEffectPosition{tx * m_chipSize,ty * m_chipSize});
 				}
 			}
 		}
@@ -708,8 +714,8 @@ void Map::BreakArea(
 	// 実際に地形が変更された場合だけBreakLevelを増加
 	if (isChanged)
 	{
-		m_breakLevel = std::min(40, m_breakLevel + dangerAdd);
-		m_level = m_breakLevel / 10;
+		m_breakLevel = std::min(80, m_breakLevel + dangerAdd);
+		m_level = m_breakLevel / 20;
 	}
 }
 void Map::BreakAreaByGroup(
@@ -736,12 +742,14 @@ void Map::BreakAreaByGroup(
 			int ty = centerY + y;
 
 			// マップ外なら無視
-			if (tx < 0 || tx >= MAP_WIDTH ||
-				ty < 0 || ty >= MAP_HEIGHT)
+			if (tx < 0 || tx >= MAP_WIDTH ||ty < 0 || ty >= MAP_HEIGHT)
 			{
 				continue;
 			}
-
+			if (NextMapSearch(m_currentMap,tx,ty))
+			{
+				continue;
+			}
 			int objectNo = m_objectmap[m_currentMap][ty][tx];
 
 			for (const auto& breakTile : breakTiles)
@@ -752,20 +760,13 @@ void Map::BreakAreaByGroup(
 					if (m_objectmap[m_currentMap][ty][tx] != breakTile.replaceTile ||
 						m_basemap[m_currentMap][ty][tx] != breakTile.replaceType)
 					{
-						m_objectmap[m_currentMap][ty][tx] =
-							breakTile.replaceTile;
+						m_objectmap[m_currentMap][ty][tx] =	breakTile.replaceTile;
 
-						m_basemap[m_currentMap][ty][tx] =
-							breakTile.replaceType;
+						m_basemap[m_currentMap][ty][tx] =breakTile.replaceType;
 
 						isChanged = true;
 
-						m_breakEffectPositions.push_back(
-							BreakEffectPosition{
-								tx * m_chipSize,
-								ty * m_chipSize
-							}
-						);
+						m_breakEffectPositions.push_back(BreakEffectPosition{tx * m_chipSize,ty * m_chipSize});
 					}
 
 					break;
@@ -778,9 +779,9 @@ void Map::BreakAreaByGroup(
 	if (isChanged)
 	{
 		m_breakLevel =
-			std::min(40, m_breakLevel + dangerAdd);
+			std::min(80, m_breakLevel + dangerAdd);
 
-		m_level = m_breakLevel / 10;
+		m_level = m_breakLevel / 20;
 	}
 }
 void Map::RevealArea(int centerX, int centerY, int radius)
@@ -798,6 +799,32 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			m_fog[m_currentMap][ty][tx] = false;
 		}
 	}
+}
+bool Map::NextMapSearch(int map, int x, int y)
+{
+	if (map < 0 || map >= MAP_NUM ||
+		x < 0 || x >= MAP_WIDTH ||
+		y < 0 || y >= MAP_HEIGHT)
+	{
+		return false;
+	}
+
+	int objectNo = m_beforChange[map][y][x];
+
+	return objectNo == 288 ||
+		objectNo == 289 ||
+		objectNo == 304 ||
+		objectNo == 305 ||
+		objectNo == 320 ||
+		objectNo == 321 ||
+		objectNo == 322 ||
+		objectNo == 323 ||
+		objectNo == 336 ||
+		objectNo == 337 ||
+		objectNo == 352 ||
+		objectNo == 353 ||
+		objectNo == 368 ||
+		objectNo == 369;
 }
 
 		void Map::UsedTreasure(PlayerManager& player)
@@ -963,7 +990,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 					if (m_objectmap[m_currentMap][y][x] == 291)
 					{
 						m_objectmap[m_currentMap][y][x] = 134;
-						m_basemap[m_currentMap][y][x] = TileType::Floor;
+						m_basemap[m_currentMap][y][x] = TileType::Wall;
 					}
 				}
 			}
@@ -977,7 +1004,7 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx, ty, -2, 3, -2, 3, -1, 91, TileType::GrassLounge, 0);
+			BreakArea(tx, ty, -1, 2, -1, 2, -1, 91, TileType::GrassLounge, 0);
 		}
 
 		void Map::VolcazationBreak(PlayerManager& player)

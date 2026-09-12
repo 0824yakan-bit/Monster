@@ -39,7 +39,7 @@ void TransitionManager::Update()
 		break;
 
 	case TransitionState::FadeIn:
-		m_frameConunt--;
+		m_frameConunt-=2;
 		if (m_frameConunt <= 0)
 		{
 			m_frameConunt = 0;

@@ -47,8 +47,8 @@ void Fairy::Render()
 {
 	Vector2 drawSize;
 
-	drawSize.x = size.x * m_drawScale;
-	drawSize.y = size.y * m_drawScale;
+	drawSize.x = size.x * m_drawScale/100;
+	drawSize.y = size.y * m_drawScale/100;
 
 	m_image->DrawFairy(position, drawSize);
 }

@@ -47,24 +47,25 @@ public:
     Vector2 renderSize;
 
     int hp;
-
     int power;
-
     int level;
 
     int moveTimer;
     int moveCounter;
     // 描画倍率
-    float m_drawScale = 1.0f;
+    int m_drawScale = 100;
 
     // 落下状態
     bool m_isFalling = false;
     int m_fallTimer = 0;
-    float m_fallScale = 1.0f;
+    int m_fallScale = 100;
 private:
     bool m_isBattleEnemy = false;
     bool m_isBoss = false;
     int m_bossNo = -1;
+    int m_enemyId = -1;
+    std::wstring m_singleAttackName;
+    std::wstring m_allAttackName;
 public:
     void Damage(int power);//パーティのpower
     int GetPower()const;
@@ -85,7 +86,11 @@ public:
     // 敵を仲間の種類に変換
     Monster::Type GetMonsterType() const;
     void SetEnemyStats(Map& map,Party&party, int power, int hp);
-
+    void SetEnemyId(int id);
+    int GetEnemyId() const;
+    void SetAttackNames(const std::wstring& singleAttackName,const std::wstring& allAttackName);
+    const std::wstring& GetSingleAttackName() const;
+    const std::wstring& GetAllAttackName() const;
 public:
     Enemy();
     virtual ~Enemy() = default;

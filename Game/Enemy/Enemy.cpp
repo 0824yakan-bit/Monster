@@ -133,3 +133,29 @@ void Enemy::SetEnemyStats(Map& map,Party&party, int basePower, int baseHp)
     hp = baseHp+5*(level)+10*(partycount-1);
     power = basePower + 2 * (level+partycount-1);
 }
+
+void Enemy::SetEnemyId(int id)
+{
+    m_enemyId = id;
+}
+
+int Enemy::GetEnemyId() const
+{
+    return m_enemyId;
+}
+
+void Enemy::SetAttackNames(const std::wstring& singleAttackName, const std::wstring& allAttackName)
+{
+    m_singleAttackName = singleAttackName;
+    m_allAttackName = allAttackName;
+}
+
+const std::wstring& Enemy::GetSingleAttackName() const
+{
+    return m_singleAttackName;
+}
+
+const std::wstring& Enemy::GetAllAttackName() const
+{
+    return m_allAttackName;
+}

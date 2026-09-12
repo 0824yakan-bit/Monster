@@ -15,6 +15,7 @@ public:
 		Signboard_2,//看板２
 		Signboard_3,//看板３
 		Signboard_4,//看板４
+		LastBoss,//悪魔撃破時
 		End,//ゲーム終了時
 		textend,
 	};
@@ -52,6 +53,7 @@ public:
 	void SignBoard_2Text(int count);
 	void SignBoard_3Text(int count);
 	void SignBoard_4Text(int count);
+	void LastBossText(int count);
 	void EndText(int count);
 
 	void DrawCooperatText();
