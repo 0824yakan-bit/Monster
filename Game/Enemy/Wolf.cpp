@@ -52,8 +52,12 @@ void Wolf::Update(Map& map)
 
 void Wolf::Render()
 {
-	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(255, 0, 0), TRUE);
-	m_image->DrawWolf(position, size);
+	Vector2 drawSize;
+
+	drawSize.x = size.x * m_drawScale/100;
+	drawSize.y = size.y * m_drawScale/100;
+
+	m_image->DrawWolf(position,drawSize);
 }
 
 void Wolf::Finalize()

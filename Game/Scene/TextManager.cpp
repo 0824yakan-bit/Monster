@@ -21,6 +21,7 @@ TextManager::TextManager()
 	m_TextCount[Signboard_2]	= 2;
 	m_TextCount[Signboard_3]	= 1;
 	m_TextCount[Signboard_4]	= 4;
+	m_TextCount[LastBoss]		= 5;
 	m_TextCount[End]			= 5;
 }
 
@@ -31,6 +32,10 @@ TextManager::~TextManager()
 void TextManager::Initialize()
 {
 	m_displayTimer = 0;
+	m_fpsCounter = 0;
+	m_displaytextLength = 0;
+	m_displaySpeed = 3;//テキスト表示スピード小さいほど速い
+	m_isTyping = true;
 	m_gameClear = false;
 	//本文
 	m_TextCount[Start]			= 7;
@@ -38,25 +43,30 @@ void TextManager::Initialize()
 	m_TextCount[Signboard_2]	= 2;
 	m_TextCount[Signboard_3]	= 5;
 	m_TextCount[Signboard_4]	= 5;
+	m_TextCount[LastBoss]		= 5;
 	m_TextCount[End]			= 5;
 
 	drawTextBoxPosition = {20,500};
 	drawTextBoxSize = {1240,180};
 }
 
-void TextManager::Update(InputManager& inputManager,FieldScene&fieldScene)
+void TextManager::Update(InputManager& inputManager, FieldScene& fieldScene)
 {
 	if (!m_display)
 	{
 		return;
 	}
+
 	m_displayTimer++;
+
 	if (m_displayTimer % 20 == 0)
 	{
 		m_blinking = !m_blinking;
 	}
+
+	TypeWriter(inputManager);
 	// Enterでテキストを閉じる
-	if (fieldScene.m_count==m_TextCount[m_currentTextType])
+	if (fieldScene.m_count == m_TextCount[m_currentTextType])
 	{
 		m_display = false;
 		fieldScene.m_count = 0;
@@ -73,9 +83,12 @@ void TextManager::Update(InputManager& inputManager,FieldScene&fieldScene)
 			break;
 		case Signboard_3:
 			fieldScene.STtext.m_signboard_3 = false;
+			break;
 		case Signboard_4:
 			fieldScene.STtext.m_signboard_4 = false;
 			break;
+		case LastBoss:
+			fieldScene.STtext.m_lastBoss = false;
 		case End:
 			fieldScene.STtext.m_end = false;
 			break;
@@ -88,10 +101,13 @@ void TextManager::Render()
 	{
 		return;
 	}
-
+	Vector2 slimeTextPosition = { 50,430 };
+	Vector2 slimeTextSize = { 220,75 };
+	m_image->DrawCommandbox1(slimeTextPosition, slimeTextSize);
 	m_image->DrawCommandbox2(drawTextBoxPosition, drawTextBoxSize);
 	SetFontSize(40);
-	DrawString(120,550,m_displayText.c_str(), GetColor(255, 255, 255), TRUE);
+	DrawString(75, 446, L"スライム", GetColor(255, 255, 255), TRUE);
+	DrawString(120,550,m_currentdisplayText.c_str(), GetColor(255, 255, 255), TRUE);
 	SetFontSize(30);
 	Vector2 drawNextTextPosition = { 1100,630 };
 	Vector2 drawNextTextSize = { 30,30 };
@@ -129,7 +145,7 @@ void TextManager::StartText(int count)
 		m_displayText = L"だから頼む、あの悪魔を倒して、\n森を平和な場所に戻してくれ！";
 			break;
 	case 4:
-		m_displayText = L"君一人だと心配だから、僕もついていくよ。\n僕は無属性と水属性なら扱えるよ、覚えておいてね。";
+		m_displayText = L"君一人だと心配だから、僕もついていくよ。\n僕は無属性と水属性なら教えられるよ、覚えておいてね。";
 			break;
 	case 5:
 		m_displayText = L"...まずはここから出ないとね。この壁の近くでなら、\nYでメニューを開いて、技の無属性で壊せると思うよ。";
@@ -179,7 +195,7 @@ void TextManager::SignBoard_3Text(int count)
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"「複数の技を組み合わせることで\n強力な攻撃ができます";
+		m_displayText = L"「複数の技を組み合わせることで\n強力な攻撃ができます」";
 		break;
 	}
 }
@@ -195,10 +211,32 @@ void TextManager::SignBoard_4Text(int count)
 		m_displayText = L"この看板は、あの悪魔がかいたみたいだよ\n一応読んでみようか";
 		break;
 	case 1:
-		m_displayText = L"「我に謁見を望む……ならば、\n岩と鳥と竜を打ち倒してみせよ";
+		m_displayText = L"「我に謁見を望むならば、\n岩と鳥と竜を打ち倒してみせよ";
 		break;
 	case 2:
 		m_displayText=L"見事、すべてを屠った暁には\n貴様に我が魔城へ立ち入る権利を授けてやろう」";
+		break;
+	case 3:
+		m_displayText = L"岩？鳥？竜？わからないけど、とにかく探すしかないね。";
+		break;
+	}
+}
+
+void TextManager::LastBossText(int count)////
+{
+	m_display = true;
+
+	m_currentTextType = TextType::LastBoss;
+	switch (count)
+	{
+	case 0:
+		m_displayText = L"この看板は、あの悪魔がかいたみたいだよ\n一応読んでみようか";
+		break;
+	case 1:
+		m_displayText = L"「我に謁見を望むならば、\n岩と鳥と竜を打ち倒してみせよ";
+		break;
+	case 2:
+		m_displayText = L"見事、すべてを屠った暁には\n貴様に我が魔城へ立ち入る権利を授けてやろう」";
 		break;
 	case 3:
 		m_displayText = L"岩？鳥？竜？わからないけど、とにかく探すしかないね。";
@@ -234,4 +272,107 @@ void TextManager::EndText(int count)
 bool TextManager::GameClear()
 {
 	return m_gameClear;
+}
+
+void TextManager::TypeWriter(InputManager&inputManager)
+{
+	m_fpsCounter++;
+	if (m_fpsCounter >= m_displaySpeed)
+	{
+		m_fpsCounter = 0;
+		if (m_displaytextLength < m_displayText.length())
+		{
+			m_displaytextLength++;
+		}
+	}
+	m_currentdisplayText = m_displayText.substr(0, m_displaytextLength);
+	if (m_displaytextLength == m_displayText.length())
+	{
+		m_isTyping = false;
+	}
+}
+void TextManager::SkipText()
+{
+	m_displaytextLength = m_displayText.length();
+	m_currentdisplayText = m_displayText;
+	m_isTyping = false;
+}
+void TextManager::SetTyping()
+{
+	m_isTyping = true;
+}
+
+bool TextManager::GetTyping()const
+{
+	return m_isTyping;
+}
+
+void TextManager::SetDisplayTextLength()
+{
+	m_displaytextLength = 0;
+}
+
+void TextManager::DrawCooperatText()
+{
+	SetFontSize(35);
+	DrawString(650,150,m_displayText.c_str(),GetColor(255, 255, 255),TRUE);
+	SetFontSize(10);
+}
+
+void TextManager::CooperatText(CooperatList skill)
+{
+	switch (skill)
+	{
+	case CooperatList::None:
+		m_displayText = L"無属性\n\n属性を持たない基本的な技。\n壁を壊すことが可能";
+		break;
+
+	case CooperatList::Fire:
+		m_displayText = L"火属性\n\n炎の力を利用した技。\n燃やすことが可能";
+		break;
+
+	case CooperatList::Water:
+		m_displayText = L"水属性\n\n水の力を利用した技。\n穴に水で満たすことが可能";
+		break;
+
+	case CooperatList::Grass:
+		m_displayText = L"草属性\n\n自然の力を利用した技。\n枯れた地面を\n豊かにすることが可能";
+		break;
+
+	case CooperatList::Soil:
+		m_displayText = L"土属性\n\n大地の力を利用した連携技。\n水の上に\n土を置くことが可能";
+		break;
+
+	case CooperatList::Wind:
+		m_displayText = L"風属性\n\n風の力を利用した技。\n風で葉を飛ばすことが可能";
+		break;
+
+	case CooperatList::Darkness:
+		m_displayText = L"闇属性\n\n闇の力を利用した技。\nすべてを飲み込む力で新た\nな道を切り開くことが可能";
+		break;
+
+	case CooperatList::SteamExplpsion:
+		m_displayText = L"蒸界爆砕\n\n水と火の力を利用した\n強力な連携技。\nあたり一帯を吹き飛ばすこ\nとが可能";
+		break;
+
+	case CooperatList::FloorBreak:
+		m_displayText = L"地殻崩壊\n\n大地を砕く強力な連携技。\n大きな穴をあけること\nが可能";
+		break;
+
+	case CooperatList::WaterFlows:
+		m_displayText = L"蒼波\n\n激しい水流を発生させる\n強力な連携技。\nすべての穴を水で満たす\nことが可能";
+		break;
+
+	case CooperatList::GrawGrass:
+		m_displayText = L"大地の恵み\n\n自然の力を利用した連携技。\n地面をより豊かにする\nことが可能";
+		break;
+
+	case CooperatList::Volcazation:
+		m_displayText = L"灼界\n\n灼熱の力を利用した\n強力な連携技。\nすべての水を蒸発させる\nことが可能";
+		break;
+
+	default:
+		m_displayText = L"";
+		break;
+	}
 }

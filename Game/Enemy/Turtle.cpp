@@ -47,8 +47,12 @@ void Turtle::Update(Map& map)
 
 void Turtle::Render()
 {
-	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
-	m_image->DrawTurtle(position, size);
+	Vector2 drawSize;
+
+	drawSize.x = size.x * m_drawScale/100;
+	drawSize.y = size.y * m_drawScale/100;
+
+	m_image->DrawTurtle(position, drawSize);
 }
 
 void Turtle::Finalize()

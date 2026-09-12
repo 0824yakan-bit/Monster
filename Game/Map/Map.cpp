@@ -49,6 +49,7 @@ void Map::Initialize(const wchar_t* fileName)
 	m_moveDir = MoveDir::None;
 	m_stageNo = 0;
 	m_isbossAreaOpen = false;
+	m_fogdensity = 0;
 	m_level = 0;
 	m_breakLevel = 0;
 	for (int i = 0; i < MAP_NUM; i++)
@@ -61,6 +62,7 @@ void Map::Initialize(const wchar_t* fileName)
 	}
 	m_changeMap = 9;
 
+	m_speedrand = 10;
 	m_changeTimer = 0;
 	m_changeInterval = 5;
 
@@ -288,13 +290,7 @@ void Map::DrawCurrentMap(int offsetX, int offsetY)
 			{
 				DrawGraph(x * m_chipSize + offsetX,y * m_chipSize + offsetY,m_ghChip[objectNo],	TRUE);
 			}
-		///霧描画
-			if (m_fog[m_currentMap][y][x])
-			{
-				SetDrawBlendMode(DX_BLENDMODE_ALPHA, m_fogdensity);
-				DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-			}
+
 		}
 	}
 
@@ -315,9 +311,18 @@ void Map::DrawNextMap(int offsetX, int offsetY)
 			{
 				DrawGraph(x * m_chipSize + offsetX,y * m_chipSize + offsetY,m_ghChip[objectNo],	TRUE);
 			}
+		}
+	}
+}
 
-		///霧描画
-			if (m_fog[m_nextmap][y][x])
+void Map::DrawFog(int offsetX, int offsetY)
+{
+	for (int y = 0; y < MAP_HEIGHT; y++)
+	{
+		for (int x = 0; x < MAP_WIDTH; x++)
+		{
+			///霧描画
+			if (m_fog[m_currentMap][y][x])
 			{
 				SetDrawBlendMode(DX_BLENDMODE_ALPHA, m_fogdensity);
 				DrawGraph(x * m_chipSize + offsetX, y * m_chipSize + offsetY, m_ghChip[290], TRUE);
@@ -390,7 +395,10 @@ bool Map::IsSafeArea(int map, int x, int y)
 			return true;
 		}
 	}
-
+	if (NextMapSearch(map,x,y))
+	{
+		return true;
+	}
 	return false;
 }
 void Map::LastBossDefeated()
@@ -436,16 +444,16 @@ void Map::LastBossDefeated()
 		m_objectmap[map][rightY][rightX] = -1;
 	}
 
-	// 右側も独立して進む
+	// 右側
 	m_rightChangeX[map] -= GetRand(2) + 1;
-	// Yも左とは別に変化
+	// 左とは別に変化
 	m_rightChangeY[map] += GetRand(3) - 1;
 
 	if (m_rightChangeY[map] < 0)m_rightChangeY[map] = 0;
 	if (m_rightChangeY[map] >= MAP_HEIGHT)m_rightChangeY[map] = MAP_HEIGHT - 1;
 
 	// 崩壊タイミング
-	m_changeInterval = GetRand(20) + 10;
+	m_changeInterval = GetRand(m_speedrand) + 5;
 }
 
 void Map::MapBreak()
@@ -620,6 +628,11 @@ int Map::GetBreakLevel()const
 	return m_level;
 }
 
+const std::vector<BreakEffectPosition>& Map::GetBreakEffectPositions() const
+{
+	return m_breakEffectPositions;
+}
+
 bool Map::PrepareBreakArea(int centerX,int centerY,int x,int y,int& tx,int& ty)
 {
 	tx = centerX + x;
@@ -647,11 +660,19 @@ bool Map::PrepareBreakArea(int centerX,int centerY,int x,int y,int& tx,int& ty)
  * @param replaceType   置換後のタイル種別
  * @param dangerAdd   属性ごとの上昇量
  */
-void Map::BreakArea(int centerX,int centerY,int left,int right,int top,int bottom,int targetObject,int replaceObject,TileType replaceType,int dangerAdd)
+void Map::BreakArea(
+	int centerX,
+	int centerY,
+	int left,
+	int right,
+	int top,
+	int bottom,
+	int targetObject,
+	int replaceObject,
+	TileType replaceType,
+	int dangerAdd)
 {
-	// 技1回分のBreakLevel上昇
-	m_breakLevel = std::min(40, m_breakLevel + dangerAdd);
-	m_level = m_breakLevel / 10;
+	bool isChanged = false;
 
 	for (int y = top; y <= bottom; ++y)
 	{
@@ -660,56 +681,107 @@ void Map::BreakArea(int centerX,int centerY,int left,int right,int top,int botto
 			int tx;
 			int ty;
 
-			// 座標チェック＋霧解除
-			if (!PrepareBreakArea(centerX, centerY,x, y,tx,ty))
+			if (!PrepareBreakArea(centerX, centerY, x, y, tx, ty))
 			{
 				continue;
 			}
-
-			// 対象オブジェクトなら変更
-			if (targetObject < 0 ||
-				m_objectmap[m_currentMap][ty][tx] == targetObject)
+			if (NextMapSearch(m_currentMap,tx,ty))
 			{
-				m_objectmap[m_currentMap][ty][tx] = replaceObject;
-				m_basemap[m_currentMap][ty][tx] = replaceType;
+				continue;
+			}
+			if (m_objectmap[m_currentMap][ty][tx] == 41)
+			{
+				continue;
+			}
+			if (targetObject < 0 ||m_objectmap[m_currentMap][ty][tx] == targetObject)
+			{
+				// オブジェクトまたは地形が実際に変わる場合だけ
+				if (m_objectmap[m_currentMap][ty][tx] != replaceObject ||
+					m_basemap[m_currentMap][ty][tx] != replaceType)
+				{
+					m_objectmap[m_currentMap][ty][tx] = replaceObject;
+					m_basemap[m_currentMap][ty][tx] = replaceType;
+
+					isChanged = true;
+
+					// 実際に変更された場所を記録
+					m_breakEffectPositions.push_back(BreakEffectPosition{tx * m_chipSize,ty * m_chipSize});
+				}
 			}
 		}
 	}
-}
-void Map::BreakAreaByGroup(int centerX,int centerY,int left,int right,int top,int bottom,TileGroup group,int dangerAdd)
-{
-	const auto& breakTiles =m_tileRole.GetBreakTiles(group);
 
-	// 技1回分のBreakLevel上昇
-	m_breakLevel = std::min(40, m_breakLevel + dangerAdd);
-	m_level = m_breakLevel / 10;
+	// 実際に地形が変更された場合だけBreakLevelを増加
+	if (isChanged)
+	{
+		m_breakLevel = std::min(80, m_breakLevel + dangerAdd);
+		m_level = m_breakLevel / 20;
+	}
+}
+void Map::BreakAreaByGroup(
+	int centerX,
+	int centerY,
+	int left,
+	int right,
+	int top,
+	int bottom,
+	TileGroup group,
+	int dangerAdd)
+{
+	const auto& breakTiles = m_tileRole.GetBreakTiles(group);
+
+	// 今回、本当にマップが変更されたか
+	bool isChanged = false;
 
 	for (int y = top; y <= bottom; ++y)
 	{
 		for (int x = left; x <= right; ++x)
 		{
-			int tx;
-			int ty;
+			// 中心座標 + 相対座標
+			int tx = centerX + x;
+			int ty = centerY + y;
 
-			// 座標チェック＋霧解除
-			if (!PrepareBreakArea(centerX, centerY,x, y,tx, ty))
+			// マップ外なら無視
+			if (tx < 0 || tx >= MAP_WIDTH ||ty < 0 || ty >= MAP_HEIGHT)
 			{
 				continue;
 			}
+			if (NextMapSearch(m_currentMap,tx,ty))
+			{
+				continue;
+			}
+			int objectNo = m_objectmap[m_currentMap][ty][tx];
 
-			int objectNo =m_objectmap[m_currentMap][ty][tx];
-
-			// TileGroupに登録されたタイルを探す
 			for (const auto& breakTile : breakTiles)
 			{
 				if (objectNo == breakTile.targetTile)
 				{
-					m_objectmap[m_currentMap][ty][tx]= breakTile.replaceTile;
-					m_basemap[m_currentMap][ty][tx]= breakTile.replaceType;
+					// すでに同じものなら変更扱いにしない
+					if (m_objectmap[m_currentMap][ty][tx] != breakTile.replaceTile ||
+						m_basemap[m_currentMap][ty][tx] != breakTile.replaceType)
+					{
+						m_objectmap[m_currentMap][ty][tx] =	breakTile.replaceTile;
+
+						m_basemap[m_currentMap][ty][tx] =breakTile.replaceType;
+
+						isChanged = true;
+
+						m_breakEffectPositions.push_back(BreakEffectPosition{tx * m_chipSize,ty * m_chipSize});
+					}
+
 					break;
 				}
 			}
 		}
+	}
+
+	// 1マスでも実際に変更された場合だけBreakLevel上昇
+	if (isChanged)
+	{
+		m_breakLevel =
+			std::min(80, m_breakLevel + dangerAdd);
+
+		m_level = m_breakLevel / 20;
 	}
 }
 void Map::RevealArea(int centerX, int centerY, int radius)
@@ -728,6 +800,32 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 		}
 	}
 }
+bool Map::NextMapSearch(int map, int x, int y)
+{
+	if (map < 0 || map >= MAP_NUM ||
+		x < 0 || x >= MAP_WIDTH ||
+		y < 0 || y >= MAP_HEIGHT)
+	{
+		return false;
+	}
+
+	int objectNo = m_beforChange[map][y][x];
+
+	return objectNo == 288 ||
+		objectNo == 289 ||
+		objectNo == 304 ||
+		objectNo == 305 ||
+		objectNo == 320 ||
+		objectNo == 321 ||
+		objectNo == 322 ||
+		objectNo == 323 ||
+		objectNo == 336 ||
+		objectNo == 337 ||
+		objectNo == 352 ||
+		objectNo == 353 ||
+		objectNo == 368 ||
+		objectNo == 369;
+}
 
 		void Map::UsedTreasure(PlayerManager& player)
 		{
@@ -743,6 +841,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::NormalBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Accessory::UpgradeAccessory nomal = m_accessory.GetAccessory(Accessory::ElementType::NOMAL);
 
 			Vector2 pos = player.GetPosition();
@@ -755,6 +855,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::FireBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -767,6 +869,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WaterBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -778,18 +882,20 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::GrassBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
 			BreakAreaByGroup(tx, ty, -3, 4, -3, 4, TileGroup::Grass, 0);
-
-
 		}
 
 		void Map::SoilBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -801,6 +907,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WindBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -836,6 +944,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::DarknessBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -848,6 +958,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 ////連携技
 		void Map::SteamExplosionBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
@@ -857,6 +969,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::FloorBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
@@ -867,14 +981,16 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WaterFlowsBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			for (int y = 0; y < MAP_HEIGHT; ++y)
 			{
 				for (int x = 0; x < MAP_WIDTH; ++x)
 				{
-					if (m_objectmap[m_currentMap][y][x] == 134)
+					if (m_objectmap[m_currentMap][y][x] == 291)
 					{
-						m_objectmap[m_currentMap][y][x] = 3;
-						m_basemap[m_currentMap][y][x] = TileType::Floor;
+						m_objectmap[m_currentMap][y][x] = 134;
+						m_basemap[m_currentMap][y][x] = TileType::Wall;
 					}
 				}
 			}
@@ -882,15 +998,19 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::GrowGrassBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx, ty, -2, 3, -2, 3, -1, 91, TileType::GrassLounge, 0);
+			BreakArea(tx, ty, -1, 2, -1, 2, -1, 91, TileType::GrassLounge, 0);
 		}
 
 		void Map::VolcazationBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;

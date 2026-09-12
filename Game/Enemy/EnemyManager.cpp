@@ -47,65 +47,69 @@ namespace
         Daemon, //9//ボス４
         */
         // map0
-        {0, 1, 9,  12, false, -1},
-        {0, 1, 26,  7, false, -1},
+        {1,0, 1, 9,  12, false, -1},
+        {2,0, 1, 26,  7, false, -1},
 
         // map1
-        {1,0,11,8,false,-1},
-        {1,2,21,14,false,-1},
+        {3,1,0,11,8,false,-1},
+        {4,1,2,21,14,false,-1},
         // map2
-        {2, 6, 9,  7, true ,  0},  //ボス１ゴーレム
-        {2,4,33,13,false,-1},
-        {2,1,33,19,false,-1},
+        {5,2, 6, 9,  7, true ,  0},  //ボス１ゴーレム
+        {6,2,4,33,13,false,-1},
+        {7,2,1,33,19,false,-1},
         // map3
-        {3, 7,  18, 13, true, 1},//ボス２フェニックス
-        {3,5,33,4,false,-1},
+        {8,3, 7,  18, 13, true, 1},//ボス２フェニックス
+        {9,3,5,33,4,false,-1},
         // map4
-        {4,3,14,3,false,-1},
-        {4,0,12,19,false,-1},
-        {4,0,27,20,false,-1},
-        {4,6,35,16,false,-1},
-        {4,3,25,8,false,-1},
+        {10,4,3,14,3,false,-1},
+        {11,4,0,12,19,false,-1},
+        {12,4,0,27,20,false,-1},
+        {13,4,2,35,16,false,-1},
+        {14,4,3,25,8,false,-1},
 
         // map5
-        {5,5,26,13,false,-1},
+        {15,5,5,26,13,false,-1},
 
         // map6
-        {6,5,6,10,false,-1},
-        {6,1,29,11,false,-1},
+        {16,6,5,6,10,false,-1},
+        {17,6,1,29,11,false,-1},
 
         // map7
-        {7, 8, 15, 4, true,2}, // ボス3ドラゴン
-        {7,3,15,14,false,-1},
-        {7,4,29,12,false,-1},
-        {7,0,33,6,false,-1},
+        {18,7, 8, 15, 4, true,2}, // ボス3ドラゴン
+        {19,7,3,15,14,false,-1},
+        {20,7,4,29,12,false,-1},
+        {21,7,0,33,6,false,-1},
         // map8
-        {8,5,5,5,false,-1},
-        {8,4,9,12,false,-1},
-        {8,3,11,19,false,-1},
-        {8,1,21,17,false,-1},
+        {22,8,5,5,5,false,-1},
+        {23,8,4,9,12,false,-1},
+        {24,8,3,11,17,false,-1},
+        {25,8,1,21,17,false,-1},
 
         // map9 ボス専用マップ
-        {9,9,15,0,true,3}//ボス4
+        {26,9,9,15,0,true,3}//ボス4
     };
 }
 
 
-void EnemyManager::Initialize(Map& map,Party&party)
+void EnemyManager::Initialize(Map& map, Party& party)
 {
 
     m_enemies.clear();
 
     int mapNo = map.GetCurrentMap();
 
-    for (auto& data : enemyData)
+    for (const auto& data : enemyData)
     {
         if (data.mapNo != mapNo)
+            continue;
+
+        // すでに倒している敵なら生成しない
+        if (m_defeatedEnemies.find(data.id) != m_defeatedEnemies.end())
             continue;
         switch (data.enemyType)
         {
         case 0:
-            CreateSlime(data.x, data.y, map,data.isBoss,data.bossNo, party);
+            CreateSlime(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
 
         case 1:
@@ -141,22 +145,81 @@ void EnemyManager::Initialize(Map& map,Party&party)
             break;
 
         case 9:
-            CreateDaemon(data.x, data.y, map, data.isBoss, data.bossNo,party);
+            CreateDaemon(data.x, data.y, map, data.isBoss, data.bossNo, party);
             break;
+        }
+
+        // 作成した敵にデータを設定
+        if (!m_enemies.empty())
+        {
+            Enemy* enemy = m_enemies.back().get();
+
+            enemy->SetEnemyId(data.id);
+
+            // 技名
+            SetEnemyAttackNames(enemy);
         }
     }
 }
 
 void EnemyManager::Update(Map& map)
 {
-    for (auto& enemy : m_enemies)
+    for (auto it = m_enemies.begin(); it != m_enemies.end(); )
     {
+        Enemy* enemy = it->get();
+
+        // バトル中の敵は処理しない
         if (enemy->IsBattleEnemy())
         {
+            ++it;
             continue;
         }
 
+        // Bossは絶対に落ちない
+        if (enemy->IsBoss())
+        {
+            enemy->Update(map);
+
+            ++it;
+            continue;
+        }
+
+        // すでに落下中の場合
+        if (enemy->IsFalling())
+        {
+            if (ReductionEnemy(*enemy))
+            {
+                int enemyId = enemy->GetEnemyId();
+
+                if (enemyId >= 0)
+                {
+                    m_defeatedEnemies.insert(enemyId);
+                }
+
+                it = m_enemies.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+
+            continue;
+        }
+
+        // 通常の敵を更新
         enemy->Update(map);
+
+        // Fallが1マスでもあれば落下開始
+        if (map.IsFallRect(
+            enemy->GetPosition().x,
+            enemy->GetPosition().y,
+            enemy->GetSize().x,
+            enemy->GetSize().y))
+        {
+            ReductionEnemy(*enemy);
+        }
+
+        ++it;
     }
 }
 void EnemyManager::Render()
@@ -207,6 +270,18 @@ Enemy* EnemyManager::CheckHit(PlayerManager& playermanager)
 }
 void EnemyManager::RemoveEnemy(Enemy* enemy)
 {
+    if (enemy == nullptr)
+        return;
+
+    // 撃破済みとして記録
+    int enemyId = enemy->GetEnemyId();
+
+    if (enemyId >= 0)
+    {
+        m_defeatedEnemies.insert(enemyId);
+    }
+
+    // リストから削除
     auto it = std::remove_if(
         m_enemies.begin(),
         m_enemies.end(),
@@ -214,6 +289,7 @@ void EnemyManager::RemoveEnemy(Enemy* enemy)
         {
             return e.get() == enemy;
         });
+
     m_enemies.erase(it, m_enemies.end());
 }
 
@@ -247,7 +323,14 @@ void EnemyManager::CreateRandomEnemy(Map& map,Party&party, int x, int y)
         CreateFox(x, y, map, false, -1, party);
         break;
     }
+    if (!m_enemies.empty())
+    {
+        Enemy* enemy = m_enemies.back().get();
+        m_enemies.back()->SetEnemyId(-1);
+        SetEnemyAttackNames(enemy);
+    }
 }
+
 Enemy* EnemyManager::CreateBattleEnemy(Map& map, Party& party, Enemy::EnemyType type)
 {
     switch (type)
@@ -303,10 +386,12 @@ Enemy* EnemyManager::CreateBattleEnemy(Map& map, Party& party, Enemy::EnemyType 
     }
 
     Enemy* enemy = m_enemies.back().get();
+    SetEnemyAttackNames(enemy);
 
     //Battle専用敵であることを設定
     enemy->SetBattleEnemy(true);
-
+    //BattleEnemyは撃破記録対象外
+    enemy->SetEnemyId(-1);
     return enemy;
 }
 void EnemyManager::CreateSlime(int x, int y, Map& map, bool isBoss, int bossNo, Party& party)
@@ -453,3 +538,117 @@ void EnemyManager::CreateDaemon(int x, int y, Map& map, bool isBoss, int bossNo,
     m_enemies.push_back(std::move(daemon));
 }
 
+bool EnemyManager::ReductionEnemy(Enemy& enemy)
+{
+    // 初めて落下した瞬間
+    if (!enemy.m_isFalling)
+    {
+        enemy.m_isFalling = true;
+        enemy.m_fallTimer = 0;
+        enemy.m_fallScale = 100;
+    }
+
+    enemy.m_fallTimer++;
+
+    // 徐々に小さくする
+    enemy.m_fallScale -= 3;
+
+    if (enemy.m_fallScale < 0)
+    {
+        enemy.m_fallScale = 0;
+    }
+
+    // 描画倍率
+    enemy.m_drawScale = enemy.m_fallScale;
+
+    // 下に落ちる
+    enemy.position.y += 2;
+
+    // 30フレーム後に削除する
+    if (enemy.m_fallTimer >= 30)
+    {
+        return true;
+    }
+
+    return false;
+}
+void EnemyManager::SetEnemyAttackNames(Enemy* enemy)
+{
+    if (enemy == nullptr)
+    {
+        return;
+    }
+
+    switch (enemy->type)
+    {
+    case Enemy::EnemyType::Slime:
+        enemy->SetAttackNames(
+            L"たいあたり",
+            L"スライムシャワー"
+        );
+        break;
+
+    case Enemy::EnemyType::Wolf:
+        enemy->SetAttackNames(
+            L"ひっかき",
+            L"なぎはらい"
+        );
+        break;
+
+    case Enemy::EnemyType::Fairy:
+        enemy->SetAttackNames(
+            L"かみつき",
+            L"もうどくのきり"
+        );
+        break;
+
+    case Enemy::EnemyType::Turtle:
+        enemy->SetAttackNames(
+            L"たいあたり",
+            L"じしん"
+        );
+        break;
+
+    case Enemy::EnemyType::Mole:
+        enemy->SetAttackNames(
+            L"つちほり",
+            L"じわれ"
+        );
+        break;
+
+    case Enemy::EnemyType::Fox:
+        enemy->SetAttackNames(
+            L"かみつき",
+            L"きつねび"
+        );
+        break;
+
+    case Enemy::EnemyType::Golem:
+        enemy->SetAttackNames(
+            L"パンチ",
+            L"いわなげ"
+        );
+        break;
+
+    case Enemy::EnemyType::Phoenix:
+        enemy->SetAttackNames(
+            L"つばさでうつ",
+            L"ほのおのうず"
+        );
+        break;
+
+    case Enemy::EnemyType::Dragon:
+        enemy->SetAttackNames(
+            L"かみつき",
+            L"ドラゴンブレス"
+        );
+        break;
+
+    case Enemy::EnemyType::Daemon:
+        enemy->SetAttackNames(
+            L"ひっかき",
+            L"ダークネス"
+        );
+        break;
+    }
+}

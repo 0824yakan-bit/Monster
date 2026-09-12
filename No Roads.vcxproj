@@ -201,6 +201,7 @@
     <ClInclude Include="Game\Player\PlayerManager.h" />
     <ClInclude Include="Game\Player\PlayerMove.h" />
     <ClInclude Include="Game\Scene\BattleScene.h" />
+    <ClInclude Include="Game\Scene\CooperatList.h" />
     <ClInclude Include="Game\Scene\FieldScene.h" />
     <ClInclude Include="Game\Scene\GameOver.h" />
     <ClInclude Include="Game\Scene\Scene.h" />

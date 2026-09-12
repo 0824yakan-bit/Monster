@@ -60,7 +60,7 @@ void BattleScene::Initialize(InputManager& inputmanager,SceneManager& sceneManag
 	// 仲間にするかボックス
 	drawCommandBoxPosition.x = 120;
 	drawCommandBoxPosition.y = 440;
-	drawCommandBoxSize.x = 430;
+	drawCommandBoxSize.x = 450;
 	drawCommandBoxSize.y = 270;
 
 	// 状態リセット
@@ -203,7 +203,15 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 		}
 		m_isFieldRequested = true;
 	}
-
+	// 倒したエンカウント敵
+	Enemy* targetEnemy = m_enemy;
+	if (m_battle->IsRunSuccess())
+	{
+		// Battleから敵を削除
+		m_battle->RemoveEnemy(targetEnemy);
+		// EnemyManagerから敵本体を削除
+		enemyManager.RemoveEnemy(targetEnemy);
+	}
 	// 仲間加入選択
 	if (m_isJoinRequested)
 	{
@@ -225,8 +233,7 @@ void BattleScene::Update(InputManager& inputManager,SceneManager& sceneManager,F
 			// 決定
 			else if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A))
 			{
-				// 倒したエンカウント敵
-				Enemy* targetEnemy = m_enemy;
+
 				if (targetEnemy == nullptr)
 				{
 					return;
@@ -543,14 +550,18 @@ void BattleScene::SetBattleEnemyPositions()
 		{
 			break;
 		}
-
+		if (enemy->type == Enemy::EnemyType::Slime)
+		{
+			enemy->renderSize.x = 100;
+			enemy->renderSize.y = 100;
+		}
 		if (enemy->type == Enemy::EnemyType::Golem)
 		{
-			enemy->renderPosition.x = positions[positionIndex] - 300;
-			enemy->renderPosition.y = y - 400;
+			enemy->renderPosition.x = positions[positionIndex] - 100;
+			enemy->renderPosition.y = y - 200;
 
-			enemy->renderSize.x = 1000;
-			enemy->renderSize.y = 1000;
+			enemy->renderSize.x = 700;
+			enemy->renderSize.y = 700;
 		}
 		else if (enemy->type == Enemy::EnemyType::Phoenix)
 		{

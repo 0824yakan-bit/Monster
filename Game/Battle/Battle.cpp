@@ -55,7 +55,7 @@ void Battle::Initialize(SceneManager* sceneManager)
 	// コマンド選択画面
 	drawCommandBoxPosition1.x = 120;
 	drawCommandBoxPosition1.y = 440;
-	drawCommandBoxSize1.x = 430;
+	drawCommandBoxSize1.x = 450;
 	drawCommandBoxSize1.y = 270;
 
 	// 敵情報
@@ -67,13 +67,13 @@ void Battle::Initialize(SceneManager* sceneManager)
 	// 各キャラクターのコマンド一覧
 	drawCommandBoxPosition2.x = 120;
 	drawCommandBoxPosition2.y = 550;
-	drawCommandBoxSize2.x = 430;
+	drawCommandBoxSize2.x = 450;
 	drawCommandBoxSize2.y = 160;
 
 	// キャラクター名・HP表示
 	drawCommandBoxPosition2_1.x = 120;
 	drawCommandBoxPosition2_1.y = 440;
-	drawCommandBoxSize2_1.x = 430;
+	drawCommandBoxSize2_1.x = 450;
 	drawCommandBoxSize2_1.y = 100;
 
 	// 現在選択中のコマンド一覧
@@ -85,7 +85,7 @@ void Battle::Initialize(SceneManager* sceneManager)
 	// ターン中の表示
 	drawCommandBoxPosition2_3.x = 120;
 	drawCommandBoxPosition2_3.y = 440;
-	drawCommandBoxSize2_3.x = 430;
+	drawCommandBoxSize2_3.x = 450;
 	drawCommandBoxSize2_3.y = 270;
 
 	// 攻撃エフェクト
@@ -199,7 +199,6 @@ void Battle::Initialize(SceneManager* sceneManager)
 	// 加入予定の敵をクリア
 	m_joinEnemy = nullptr;
 }
-
 void Battle::Finalize()
 {
 }
@@ -289,7 +288,7 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 						break;
 
 					case 2:
-						// 応援
+						// 仲間
 						m_windowWidth = 0;
 						m_windowWidthFront = 0;
 						m_state = BattleState::Party;
@@ -369,7 +368,6 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 		}
 	}
 }
-
 // Render
 void Battle::Render(GameOver& gameOver, Map& map)
 {
@@ -442,7 +440,7 @@ void Battle::Render(GameOver& gameOver, Map& map)
 			m_image->DrawDarkness(drawEffectPosition, drawEffectSize);
 			break;
 
-		case Monster::CharacteRistics::SteamExplpsion:
+		case Monster::CharacteRistics::SteamExplosion:
 			m_image->DrawSteamexplosion(drawEffectPosition, drawEffectSize);
 			break;
 
@@ -574,7 +572,6 @@ void Battle::RenderCommand()
 		}
 	}
 }
-
 void Battle::RenderCurrentCommand()
 {
 	m_image->DrawCommandbox1(drawCommandBoxPosition2_2,drawCommandBoxSize2_2);
@@ -643,7 +640,6 @@ void Battle::RenderCurrentCommand()
 		}
 	}
 }
-
 void Battle::RenderCurrentHp()
 {
 	m_image->DrawCommandbox1(drawCommandBoxPosition2_2, drawCommandBoxSize2_2);
@@ -669,7 +665,6 @@ void Battle::RenderCurrentHp()
 		DrawFormatString(x, y + 35, GetColor(255, 255, 0), L"HP : %d / %d", m_monsterhp[i], monster->GetMaxHitPoint());
 	}
 }
-
 
 // Attack Select
 void Battle::UpdateAttackSelect(InputManager&inputManager)
@@ -853,7 +848,6 @@ void Battle::RenderAttackSelect()
 	}
 
 	Monster* monster = m_party->GetMonster(m_monsterSelect);
-
 	if (monster == nullptr)
 	{
 		return;
@@ -862,24 +856,78 @@ void Battle::RenderAttackSelect()
 	std::wstring name = monster->GetName();
 	auto& attacks = monster->GetAttacks();
 
+	int color;
 	// 仲間の名前
-	DrawString(160,470,name.c_str(),GetColor(0, 0, 255));
+	float hpRate =static_cast<float>(m_monsterhp[m_monsterSelect]) /static_cast<float>(monster->GetMaxHitPoint());
+	if (hpRate >= 0.7f)
+	{
+		color = GetColor(0, 255, 0);
+	}
+	else if (hpRate >= 0.4f)
+	{
+		color = GetColor(255, 255, 0);
+	}
+	else
+	{
+		color = GetColor(255, 0, 0);
+	}
+	DrawString(160,470,name.c_str(),GetColor(255,255,255));
 	// HP
-	DrawFormatString(300,520,GetColor(0, 255, 255),L"HP : %d / %d",	m_monsterhp[m_monsterSelect],monster->GetMaxHitPoint());
+	DrawFormatString(300,520,color,L"HP : %d / %d",	m_monsterhp[m_monsterSelect],monster->GetMaxHitPoint());
 
 	// 技一覧
 	for (int i = 0; i < attacks.size(); i++)
 	{
 		int color = GetColor(255, 255, 255);
-		// 選択済み
-		if (m_selectedAttack[m_monsterSelect] == i)
+		// 技の属性によって色を変更
+		switch (attacks[i].element)
 		{
-			color = GetColor(255, 255, 0);
+		case Monster::CharacteRistics::Normal:
+			color = GetColor(255, 255, 255);
+			break;
+
+		case Monster::CharacteRistics::Fire:
+			color = GetColor(255, 80, 80);
+			break;
+
+		case Monster::CharacteRistics::Water:
+			color = GetColor(80, 160, 255);
+			break;
+
+		case Monster::CharacteRistics::Grass:
+			color = GetColor(80, 200, 80);
+			break;
+
+		case Monster::CharacteRistics::Soil:
+			color = GetColor(180, 120, 60);
+			break;
+
+		case Monster::CharacteRistics::Wind:
+			color = GetColor(100, 220, 220);
+			break;
+
+		case Monster::CharacteRistics::Darkness:
+			color = GetColor(180, 80, 220);
+			break;
+
+		case Monster::CharacteRistics::Defense:
+			color = GetColor(180, 180, 180);
+			break;
+
+		case Monster::CharacteRistics::GrawGrass:
+			color = GetColor(100, 220, 100);
+			break;
+
+		default:
+			color = GetColor(255, 255, 255);
+			break;
 		}
-
 		// 技名
-		DrawString(250,580 + i * 40,attacks[i].name,color);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 150);
+		DrawBox(170, 575 + i * 40, 500, 615 + i * 40, color, TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
+		DrawString(250,580 + i * 40,attacks[i].name,GetColor(255,255,255));
 		// 現在のカーソル
 		if (i == m_attackSelect)
 		{
@@ -1127,7 +1175,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 		case Monster::CharacteRistics::Defense:
 			// このターン防御
 			m_requestDefense[m_displayIndex] = true;
-			AddDisplayMessage(DisplayMessageType::Normal, monster->GetName() + L"は身を守っている！");
+			AddDisplayMessage(DisplayMessageType::Normal, monster->GetName() + L"\nは身を守っている！");
 			break;
 		}
 
@@ -1178,7 +1226,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 		if (!isDefense && !isComboMember)
 		{
-			AddDisplayMessage(DisplayMessageType::Normal,monster->GetName() + L"の" + attacks[index].name + L"！");
+			AddDisplayMessage(DisplayMessageType::Normal,monster->GetName() + L"の\n" + attacks[index].name + L"！");
 			Enemy* target = GetSelectedTargetEnemy();
 			if (target != nullptr)
 			{
@@ -1218,15 +1266,18 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 }
 void Battle::RenderAttackAction()
 {
-	m_image->DrawCommandbox1(drawCommandBoxPosition2_3,drawCommandBoxSize2_3);
+	m_image->DrawCommandbox1(drawCommandBoxPosition2_3, drawCommandBoxSize2_3);
+
 	if (m_isDisplayingMessage)
 	{
 		int color = GetColor(255, 255, 255);
-		if (m_currentDisplayMessage.type ==	DisplayMessageType::Damage)
+		if (m_currentDisplayMessage.type == DisplayMessageType::Damage)
 		{
 			color = GetColor(255, 0, 0);
 		}
-		DrawString(150,480,m_currentDisplayMessage.text.c_str(),color);
+		// タイプライター表示
+		std::wstring displayText =m_currentDisplayMessage.text.substr(0,m_displayMessageCharIndex);
+		DrawString(150, 480, displayText.c_str(), color);
 	}
 	RenderCurrentCommand();
 }
@@ -1407,7 +1458,7 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 			return;
 		}
 
-		m_displayMessage =target->GetName() + L"に攻撃！";///////後に技名にする
+		m_displayMessage =target->GetName() + L"に"+enemy->GetSingleAttackName();
 		// 120フレーム目にダメージ
 		if (m_displaytextTimer == 120)
 		{
@@ -1434,7 +1485,7 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 	// 全体攻撃
 	else if (m_enemyAttackType == 1 &&m_displaytextTimer <= 120)
 	{
-		m_displayMessage = L"全体攻撃";///////後に技名にする
+		m_displayMessage = std::wstring(enemy->GetName()) + L"の"+enemy->GetAllAttackName();
 
 		// 120フレーム目にダメージ
 		if (m_displaytextTimer == 120)
@@ -1721,12 +1772,32 @@ void Battle::UpdateDisplayMessage()
 	// 現在のメッセージを表示中
 	if (m_isDisplayingMessage)
 	{
-		m_currentDisplayTimer++;
-		// 60フレーム表示したら次へ
-		if (m_currentDisplayTimer >= 60)
+		m_displayMessageCharTimer++;
+
+		// 一定フレームごとに1文字追加
+		if (m_displayMessageCharTimer >= m_displayMessageCharSpeed)
 		{
-			m_isDisplayingMessage = false;
-			m_currentDisplayTimer = 0;
+			m_displayMessageCharTimer = 0;
+			m_displayMessageCharIndex++;
+
+			// 全文字表示し終わった
+			if (m_displayMessageCharIndex >=static_cast<int>(m_currentDisplayMessage.text.size()))
+			{
+				m_displayMessageCharIndex =static_cast<int>(m_currentDisplayMessage.text.size());
+			}
+		}
+
+		// 全文表示後、60フレーム経過したら次へ
+		if (m_displayMessageCharIndex >=static_cast<int>(m_currentDisplayMessage.text.size()))
+		{
+			m_currentDisplayTimer++;
+			if (m_currentDisplayTimer >= 60)
+			{
+				m_isDisplayingMessage = false;
+				m_currentDisplayTimer = 0;
+				m_displayMessageCharIndex = 0;
+				m_displayMessageCharTimer = 0;
+			}
 		}
 		return;
 	}
@@ -1740,8 +1811,13 @@ void Battle::UpdateDisplayMessage()
 	// キューの先頭を取り出す
 	m_currentDisplayMessage = m_displayQueue.front();
 	m_displayQueue.pop_front();
+
 	m_isDisplayingMessage = true;
+
+	// タイプライターをリセット
 	m_currentDisplayTimer = 0;
+	m_displayMessageCharIndex = 0;
+	m_displayMessageCharTimer = 0;
 }
 void Battle::AddDisplayMessage(DisplayMessageType type,const std::wstring& text)
 {
@@ -1958,10 +2034,10 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		}
 		AddDisplayMessage(DisplayMessageType::Combo,L"蒸気爆発が発動した！");
 		UsedAttackInfo info;
-		info.element =Monster::CharacteRistics::SteamExplpsion;
+		info.element =Monster::CharacteRistics::SteamExplosion;
 		info.attackName = L"蒸気爆発！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::SteamExplpsion);
+		m_fieldScene->LearnCompositeSkill(CooperatList::SteamExplpsion);
 	}
 
 	// 水 + 土
@@ -1978,7 +2054,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		info.element =Monster::CharacteRistics::FloorBreak;
 		info.attackName = L"泥流生成！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::FloorBreak);
+		m_fieldScene->LearnCompositeSkill(CooperatList::FloorBreak);
 	}
 
 	// 水 + 風
@@ -1995,7 +2071,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		info.element =Monster::CharacteRistics::WaterFlows;
 		info.attackName = L"激流！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::WaterFlows);
+		m_fieldScene->LearnCompositeSkill(CooperatList::WaterFlows);
 	}
 	////水＋草
 	if (growGrassCombo)
@@ -2019,7 +2095,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		info.element = Monster::CharacteRistics::GrawGrass;
 		info.attackName = L"草！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::GrawGrass);
+		m_fieldScene->LearnCompositeSkill(CooperatList::GrawGrass);
 	}
 	////火＋土
 	if (volcazationCombo)
@@ -2035,7 +2111,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		info.element = Monster::CharacteRistics::Volcazation;
 		info.attackName = L"火山！";
 		m_usedAttackOrder.push_back(info);
-		m_fieldScene->LearnCompositeSkill(FieldScene::CooperatList::Volcazation);
+		m_fieldScene->LearnCompositeSkill(CooperatList::Volcazation);
 	}
 
 	// 敵ごとの合計ダメージ表示を作成

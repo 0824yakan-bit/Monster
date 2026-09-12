@@ -3,6 +3,19 @@
 
 void SEManager::LoadSounds()
 {
+    soundEffects.push_back({ SoundList::Fire,LoadSoundMem(L"Resources/Sounds/fire.ogg") });
+    soundEffects.push_back({ SoundList::Water,LoadSoundMem(L"Resources/Sounds/water.ogg") });
+    soundEffects.push_back({ SoundList::Grass,LoadSoundMem(L"Resources/Sounds/grass.ogg") });
+    soundEffects.push_back({ SoundList::Wind,LoadSoundMem(L"Resources/Sounds/wind.ogg") });
+    soundEffects.push_back({ SoundList::Darkness,LoadSoundMem(L"Resources/Sounds/darkness.ogg") });
+
+    soundEffects.push_back({ SoundList::SteamExplosion,LoadSoundMem(L"Resources/Sounds/steamexplosion.ogg") });
+    soundEffects.push_back({ SoundList::FloorBreak,LoadSoundMem(L"Resources/Sounds/floorbreak.ogg") });
+    soundEffects.push_back({ SoundList::WaterFlows,LoadSoundMem(L"Resources/Sounds/waterflows.ogg") });
+    soundEffects.push_back({ SoundList::GrawGrass,LoadSoundMem(L"Resources/Sounds/grawgrass.ogg") });
+    soundEffects.push_back({ SoundList::Volcazation,LoadSoundMem(L"Resources/Sounds/volcazation.ogg") });
+    soundEffects.push_back({ SoundList::Defense,LoadSoundMem(L"Resources/Sounds/defense.ogg") });
+
     //汎用
     soundEffects.push_back({ SoundList::Decision,LoadSoundMem(L"Resources/Sounds/decision.ogg") });
     soundEffects.push_back({ SoundList::Cancel,LoadSoundMem(L"Resources/Sounds/cancel.ogg") });

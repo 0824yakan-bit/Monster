@@ -45,7 +45,12 @@ void Fairy::Update(Map& map)
 
 void Fairy::Render()
 {
-	m_image->DrawFairy(position, size);
+	Vector2 drawSize;
+
+	drawSize.x = size.x * m_drawScale/100;
+	drawSize.y = size.y * m_drawScale/100;
+
+	m_image->DrawFairy(position, drawSize);
 }
 
 void Fairy::Finalize()

@@ -1,12 +1,17 @@
 ﻿#pragma once
 
+#include <vector>
 #include "Game/Party/Accessory.h"
 #include "Game/TileRole/TileRole.h"
 
 class InputManager;
 class PlayerManager;
 class BossManager;
-
+struct BreakEffectPosition
+{
+	int x;
+	int y;
+};
 class Map
 {
 public:
@@ -47,14 +52,15 @@ public:
 	int m_chipSize;		// マップチップのサイズ
 
 
-
+public:
+	//マップ移動
+	bool m_isTransition;
+	int	 m_transition;
 private:
 	static constexpr int GH_MAX		= 384;	// 24 * 16
 
 	// マップ移動
-	bool m_isTransition;
 	int	 m_nextmap;
-	int	 m_transition;
 
 	Accessory	& m_accessory;
 	BossManager	& m_bossManager;
@@ -76,11 +82,13 @@ private:
 
 
 	// ブレイク情報
-	int dangerAdd = 1;
 	int m_breakLevel;	// 地形破壊回数(ブレイクカウント)
 	int m_level;		//ブレイクレベル
 
+	std::vector<BreakEffectPosition>m_breakEffectPositions;
+
 	//段々崩れる
+	int m_speedrand;
 	int m_leftChangeX[MAP_NUM];
 	int m_leftChangeY[MAP_NUM];
 
@@ -155,13 +163,16 @@ public:
 	// マップ描画
 	void	DrawCurrentMap	(int offsetX, int offsetY);		// 現在のマップを描画
 	void	DrawNextMap		(int offsetX, int offsetY);		// 次のマップを描画
+	void	DrawFog			(int offsetX, int offsetY);		//霧描画
 
 	// ブレイクレベル
 	int	GetBreakLevel() const;	// 地形破壊回数を取得
+	const std::vector<BreakEffectPosition>& GetBreakEffectPositions() const;
 
 	// 霧
 	void RevealArea(int centerX,int centerY,int radius);	// 指定範囲の霧を晴らす
-
+	//階段は消さない
+	bool NextMapSearch(int map, int x, int y);
 	// 宝箱
 	void UsedTreasure		(PlayerManager& player);	// 宝箱を使用済みにする
 

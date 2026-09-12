@@ -174,7 +174,12 @@ private:
 		std::wstring text;
 	};
 	std::deque<BattleDisplayMessage> m_displayQueue;
+	// タイプライター用
+	int m_displayMessageCharIndex = 0;
+	int m_displayMessageCharTimer = 0;
 
+	// 1文字表示する間隔（フレーム）
+	int m_displayMessageCharSpeed = 2;
 	// 現在表示しているメッセージ
 	BattleDisplayMessage m_currentDisplayMessage;
 

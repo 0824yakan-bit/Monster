@@ -1,9 +1,10 @@
 ﻿#pragma once
 #include"Game/Maths/Vector2.h"
-
+#include"Game/Scene/CooperatList.h"
 class InputManager;
 class ImageManager;
 class FieldScene;
+
 class TextManager
 {
 public:
@@ -14,6 +15,7 @@ public:
 		Signboard_2,//看板２
 		Signboard_3,//看板３
 		Signboard_4,//看板４
+		LastBoss,//悪魔撃破時
 		End,//ゲーム終了時
 		textend,
 	};
@@ -25,11 +27,15 @@ private:
 	TextType m_currentTextType;
 	int m_TextCount[TextType::textend];
 	bool m_display;
+	int m_fpsCounter;
+	int m_displaytextLength;
+	int m_displaySpeed;
+	bool m_isTyping;
 	bool m_blinking;
 	int m_displayTimer;
 	int m_receptionTimer;
 	std::wstring m_displayText;
-
+	std::wstring m_currentdisplayText;
 	bool m_gameClear;
 public:
 	TextManager();
@@ -47,8 +53,19 @@ public:
 	void SignBoard_2Text(int count);
 	void SignBoard_3Text(int count);
 	void SignBoard_4Text(int count);
+	void LastBossText(int count);
 	void EndText(int count);
 
+	void DrawCooperatText();
+	void CooperatText(CooperatList skill);
+
 	bool GameClear();
+
+	void TypeWriter(InputManager&inputManager);
+	void SkipText();
+
+	void SetTyping();
+	bool GetTyping()const;
+	void SetDisplayTextLength();
 };
 

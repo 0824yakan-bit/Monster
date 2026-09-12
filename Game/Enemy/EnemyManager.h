@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-
+#include<unordered_set>
 #include "Game/ImageManager/ImageManager.h"
 #include "Game/Enemy/Enemy.h"
 
@@ -12,6 +12,7 @@ class PlayerManager;
 
 struct EnemyData
 {
+    int id;
     int mapNo;
     int enemyType;
     int x;
@@ -27,7 +28,7 @@ private:
 public:
 
     std::vector<std::unique_ptr<Enemy>> m_enemies;
-
+    std::unordered_set<int> m_defeatedEnemies;
 public:
     EnemyManager();
     ~EnemyManager();
@@ -57,4 +58,7 @@ public:
     void CreatePhoenix  (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
     void CreateDragon   (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
     void CreateDaemon   (int x, int y, Map& map, bool isBoss, int bossNo,Party&party);
+
+    bool ReductionEnemy(Enemy& enemy);
+    void SetEnemyAttackNames(Enemy* enemy);
 };

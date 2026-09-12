@@ -54,8 +54,12 @@ void Mole::Update(Map& map)
 
 void Mole::Render()
 {
-	//DrawBox(position.x, position.y, position.x + size.x, position.y + size.y, GetColor(0, 255, 0), TRUE);
-	m_image->DrawMole(position, size);
+	Vector2 drawSize;
+
+	drawSize.x = size.x * m_drawScale/100;
+	drawSize.y = size.y * m_drawScale/100;
+
+	m_image->DrawMole(position, drawSize);
 }
 
 void Mole::Finalize()

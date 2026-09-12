@@ -31,7 +31,7 @@ public:
         Soil,  //土属性
         Darkness,//闇属性
         Wind,  //風属性
-        SteamExplpsion,
+        SteamExplosion,
         FloorBreak,
         WaterFlows,
         GrawGrass,

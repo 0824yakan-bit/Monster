@@ -268,7 +268,7 @@ Vector2 PlayerMove::FindSafePosition(Map* map, PlayerManager& playermanager)
 	int centerY = static_cast<int>(m_fallPosition.y) / m_chipsize;
 
 	//周囲を近い順に探す
-	for (int radius = 1;radius <= 5;++radius)
+	for (int radius = 1;radius <= 10;++radius)
 	{
 		for (int y = -radius;y <= radius;++y)
 		{
