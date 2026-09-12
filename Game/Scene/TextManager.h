@@ -60,6 +60,8 @@ public:
 	bool GameClear();
 
 	void TypeWriter(InputManager&inputManager);
+	void SkipText();
+
 	void SetTyping();
 	bool GetTyping()const;
 	void SetDisplayTextLength();

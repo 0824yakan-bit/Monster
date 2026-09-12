@@ -48,20 +48,23 @@ void TextManager::Initialize()
 	drawTextBoxSize = {1240,180};
 }
 
-void TextManager::Update(InputManager& inputManager,FieldScene&fieldScene)
+void TextManager::Update(InputManager& inputManager, FieldScene& fieldScene)
 {
 	if (!m_display)
 	{
 		return;
 	}
+
 	m_displayTimer++;
+
 	if (m_displayTimer % 20 == 0)
 	{
 		m_blinking = !m_blinking;
 	}
+
 	TypeWriter(inputManager);
 	// Enterでテキストを閉じる
-	if (fieldScene.m_count==m_TextCount[m_currentTextType])
+	if (fieldScene.m_count == m_TextCount[m_currentTextType])
 	{
 		m_display = false;
 		fieldScene.m_count = 0;
@@ -261,7 +264,12 @@ void TextManager::TypeWriter(InputManager&inputManager)
 		m_isTyping = false;
 	}
 }
-
+void TextManager::SkipText()
+{
+	m_displaytextLength = m_displayText.length();
+	m_currentdisplayText = m_displayText;
+	m_isTyping = false;
+}
 void TextManager::SetTyping()
 {
 	m_isTyping = true;

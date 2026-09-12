@@ -48,6 +48,13 @@ public:
     void SetAttackEffects(const std::vector<Battle::UsedAttackInfo>& effects);
 
 private:
+struct FieldBreakEffect
+{
+    Monster::CharacteRistics element;
+    Vector2 position;
+    int timer;
+};
+std::vector<FieldBreakEffect> m_breakEffects;
     static constexpr int MAX_PARTY = 4;
     bool m_annihilation;
     int m_monsterhp[MAX_PARTY];
@@ -194,6 +201,9 @@ public:
     void SetSound(SEManager* sound);
 
     bool IsBattleRequested() const;
+
+    void SetBreakEffects(Map& map, Monster::CharacteRistics element);
+
 
     Enemy* GetHitEnemy() const;
 

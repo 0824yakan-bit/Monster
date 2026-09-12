@@ -14,7 +14,7 @@
 
 static std::vector<Battle::UsedAttackInfo>MakeFieldEffect(Monster::CharacteRistics element, const wchar_t* name)
 {
-	Battle::UsedAttackInfo info;
+	Battle::UsedAttackInfo info{};
 
 	info.element = element;
 	info.attackName = name;
@@ -162,15 +162,35 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 	if (STtext.m_signboard_4)textManager.SignBoard_4Text(m_count);
 	if (STtext.m_end)textManager.EndText(m_count);
 
-	if (textManager.SelectDisplayText() == true)
+	if (textManager.SelectDisplayText())
 	{
-		if ((inputManager.IsTrigger(KEY_INPUT_RETURN)||inputManager.IsPadTrigger(PAD_INPUT_1))&&textManager.GetTyping()==false)
+		bool enter =
+			inputManager.IsTrigger(KEY_INPUT_RETURN) ||
+			inputManager.IsPadTrigger(PAD_INPUT_1);
+
+		if (enter)
 		{
-			m_count++;
-			textManager.SetTyping();
-			textManager.SetDisplayTextLength();
-			m_sound->PlayTypeBackStart(SEManager::SoundList::Decision);
+			if (textManager.GetTyping())
+			{
+				// 文字表示中
+				// → 一気に全文表示
+				textManager.SkipText();
+			}
+			else
+			{
+				// 全文表示済み
+				// → 次の文章へ
+				m_count++;
+
+				textManager.SetTyping();
+				textManager.SetDisplayTextLength();
+
+				m_sound->PlayTypeBackStart(
+					SEManager::SoundList::Decision
+				);
+			}
 		}
+
 		textManager.Update(inputManager,*this);
 		return;
 	}
@@ -337,7 +357,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::None:
 			map.NormalBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::None, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::None);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -347,7 +367,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::Fire:
 			map.FireBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Fire, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::Fire);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -357,7 +377,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::Water:
 			map.WaterBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Water, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::Water);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -367,7 +387,8 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::Grass:
 			map.GrassBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Grass, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::Grass);
+
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
 			m_cooperatList = CooperatList::Empty;
@@ -376,7 +397,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::Soil:
 			map.SoilBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Soil, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::Soil);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -386,7 +407,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::Wind:
 			map.WindBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Wind, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::Wind);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -396,7 +417,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::Darkness:
 			map.DarknessBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Darkness, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::Darkness);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -406,7 +427,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::SteamExplpsion:
 			map.SteamExplosionBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::SteamExplosion, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::SteamExplosion);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -416,7 +437,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::WaterFlows:
 			map.WaterFlowsBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::WaterFlows, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::WaterFlows);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -426,7 +447,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::FloorBreak:
 			map.FloorBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::FloorBreak, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::FloorBreak);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -436,7 +457,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::GrawGrass:
 			map.GrowGrassBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::GrawGrass, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::GrawGrass);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -446,7 +467,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		case CooperatList::Volcazation:
 			map.VolcazationBreak(playerManager);
 
-			SetAttackEffects(MakeFieldEffect(Monster::CharacteRistics::Volcazation, L""));
+			SetBreakEffects(map, Monster::CharacteRistics::Volcazation);
 
 			m_isMenuActive = false;
 			m_isCooperatDetailActive = false;
@@ -501,7 +522,12 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 			}
 		}
 	}
+	for (auto& effect : m_breakEffects)
+	{
+		effect.timer--;
+	}
 
+	m_breakEffects.erase(std::remove_if(m_breakEffects.begin(),m_breakEffects.end(),[](const FieldBreakEffect& effect){return effect.timer <= 0;}),	m_breakEffects.end());
 	//ブレイクレベル管理
 	int m_level = m_breakLevel / 10;
 
@@ -594,60 +620,68 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 	}
 	textManager.Render();
 
-	//フィールド技エフェクト
-	if (m_playEffect && m_effectIndex < static_cast<int>(m_attackEffects.size()))
+	// フィールド技エフェクト
+	if (!m_breakEffects.empty())
 	{
-		const auto& info = m_attackEffects[m_effectIndex];
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 180);
 
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 100);
-
-		switch (info.element)////連携技未追加
+		for (const auto& effect : m_breakEffects)
 		{
-		case Monster::CharacteRistics::None:
-			m_image->DrawNormal(drawEffectPosition, drawEffectSize);
-			break;
+			Vector2 position = effect.position;
+			Vector2 size ={map.GetChipSize(),map.GetChipSize()};
 
-		case Monster::CharacteRistics::Fire:
-			m_image->DrawFire(drawEffectPosition, drawEffectSize);
-			break;
+			switch (effect.element)
+			{
+			case Monster::CharacteRistics::None:
+				m_image->DrawNormal(position, size);
+				break;
 
-		case Monster::CharacteRistics::Water:
-			m_image->DrawWater(drawEffectPosition, drawEffectSize);
+			case Monster::CharacteRistics::Fire:
+				m_image->DrawFire(position, size);
+				break;
 
-			break;
+			case Monster::CharacteRistics::Water:
+				m_image->DrawWater(position, size);
+				break;
 
-		case Monster::CharacteRistics::Grass:
-			m_image->DrawGrass(drawEffectPosition, drawEffectSize);
-			break;
+			case Monster::CharacteRistics::Grass:
+				m_image->DrawGrass(position, size);
+				break;
 
-		case Monster::CharacteRistics::Wind:
-			m_image->DrawWind(drawEffectPosition, drawEffectSize);
-			break;
+			case Monster::CharacteRistics::Wind:
+				m_image->DrawWind(position, size);
+				break;
 
-		case Monster::CharacteRistics::Darkness:
-			m_image->DrawDarkness(drawEffectPosition, drawEffectSize);
-			break;
-		case Monster::CharacteRistics::SteamExplosion:
-			m_image->DrawSteamexplosion(drawEffectPosition, drawEffectSize);
-			break;
-		case Monster::CharacteRistics::WaterFlows:
-			m_image->DrawWaterflows(drawEffectPosition, drawEffectSize);
-			break;
-		case Monster::CharacteRistics::FloorBreak:
-			m_image->DrawFloorBreak(drawEffectPosition, drawEffectSize);
-			break;
-		case Monster::CharacteRistics::GrawGrass:
-			m_image->DrawGrowgrass(drawEffectPosition, drawEffectSize);
-			break;
-		case Monster::CharacteRistics::Volcazation:
-			m_image->DrawVolcazation(drawEffectPosition, drawEffectSize);
-			break;
+			case Monster::CharacteRistics::Darkness:
+				m_image->DrawDarkness(position, size);
+				break;
 
-		default:
-			break;
+			case Monster::CharacteRistics::SteamExplosion:
+				m_image->DrawSteamexplosion(position, size);
+				break;
+
+			case Monster::CharacteRistics::WaterFlows:
+				m_image->DrawWaterflows(position, size);
+				break;
+
+			case Monster::CharacteRistics::FloorBreak:
+				m_image->DrawFloorBreak(position, size);
+				break;
+
+			case Monster::CharacteRistics::GrawGrass:
+				m_image->DrawGrowgrass(position, size);
+				break;
+
+			case Monster::CharacteRistics::Volcazation:
+				m_image->DrawVolcazation(position, size);
+				break;
+
+			default:
+				break;
+			}
 		}
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
 
 	if (m_isMapActive)
@@ -667,7 +701,7 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 		int sizex		= 100;
 		int sizey		= 50;
 
-		float cursorY = positiony + 50.0f * m_menuListSelect;
+		int cursorY = positiony + 50 * m_menuListSelect;
 		drawSelectCursorPosition.x = positionx;
 		drawSelectCursorPosition.y = cursorY;
 		drawSelectCursorSize = { 30,30 };
@@ -772,11 +806,11 @@ void FieldScene::RenderCooperativeMove(TextManager&textManager)
 	// 背景
 	m_image->DrawCommandbox1(drawMenuBoxPosition_1,drawMenuBoxSize_1);
 
-	float positionx = 250.0f;
-	float positiony = 200.0f;
+	int positionx = 250;
+	int positiony = 200;
 
 	// カーソル
-	float cursorY =positiony + 50.0f * selectInPage;
+	int cursorY =positiony + 50 * selectInPage;
 
 	Vector2 drawSelectCursorPosition;
 	Vector2 drawSelectCursorSize = { 40, 40 };
@@ -1150,6 +1184,19 @@ void FieldScene::ResetBattleRequest()
 bool FieldScene::IsBattleRequested()const
 {
 	return m_isBattleRequested;
+}
+void FieldScene::SetBreakEffects(Map& map,Monster::CharacteRistics element)
+{
+	m_breakEffects.clear();
+	const auto& positions = map.GetBreakEffectPositions();
+	for (const auto& position : positions)
+	{
+		FieldBreakEffect effect{};
+		effect.element = element;
+		effect.position = Vector2{position.x,position.y};
+		effect.timer = 30;
+		m_breakEffects.push_back(effect);
+	}
 }
 
 Enemy* FieldScene::GetHitEnemy()const

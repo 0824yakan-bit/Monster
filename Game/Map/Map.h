@@ -1,12 +1,17 @@
 ﻿#pragma once
 
+#include <vector>
 #include "Game/Party/Accessory.h"
 #include "Game/TileRole/TileRole.h"
 
 class InputManager;
 class PlayerManager;
 class BossManager;
-
+struct BreakEffectPosition
+{
+	int x;
+	int y;
+};
 class Map
 {
 public:
@@ -77,9 +82,10 @@ private:
 
 
 	// ブレイク情報
-	int dangerAdd = 1;
 	int m_breakLevel;	// 地形破壊回数(ブレイクカウント)
 	int m_level;		//ブレイクレベル
+
+	std::vector<BreakEffectPosition>m_breakEffectPositions;
 
 	//段々崩れる
 	int m_leftChangeX[MAP_NUM];
@@ -160,6 +166,7 @@ public:
 
 	// ブレイクレベル
 	int	GetBreakLevel() const;	// 地形破壊回数を取得
+	const std::vector<BreakEffectPosition>& GetBreakEffectPositions() const;
 
 	// 霧
 	void RevealArea(int centerX,int centerY,int radius);	// 指定範囲の霧を晴らす

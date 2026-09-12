@@ -623,6 +623,11 @@ int Map::GetBreakLevel()const
 	return m_level;
 }
 
+const std::vector<BreakEffectPosition>& Map::GetBreakEffectPositions() const
+{
+	return m_breakEffectPositions;
+}
+
 bool Map::PrepareBreakArea(int centerX,int centerY,int x,int y,int& tx,int& ty)
 {
 	tx = centerX + x;
@@ -650,11 +655,19 @@ bool Map::PrepareBreakArea(int centerX,int centerY,int x,int y,int& tx,int& ty)
  * @param replaceType   置換後のタイル種別
  * @param dangerAdd   属性ごとの上昇量
  */
-void Map::BreakArea(int centerX,int centerY,int left,int right,int top,int bottom,int targetObject,int replaceObject,TileType replaceType,int dangerAdd)
+void Map::BreakArea(
+	int centerX,
+	int centerY,
+	int left,
+	int right,
+	int top,
+	int bottom,
+	int targetObject,
+	int replaceObject,
+	TileType replaceType,
+	int dangerAdd)
 {
-	// 技1回分のBreakLevel上昇
-	m_breakLevel = std::min(40, m_breakLevel + dangerAdd);
-	m_level = m_breakLevel / 10;
+	bool isChanged = false;
 
 	for (int y = top; y <= bottom; ++y)
 	{
@@ -663,56 +676,111 @@ void Map::BreakArea(int centerX,int centerY,int left,int right,int top,int botto
 			int tx;
 			int ty;
 
-			// 座標チェック＋霧解除
-			if (!PrepareBreakArea(centerX, centerY,x, y,tx,ty))
+			if (!PrepareBreakArea(centerX, centerY, x, y, tx, ty))
 			{
 				continue;
 			}
 
-			// 対象オブジェクトなら変更
 			if (targetObject < 0 ||
 				m_objectmap[m_currentMap][ty][tx] == targetObject)
 			{
-				m_objectmap[m_currentMap][ty][tx] = replaceObject;
-				m_basemap[m_currentMap][ty][tx] = replaceType;
+				// オブジェクトまたは地形が実際に変わる場合だけ
+				if (m_objectmap[m_currentMap][ty][tx] != replaceObject ||
+					m_basemap[m_currentMap][ty][tx] != replaceType)
+				{
+					m_objectmap[m_currentMap][ty][tx] = replaceObject;
+					m_basemap[m_currentMap][ty][tx] = replaceType;
+
+					isChanged = true;
+
+					// 実際に変更された場所を記録
+					m_breakEffectPositions.push_back(
+						BreakEffectPosition{
+							tx * m_chipSize,
+							ty * m_chipSize
+						}
+					);
+				}
 			}
 		}
 	}
-}
-void Map::BreakAreaByGroup(int centerX,int centerY,int left,int right,int top,int bottom,TileGroup group,int dangerAdd)
-{
-	const auto& breakTiles =m_tileRole.GetBreakTiles(group);
 
-	// 技1回分のBreakLevel上昇
-	m_breakLevel = std::min(40, m_breakLevel + dangerAdd);
-	m_level = m_breakLevel / 10;
+	// 実際に地形が変更された場合だけBreakLevelを増加
+	if (isChanged)
+	{
+		m_breakLevel = std::min(40, m_breakLevel + dangerAdd);
+		m_level = m_breakLevel / 10;
+	}
+}
+void Map::BreakAreaByGroup(
+	int centerX,
+	int centerY,
+	int left,
+	int right,
+	int top,
+	int bottom,
+	TileGroup group,
+	int dangerAdd)
+{
+	const auto& breakTiles = m_tileRole.GetBreakTiles(group);
+
+	// 今回、本当にマップが変更されたか
+	bool isChanged = false;
 
 	for (int y = top; y <= bottom; ++y)
 	{
 		for (int x = left; x <= right; ++x)
 		{
-			int tx;
-			int ty;
+			// 中心座標 + 相対座標
+			int tx = centerX + x;
+			int ty = centerY + y;
 
-			// 座標チェック＋霧解除
-			if (!PrepareBreakArea(centerX, centerY,x, y,tx, ty))
+			// マップ外なら無視
+			if (tx < 0 || tx >= MAP_WIDTH ||
+				ty < 0 || ty >= MAP_HEIGHT)
 			{
 				continue;
 			}
 
-			int objectNo =m_objectmap[m_currentMap][ty][tx];
+			int objectNo = m_objectmap[m_currentMap][ty][tx];
 
-			// TileGroupに登録されたタイルを探す
 			for (const auto& breakTile : breakTiles)
 			{
 				if (objectNo == breakTile.targetTile)
 				{
-					m_objectmap[m_currentMap][ty][tx]= breakTile.replaceTile;
-					m_basemap[m_currentMap][ty][tx]= breakTile.replaceType;
+					// すでに同じものなら変更扱いにしない
+					if (m_objectmap[m_currentMap][ty][tx] != breakTile.replaceTile ||
+						m_basemap[m_currentMap][ty][tx] != breakTile.replaceType)
+					{
+						m_objectmap[m_currentMap][ty][tx] =
+							breakTile.replaceTile;
+
+						m_basemap[m_currentMap][ty][tx] =
+							breakTile.replaceType;
+
+						isChanged = true;
+
+						m_breakEffectPositions.push_back(
+							BreakEffectPosition{
+								tx * m_chipSize,
+								ty * m_chipSize
+							}
+						);
+					}
+
 					break;
 				}
 			}
 		}
+	}
+
+	// 1マスでも実際に変更された場合だけBreakLevel上昇
+	if (isChanged)
+	{
+		m_breakLevel =
+			std::min(40, m_breakLevel + dangerAdd);
+
+		m_level = m_breakLevel / 10;
 	}
 }
 void Map::RevealArea(int centerX, int centerY, int radius)
@@ -746,6 +814,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::NormalBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Accessory::UpgradeAccessory nomal = m_accessory.GetAccessory(Accessory::ElementType::NOMAL);
 
 			Vector2 pos = player.GetPosition();
@@ -758,6 +828,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::FireBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -770,6 +842,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WaterBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -781,18 +855,20 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::GrassBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
 			BreakAreaByGroup(tx, ty, -3, 4, -3, 4, TileGroup::Grass, 0);
-
-
 		}
 
 		void Map::SoilBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -804,6 +880,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WindBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -839,6 +917,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::DarknessBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 
 			int tx = static_cast<int>(pos.x) / m_chipSize;
@@ -851,6 +931,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 ////連携技
 		void Map::SteamExplosionBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
@@ -860,6 +942,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::FloorBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
@@ -870,6 +954,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::WaterFlowsBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			for (int y = 0; y < MAP_HEIGHT; ++y)
 			{
 				for (int x = 0; x < MAP_WIDTH; ++x)
@@ -885,6 +971,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::GrowGrassBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
@@ -894,6 +982,8 @@ void Map::RevealArea(int centerX, int centerY, int radius)
 
 		void Map::VolcazationBreak(PlayerManager& player)
 		{
+			m_breakEffectPositions.clear();
+
 			Vector2 pos = player.GetPosition();
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
