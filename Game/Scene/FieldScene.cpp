@@ -3,6 +3,7 @@
 
 #include"Game/Maths/Collisionall.h"
 #include"Game/Scene/TextManager.h"
+#include"Game/Scene/SceneManager.h"
 #include"Game/ImageManager/ImageManager.h"
 #include"Game/SEManager/SEManager.h"
 #include"Game/Party/Monster.h"
@@ -24,7 +25,7 @@ static std::vector<Battle::UsedAttackInfo>MakeFieldEffect(Monster::CharacteRisti
 
 FieldScene::FieldScene(BossManager& bossManager, Party& party)
 	: m_hitEnemy				{ nullptr }
-	, STtext					{false,false,false,false,false,false}
+	, STtext					{false,false,false,false,false,false,false,false,false}
 	, m_isBattleRequested		{false}
 	, m_isMapActive				{ false }
 	, m_isMenuActive			{ false }
@@ -40,6 +41,10 @@ FieldScene::FieldScene(BossManager& bossManager, Party& party)
 	,m_monsterhp				{}
 	,m_count					{}
 	,m_annihilation				{}
+	, m_hasShownBoss1Text{}
+	,m_hasShownBoss2Text{}
+	, m_hasShownBoss3Text{}
+
 {
 
 }
@@ -47,7 +52,7 @@ FieldScene::~FieldScene()
 {
 }
 
-void FieldScene::Initialize(TextManager&textManager,InputManager& inputmanager, PlayerManager& playerManager, Map& map)
+void FieldScene::Initialize(SceneManager&sceneManager,TextManager&textManager,InputManager& inputmanager, PlayerManager& playerManager, Map& map)
 {
 
 	playerManager.SetImage(m_image);
@@ -58,11 +63,22 @@ void FieldScene::Initialize(TextManager&textManager,InputManager& inputmanager, 
 	STtext.m_signboard_2 = false;
 	STtext.m_signboard_3 = false;
 	STtext.m_signboard_4 = false;
-	STtext.m_lastBoss = false;
+	STtext.m_boss_1 = false;
+	STtext.m_boss_2 = false;
+	STtext.m_boss_3 = false;
+	STtext.m_lastBossAlive = false;
+	STtext.m_lastBossDefeated = false;
 	STtext.m_end = false;
 
-	m_hasShownLastBossText = false;
-	m_hasShownStairOpened = false;
+	if (!sceneManager.m_hasOnesActive)
+	{
+		m_hasShownBoss1Text = false;
+		m_hasShownBoss2Text = false;
+		m_hasShownBoss3Text = false;
+		m_hasShownLastBossAliveText = false;
+		m_hasShownLastBossDefeatedText = false;
+		m_hasShownStairOpened = false;
+	}
 	//初回だけ登録
 	if (m_unlockedSkills.empty())
 	{
@@ -148,7 +164,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		}
 	}
 
-	if (m_annihilation)
+	if (m_annihilation||textManager.GameOver())
 	{
 		gameOver.GameOverUpdate(inputManager);
 		return;
@@ -163,7 +179,11 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 	if (STtext.m_signboard_2)textManager.SignBoard_2Text(m_count);
 	if (STtext.m_signboard_3)textManager.SignBoard_3Text(m_count);
 	if (STtext.m_signboard_4)textManager.SignBoard_4Text(m_count);
-	if (STtext.m_lastBoss	)textManager.LastBossText	(m_count);
+	if (STtext.m_boss_1)textManager.Boss_1Text(m_count);
+	if (STtext.m_boss_2)textManager.Boss_2Text(m_count);
+	if (STtext.m_boss_3)textManager.Boss_3Text(m_count);
+	if (STtext.m_lastBossAlive)textManager.LastBossAliveText(m_count);
+	if (STtext.m_lastBossDefeated)textManager.LastBossDefeatedText	(m_count);
 	if (STtext.m_end		)textManager.EndText		(m_count);
 
 	if (textManager.SelectDisplayText())
@@ -238,14 +258,14 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 	}
 
 	//マップ表示・メニュー表示状態管理
-	if ((inputManager.IsTrigger(KEY_INPUT_X)||inputManager.IsPadTrigger(PAD_INPUT_3)) && !m_isMapActive && !m_isMenuActive)
-	{
-		m_isMapActive = true;
-	}
-	else if ((inputManager.IsTrigger(KEY_INPUT_X) || inputManager.IsPadTrigger(PAD_INPUT_3)|| (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B))) && m_isMapActive)
-	{
-		m_isMapActive = false;
-	}
+	//if ((inputManager.IsTrigger(KEY_INPUT_X)||inputManager.IsPadTrigger(PAD_INPUT_3)) && !m_isMapActive && !m_isMenuActive)
+	//{
+	//	m_isMapActive = true;
+	//}
+	//else if ((inputManager.IsTrigger(KEY_INPUT_X) || inputManager.IsPadTrigger(PAD_INPUT_3)|| (inputManager.IsTrigger(KEY_INPUT_BACK) || inputManager.IsPadTrigger(PAD_INPUT_B))) && m_isMapActive)
+	//{
+	//	m_isMapActive = false;
+	//}
 
 	if ((inputManager.IsTrigger(KEY_INPUT_Z) || inputManager.IsPadTrigger(PAD_INPUT_4)) && !m_isMenuActive && !m_isMapActive)
 	{
@@ -524,7 +544,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 
 			m_hitEnemy = enemy;
 			m_isBattleRequested = true;
-
+			battle.m_isBossBattle = enemy->IsBoss();
 			playerManager.m_invicible = true;
 		}
 	}
@@ -589,10 +609,23 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		}
 	}
 
+	if (m_bossManager.IsBossDefeated(0))
+	{
+		Boss1Defeat();
+	}
+	if (m_bossManager.IsBossDefeated(1))
+	{
+		Boss2Defeat();
+	}
+	if (m_bossManager.IsBossDefeated(2))
+	{
+		Boss3Defeat();
+	}
 	if (m_bossManager.IsBossDefeated(3))//ラスボス撃破後
 	{
-		LastBossDefeat();
+		LastBossDefeat(battle);
 	}
+
 }
 
 void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManager& playerManager, EnemyManager& enemyManager, Map& map, Accessory& accessory, Party& party)
@@ -602,15 +635,22 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 	{
 		m_image->DrawSlime(drawSlimePosition, drawSlimeSize);
 	}
+	if (STtext.m_lastBossAlive == true)
+	{
+		Vector2 drawLastBossPosition = { 23*map.m_chipSize,10 * map.m_chipSize };
+		Vector2 drawLastBossSize = { map.m_chipSize,map.m_chipSize };
+		m_image ->DrawSlime(drawLastBossPosition, drawLastBossSize);
+	}
 	if (!m_isTreasureOpen&&!map.m_isTransition)
 	{
 		enemyManager.Render();
 		playerManager.Render(this, &map, &accessory);
 	}
 
-	if (m_annihilation)
+	if (m_annihilation||textManager.GameOver())
 	{
 		gameOver.GameOverRender();
+		return;
 	}
 	if (textManager.GameClear())
 	{
@@ -796,45 +836,38 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 
 		// パネル
 		// 外側の影
-		DrawBox(480, 310,1440, 530,GetColor(0, 0, 0),TRUE);
+		DrawBox(480, 210,1440, 430,GetColor(0, 0, 0),TRUE);
 
 		// メインパネル
-		DrawBox(500, 290,1420, 510,GetColor(18, 22, 32),TRUE);
+		DrawBox(500, 190,1420, 410,GetColor(18, 22, 32),TRUE);
 
 		// 外枠
-		DrawBox(500, 290,1420, 510,GetColor(100, 180, 255),FALSE);
+		DrawBox(500, 190,1420, 410,GetColor(100, 180, 255),FALSE);
 
 		// 内側の枠
-		DrawBox(515, 305,1405, 495,GetColor(50, 70, 100),FALSE);
+		DrawBox(515, 205,1405, 395,GetColor(50, 70, 100),FALSE);
 
 		// タイトル
 		SetFontSize(42);
 		const wchar_t* title =L"◆ 新たな道が開かれた ◆";
 		int titleWidth =GetDrawStringWidth(title, -1);
-		DrawString(960 - titleWidth / 2,335,title,GetColor(120, 210, 255),TRUE);
+		DrawString(960 - titleWidth / 2,235,title,GetColor(120, 210, 255),TRUE);
 
 		// 区切り線
-		DrawLine(600, 410,1320, 410,GetColor(100, 130, 160));
+		DrawLine(600, 310,1320, 310,GetColor(100, 130, 160));
 
 		// メインメッセージ
 		SetFontSize(34);
 		const wchar_t* message =L"どこかの階段が開いたようだ";
 		int messageWidth = GetDrawStringWidth(message, -1);
-		DrawString(960 - messageWidth / 2,435,message,GetColor(255, 255, 255),TRUE);
-
-		// サブメッセージ
-		SetFontSize(24);
-		const wchar_t* subMessage =L"新たな場所へ進めるようになった";
-		int subWidth =GetDrawStringWidth(subMessage, -1);
-
-		DrawString(960 - subWidth / 2,485,subMessage,GetColor(170, 180, 195),TRUE);
+		DrawString(960 - messageWidth / 2,335,message,GetColor(255, 255, 255),TRUE);
 
 		// 決定ボタン表示
 		SetFontSize(22);
-		const wchar_t* button =	L"ENTER  /  A  で閉じる";
+		const wchar_t* button =	L"   A   / ENTER で閉じる";
 		int buttonWidth =GetDrawStringWidth(button, -1);
 
-		DrawString(960 - buttonWidth / 2,550,button,GetColor(120, 210, 255),TRUE);
+		DrawString(960 - buttonWidth / 2,450,button,GetColor(120, 210, 255),TRUE);
 		SetFontSize(30);
 	}
 	// スキル習得演出
@@ -1110,12 +1143,48 @@ void FieldScene::Level5(EnemyManager&enemyManager,Map&map)
 enemyManager.Update(map);
 }
 
-void FieldScene::LastBossDefeat()
+void FieldScene::Boss1Defeat()
 {
-	if (!m_hasShownLastBossText)
+	if (!m_hasShownBoss1Text)
 	{
-		STtext.m_lastBoss = true;
-		m_hasShownLastBossText = true;
+		STtext.m_boss_1 = true;
+		m_hasShownBoss1Text = true;
+	}
+}
+void FieldScene::Boss2Defeat()
+{
+	if (!m_hasShownBoss2Text)
+	{
+		STtext.m_boss_2 = true;
+		m_hasShownBoss2Text = true;
+	}
+}
+void FieldScene::Boss3Defeat()
+{
+	if (!m_hasShownBoss3Text)
+	{
+		STtext.m_boss_3 = true;
+		m_hasShownBoss3Text = true;
+	}
+}
+void FieldScene::LastBossDefeat(Battle&battle)
+{
+	if (!m_hasShownLastBossDefeatedText)
+	{
+		if (battle.IsChackBossSelect())
+		{
+			if (!m_hasShownLastBossAliveText)
+			{
+				STtext.m_lastBossAlive = true;
+				m_hasShownLastBossAliveText = true;
+				return;
+			}
+		}
+		else
+		{
+			STtext.m_lastBossDefeated = true;
+			m_hasShownLastBossDefeatedText = true;
+		}
 	}
 }
 

@@ -14,6 +14,10 @@ TextManager::TextManager()
 	,m_currentTextType{}
 	,m_image{}
 	,m_gameClear{}
+	,m_isTyping{}
+	,m_fpsCounter{}
+	, m_displaytextLength{}
+	,m_displaySpeed{}
 {
 	////本文
 	m_TextCount[Start]			= 7;
@@ -21,7 +25,11 @@ TextManager::TextManager()
 	m_TextCount[Signboard_2]	= 2;
 	m_TextCount[Signboard_3]	= 1;
 	m_TextCount[Signboard_4]	= 4;
-	m_TextCount[LastBoss]		= 5;
+	m_TextCount[Boss_1] = 2;
+	m_TextCount[Boss_2] = 3;
+	m_TextCount[Boss_3] = 3;
+	m_TextCount[LastBossAlive] = 14;
+	m_TextCount[LastBossDefeated]= 9;
 	m_TextCount[End]			= 5;
 }
 
@@ -37,13 +45,18 @@ void TextManager::Initialize()
 	m_displaySpeed = 3;//テキスト表示スピード小さいほど速い
 	m_isTyping = true;
 	m_gameClear = false;
+	m_gameOver = false;
 	//本文
 	m_TextCount[Start]			= 7;
 	m_TextCount[Signboard_1]	= 2;
 	m_TextCount[Signboard_2]	= 2;
 	m_TextCount[Signboard_3]	= 5;
 	m_TextCount[Signboard_4]	= 5;
-	m_TextCount[LastBoss]		= 5;
+	m_TextCount[Boss_1] = 2;
+	m_TextCount[Boss_2] = 3;
+	m_TextCount[Boss_3] = 3;
+	m_TextCount[LastBossAlive] = 14;
+	m_TextCount[LastBossDefeated]= 9;
 	m_TextCount[End]			= 5;
 
 	drawTextBoxPosition = {20,500};
@@ -87,8 +100,21 @@ void TextManager::Update(InputManager& inputManager, FieldScene& fieldScene)
 		case Signboard_4:
 			fieldScene.STtext.m_signboard_4 = false;
 			break;
-		case LastBoss:
-			fieldScene.STtext.m_lastBoss = false;
+		case Boss_1:
+			fieldScene.STtext.m_boss_1 = false;
+			break;
+		case Boss_2:
+			fieldScene.STtext.m_boss_2 = false;
+			break;
+		case Boss_3:
+			fieldScene.STtext.m_boss_3 = false;
+			break;
+		case LastBossAlive:
+			fieldScene.STtext.m_lastBossAlive = false;
+			break;
+		case LastBossDefeated:
+			fieldScene.STtext.m_lastBossDefeated = false;
+			break;
 		case End:
 			fieldScene.STtext.m_end = false;
 			break;
@@ -101,12 +127,12 @@ void TextManager::Render()
 	{
 		return;
 	}
-	Vector2 slimeTextPosition = { 50,430 };
-	Vector2 slimeTextSize = { 220,75 };
+	Vector2 slimeTextPosition = { 20,430 };
+	Vector2 slimeTextSize = { 320,75 };
 	m_image->DrawCommandbox1(slimeTextPosition, slimeTextSize);
 	m_image->DrawCommandbox2(drawTextBoxPosition, drawTextBoxSize);
 	SetFontSize(40);
-	DrawString(75, 446, L"スライム", GetColor(255, 255, 255), TRUE);
+	DrawString(80, 446, m_currentChara.c_str(), GetColor(255, 255, 255), TRUE);
 	DrawString(120,550,m_currentdisplayText.c_str(), GetColor(255, 255, 255), TRUE);
 	SetFontSize(30);
 	Vector2 drawNextTextPosition = { 1100,630 };
@@ -130,10 +156,11 @@ void TextManager::StartText(int count)
 {
 	m_display = true;
 	m_currentTextType = TextType::Start;
+	m_currentChara = L"スライム";
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"ようやく起きたか。僕はスライム、よろしく！";
+		m_displayText = L"ようやく起きたね。僕はスライム、よろしく！";
 		break;
 	case 1:
 		m_displayText = L"なんで、閉じ込められているかって？\nあの悪魔のせいさ。";
@@ -145,13 +172,13 @@ void TextManager::StartText(int count)
 		m_displayText = L"だから頼む、あの悪魔を倒して、\n森を平和な場所に戻してくれ！";
 			break;
 	case 4:
-		m_displayText = L"君一人だと心配だから、僕もついていくよ。\n僕は無属性と水属性なら教えられるよ、覚えておいてね。";
+		m_displayText = L"うーん...君一人だと心配だから、僕もついていくよ。\n僕は無属性と水属性なら教えられるよ、覚えておいてね。";
 			break;
 	case 5:
 		m_displayText = L"...まずはここから出ないとね。この壁の近くでなら、\nYでメニューを開いて、技の無属性で壊せると思うよ。";
 			break;
 	case 6:
-		m_displayText = L"もし危なくなったら、すぐに個々の場所に戻ってきてね\nここなら安全だからさ。";
+		m_displayText = L"もし危なくなったら、すぐにここ場所に戻ってきてね\nここなら安全だからさ。";
 		break;
 	}
 }
@@ -161,6 +188,7 @@ void TextManager::SignBoard_1Text(int count)
 	m_display = true;
 
 	m_currentTextType = TextType::Signboard_1;
+	m_currentChara = L"スライム";
 	switch (count)
 	{
 	case 0:
@@ -177,6 +205,7 @@ void TextManager::SignBoard_2Text(int count)
 	m_display = true;
 
 	m_currentTextType = TextType::Signboard_2;
+	m_currentChara = L"スライム";
 	switch (count)
 	{
 	case 0:
@@ -187,11 +216,12 @@ void TextManager::SignBoard_2Text(int count)
 	}
 }
 
-void TextManager::SignBoard_3Text(int count)
+void TextManager::SignBoard_3Text(int count)////
 {
 	m_display = true;
 
 	m_currentTextType = TextType::Signboard_3;
+	m_currentChara = L"スライム";
 	switch (count)
 	{
 	case 0:
@@ -205,6 +235,7 @@ void TextManager::SignBoard_4Text(int count)
 	m_display = true;
 
 	m_currentTextType = TextType::Signboard_4;
+	m_currentChara = L"スライム";
 	switch (count)
 	{
 	case 0:
@@ -222,24 +253,160 @@ void TextManager::SignBoard_4Text(int count)
 	}
 }
 
-void TextManager::LastBossText(int count)////
+void TextManager::Boss_1Text(int count)////
 {
 	m_display = true;
 
-	m_currentTextType = TextType::LastBoss;
+	m_currentTextType = TextType::Boss_1;
+	m_currentChara = L"？？？？？";
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"この看板は、あの悪魔がかいたみたいだよ\n一応読んでみようか";
+		m_displayText = L"……岩の魔獣が……倒されたか。\nまさか、ここまで辿り着くとはな……。";
 		break;
 	case 1:
-		m_displayText = L"「我に謁見を望むならば、\n岩と鳥と竜を打ち倒してみせよ";
+		m_displayText = L"……この程度では、まだ……。\nこの先へ進めば、もう後戻りはできぬぞ。";
+		break;
+	}
+}
+
+void TextManager::Boss_2Text(int count)////
+{
+	m_display = true;
+
+	m_currentTextType = TextType::Boss_2;
+	m_currentChara = L"？？？？？";
+	switch (count)
+	{
+	case 0:
+		m_displayText = L"……鳥の魔獣まで倒したか。\nなぜ、そこまでして進む……。";
+		break;
+	case 1:
+		m_displayText = L"「お前たちは、何も知らない\nこの世界で起きていることも……。";
 		break;
 	case 2:
-		m_displayText = L"見事、すべてを屠った暁には\n貴様に我が魔城へ立ち入る権利を授けてやろう」";
+		m_displayText = L"「この先に進めば、いずれ分かる。\nだが……これ以上、邪魔をされるわけにはいかない";
+		break;
+	}
+}
+
+void TextManager::Boss_3Text(int count)////
+{
+	m_display = true;
+
+	m_currentTextType = TextType::Boss_3;
+	m_currentChara = L"？？？？？";
+	switch (count)
+	{
+	case 0:
+		m_displayText = L"「……竜まで……。\n……ここまで来たのなら、仕方がない。";
+		break;
+	case 1:
+		m_displayText = L"「お前たちは……私を悪だと思っているのだろう。\nだが……見えているものだけが、すべてだとは限らない。";
+		break;
+	case 2:
+		m_displayText = L"「この先で、確かめるがいい。\nお前たちが信じてきたものが、本当に正しいのかを……。";
+		break;
+	}
+}
+
+void TextManager::LastBossAliveText(int count)
+{
+	m_display = true;
+
+	m_currentTextType = TextType::LastBossAlive;
+	switch (count)
+	{
+	case 0:
+		m_currentChara = L"ディアボロ";
+		m_displayText = L"……そうか……私は……負けたのか……\nだが……なぜだ……？なぜ、お前たちは……。";
+		break;
+	case 1:
+		m_displayText = L"我はただ……この森を修復していたに過ぎない……\n荒れ果てた大地を戻し、緑で満たそうとしていただけだ……";
+		break;
+	case 2:
+		m_currentChara = L"スライム";
+		m_displayText = L"……え？じゃあ……ディアボロは、\n本当はこの森を壊していなかったの？";
 		break;
 	case 3:
-		m_displayText = L"岩？鳥？竜？わからないけど、とにかく探すしかないね。";
+		m_currentChara = L"ディアボロ";
+		m_displayText = L"そうだ。\nお前たちがずっと見ていたこの壊れた大地も――";
+		break;
+	case 4:
+		m_displayText = L"我が力を使い、修復している途中だったのだ。\n……だが、我の力だけではもう限界だ。";
+		break;
+	case 5:
+		m_currentChara = L"スライム";
+		m_displayText = L"だったら……僕たちも手伝うよ。ここまで一緒に来たんだ。\n今度は壊れた場所を、みんなで直そう！";
+		break;
+	case 6:
+		m_currentChara = L"ディアボロ";
+		m_displayText = L"……お前たちが……？\n……ならば、一つ頼みがある。";
+		break;
+	case 7:
+		m_displayText = L"我は、この土地を緑で満たす。\nお前たちは……新しい道を作れ。";
+		break;
+	case 8:
+		m_currentChara = L"スライム";
+		m_displayText = L"もちろん！\n壊れたところは直して、";
+		break;
+	case 9:
+		m_displayText = L"通れないところには新しい道を作る。\nそうすればきっと……前よりもっと、いい場所にできるよ！";
+		break;
+	case 10:
+		m_currentChara = L"ディアボロ";
+		m_displayText = L"……そうだな。\nこの世界は、一度壊れたくらいでは終わらない。";
+		break;
+	case 11:
+		m_currentChara = L"スライム";
+		m_displayText = L"じゃあ……これからも一緒だね！";
+		break;
+	case 12:
+		m_currentChara = L"ディアボロ";
+		m_displayText = L"……ああ。\n今度は……共に、この世界を作っていこう。";
+		break;
+	case 13:
+		m_gameClear = true;
+		break;
+	}
+}
+void TextManager::LastBossDefeatedText(int count)////
+{
+	m_display = true;
+
+	m_currentTextType = TextType::LastBossDefeated;
+	switch (count)
+	{
+	case 0:
+		m_currentChara = L"ディアボロ";
+		m_displayText = L"…そうか、私は負けたのか…\nだが…なぜそこまでして…";
+		break;
+	case 1:
+		m_displayText = L"……私は、この世界を壊していたのではない。\n我はただ、この森を修復していたのに過ぎない…";
+		break;
+	case 2:
+		m_currentChara = L"スライム";
+		m_displayText = L"…え？\n森を修復していた？";
+		break;
+	case 3:
+		m_currentChara = L"ディアボロ";
+		m_displayText = L"そうだ、この森も、大地も――\nずっと前から、何者かによって荒らされていた。";
+		break;
+	case 4:
+		m_displayText = L"我は……荒れ果てたこの土地を……\n再び、緑で満たすために……";
+		break;
+	case 5:
+		m_displayText = L"力を……使っていたに……過ぎない……\n……それなのに……お前たちは……";
+		break;
+	case 6:
+		m_displayText = L"……我の力が、弱まっていくのを感じる……\nこれもまた……運命なのだな……";
+		break;
+	case 7:
+		m_displayText = L"……ならば、見届けるがいい。この世界の有様を\nそして……誰が、この世界を修復していたのかを……";
+		break;
+	case 8:
+		m_currentChara = L"スライム";
+		m_displayText = L"...まずい!ここもすぐ崩れる\nここにいたら危ない！　早く、あの場所に戻ろう！";
 		break;
 	}
 }
@@ -249,10 +416,11 @@ void TextManager::EndText(int count)
 	m_display = true;
 
 	m_currentTextType = TextType::End;
+	m_currentChara = L"スライム";
 	switch (count)
 	{
 	case 0:
-		m_displayText = L"...酷い有様になっちゃったね。\nでも、もうあの悪魔はいない。";
+		m_displayText = L"...酷い有様になっちゃったね。\nでも、ディアボロはもういない。";
 		break;
 	case 1:
 		m_displayText = L"じゃあ次は僕たちの番だ。壊れてしまったものは多い\nけれど、また住みやすい場所に戻していくよ。";
@@ -264,7 +432,7 @@ void TextManager::EndText(int count)
 		m_displayText = L"またいつか、遊びに来てよ。じゃあね";
 		break;
 	case 4:
-		m_gameClear = true;
+		m_gameOver = true;
 		break;
 	}
 }
@@ -273,7 +441,10 @@ bool TextManager::GameClear()
 {
 	return m_gameClear;
 }
-
+bool TextManager::GameOver()
+{
+	return m_gameOver;
+}
 void TextManager::TypeWriter(InputManager&inputManager)
 {
 	m_fpsCounter++;

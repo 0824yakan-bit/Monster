@@ -1004,7 +1004,7 @@ bool Map::NextMapSearch(int map, int x, int y)
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
 
-			BreakArea(tx, ty, -1, 2, -1, 2, -1, 91, TileType::GrassLounge, 0);
+			BreakAreaByGroup(tx, ty, -1, 2, -1, 2,TileGroup::GrowGrass, 0);
 		}
 
 		void Map::VolcazationBreak(PlayerManager& player)
@@ -1014,6 +1014,6 @@ bool Map::NextMapSearch(int map, int x, int y)
 			Vector2 pos = player.GetPosition();
 			int tx = static_cast<int>(pos.x) / m_chipSize;
 			int ty = static_cast<int>(pos.y) / m_chipSize;
-
-			BreakArea(tx, ty, -2, 3, -2, 3, 32, 3, TileType::Floor, 10);
+			
+			BreakAreaByGroup(tx, ty, -2, 3, -2, 3,TileGroup::Volcazation, 10);
 		}

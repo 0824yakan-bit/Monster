@@ -66,7 +66,8 @@ public:
 	void DrawVolcazation(Vector2 position, Vector2 size);
 	void DrawGrowgrass(Vector2 position, Vector2 size);
 
-
+	void GameClear(Vector2 position, Vector2 size);
+	void GameOver(Vector2 position, Vector2 size);
 
 };
 

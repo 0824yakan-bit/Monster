@@ -35,7 +35,10 @@ int Enemy::GetHp() const
 {
     return hp;
 }
-
+int Enemy::GetMaxHp()const
+{
+    return maxHp;
+}
 
 const wchar_t* Enemy::GetName() const
 {
@@ -131,6 +134,7 @@ void Enemy::SetEnemyStats(Map& map,Party&party, int basePower, int baseHp)
     int level = map.GetBreakLevel();
     int partycount = party.GetMonsterCount();
     hp = baseHp+5*(level)+10*(partycount-1);
+    maxHp = hp;
     power = basePower + 2 * (level+partycount-1);
 }
 

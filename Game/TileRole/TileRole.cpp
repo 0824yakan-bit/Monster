@@ -12,6 +12,10 @@ void TileRole::Initialize()////タイル効果未追加
         m_roles[i] = TileType::Floor;
 
     // 壁
+    m_roles[9] = TileType::Wall;
+    m_roles[10] = TileType::Wall;
+    for (int i = 16;i <= 26;i++)
+        m_roles[i] = TileType::Wall;
     for (int i = 32; i <= 79; ++i)
         m_roles[i] = TileType::Wall;
     for(int i = 102;i<=207;++i)
@@ -20,6 +24,8 @@ void TileRole::Initialize()////タイル効果未追加
         m_roles[i] = TileType::Wall;
     for (int i = 272;i <= 279;i++)
         m_roles[i] = TileType::Wall;
+
+    m_roles[22] = TileType::Floor;
     // 宝箱
     m_roles[96] = TileType::Treasure;
     m_roles[97] = TileType::Treasure;
@@ -93,6 +99,14 @@ void TileRole::Initialize()////タイル効果未追加
     m_breakGroups[TileGroup::Darkness] =
     {
         {41,-1,TileType::Floor},//コワセナイカベ41
+    };
+    m_breakGroups[TileGroup::GrowGrass] =
+    {
+        {1,91,TileType::GrassLounge},
+    };
+    m_breakGroups[TileGroup::Volcazation] =
+    {
+        {32,3,TileType::Floor},
     };
 }
 

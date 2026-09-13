@@ -46,13 +46,13 @@ private:
 	std::unique_ptr<SceneID>m_scene;
 public:
 	int m_monsterCurrentDamge[MAX_PARTY];
-
+	bool m_hasOnesActive;
 public:
 	SceneManager(BossManager&bossManager,Party&party);
 	~SceneManager();
 
 	void Initialize(TextManager& textManager,SEManager&sound, InputManager& inputmanager, SceneManager& sceneManager, PlayerManager& playerManager, Map&map,Party&party,ImageManager&image);
-	void Update(TextManager& textManager,InputManager& inputmanager,SceneManager&sceneManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory);
+	void Update(TextManager& textManager,InputManager& inputmanager,SceneManager&sceneManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
 	void Render(TextManager& textManager, PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory);
 	void Finalize();
 

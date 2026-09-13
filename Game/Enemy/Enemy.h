@@ -47,6 +47,7 @@ public:
     Vector2 renderSize;
 
     int hp;
+    int maxHp;
     int power;
     int level;
 
@@ -70,6 +71,7 @@ public:
     void Damage(int power);//パーティのpower
     int GetPower()const;
     int GetHp() const;
+    int GetMaxHp()const;
     const wchar_t* GetName() const;
     void SetImage(ImageManager* image);
     Vector2 GetPosition();

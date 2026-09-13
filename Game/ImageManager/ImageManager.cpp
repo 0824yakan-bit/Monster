@@ -54,8 +54,8 @@ void ImageManager::LoadTextures()
 	textures.push_back({ L"volcazation",LoadGraph(L"Resources/Textures/volcazation.png") });
 	textures.push_back({ L"growgrass",LoadGraph(L"Resources/Textures/growgrass.png") });
 
-
-
+	textures.push_back({ L"gameclear",LoadGraph(L"Resources/Textures/gameclear.png") });
+	textures.push_back({ L"gameover",LoadGraph(L"Resources/Textures/gameover.png") });
 }
 
 int ImageManager::GetTexture(const std::wstring& name)
@@ -340,6 +340,20 @@ void ImageManager::DrawVolcazation(Vector2 position, Vector2 size)
 void ImageManager::DrawGrowgrass(Vector2 position, Vector2 size)
 {
 	int gh = GetTexture(L"growgrass");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+void ImageManager::GameClear(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"gameclear");
+
+	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
+}
+
+void ImageManager::GameOver(Vector2 position, Vector2 size)
+{
+	int gh = GetTexture(L"gameover");
 
 	DrawExtendGraph(position.x, position.y, position.x + size.x, position.y + size.y, gh, TRUE);
 }

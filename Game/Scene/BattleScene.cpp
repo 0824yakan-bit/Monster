@@ -609,7 +609,10 @@ Enemy* BattleScene::GetTargetEnemy() const
 
 	return m_battle->GetTargetEnemy();
 }
-
+Battle& BattleScene::GetBattle()
+{
+	return *m_battle;
+}
 // Setter
 void BattleScene::SetImage(ImageManager* image)
 {

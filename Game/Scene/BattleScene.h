@@ -93,7 +93,7 @@ public:
 
 	// 現在の攻撃対象
 	Enemy* GetTargetEnemy() const;
-
+	Battle& GetBattle();
 	const std::vector<Battle::UsedAttackInfo>& GetUsedAttackOrder() const;
 	void ClearUsedAttackOrder();
 };

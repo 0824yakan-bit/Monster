@@ -18,6 +18,10 @@ class Party;
 class Enemy;
 class BossManager;
 
+enum class BossBattlePhase
+{
+	None,Phase1,Phase2,Phase3
+};
 class Battle
 {
 public:
@@ -31,6 +35,9 @@ public:
 
 	std::vector<UsedAttackInfo> m_usedAttackOrder;
 	std::map<Enemy*, int> m_comboDamageTotal;
+
+	bool m_bossRun;
+	bool m_isBossBattle;
 
 private:
 	// 定数
@@ -49,6 +56,7 @@ private:
 		Party,
 		Run,
 		EnemyTurn,
+		LastBoss,
 		EnemyDead,
 		Annihilation
 	};
@@ -84,6 +92,19 @@ private:
 
 	Enemy* m_deadEnemy = nullptr;
 	std::wstring m_deadEnemyName;
+
+	//ボス
+	BossBattlePhase m_bossBattlePhase;
+	bool m_isLastBoss;
+	int m_bossTurnCount;
+	int m_bossSelect;
+	struct IsSelect
+	{
+		bool Phase1;
+		bool Phase2;
+		bool Phase3;
+	};
+	IsSelect m_isSelect;
 
 	// 描画関連
 	Vector2 drawBgPosition;
@@ -247,6 +268,11 @@ public:
 	void UpdateEnemyTurn(SceneManager* sceneManager);		// 敵ターンの更新
 	void RenderEnemyTurn();									// 敵ターンの描画
 	void RenderCurrentHp();
+
+	void UpdateLastBoss(InputManager&inputManager);
+	void RenderLastBoss();
+	void CheckLastBossPhase();
+	bool IsChackBossSelect()const;
 
 	// 敵死亡
 	void UpdateEnemyDead();									// 敵死亡演出の更新

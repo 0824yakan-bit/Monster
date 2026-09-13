@@ -239,6 +239,8 @@
     <Image Include="Resources\Textures\fire.png" />
     <Image Include="Resources\Textures\fox.png" />
     <Image Include="Resources\Textures\front.png" />
+    <Image Include="Resources\Textures\gameclear.png" />
+    <Image Include="Resources\Textures\gameover.png" />
     <Image Include="Resources\Textures\golem.png" />
     <Image Include="Resources\Textures\grass.png" />
     <Image Include="Resources\Textures\growgrass.png" />

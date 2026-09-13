@@ -32,6 +32,12 @@ Battle::Battle(BossManager&bossManager)
 , m_replaceSelect	{}
 , m_joinState		{}
 , m_joinEnemy		{}
+,m_bossRun{false}
+,m_isSelect{}
+,m_isLastBoss{}
+,m_bossTurnCount{}
+,m_bossSelect{}
+,m_bossBattlePhase{}
 {
 }
 
@@ -100,6 +106,7 @@ void Battle::Initialize(SceneManager* sceneManager)
 	// 敵ターゲット
 	m_targetEnemyIndex = -1;
 	m_selectedTargetEnemyIndex = -1;
+
 	// キャラクター・技の選択位置
 	m_displayIndex = 0;
 	m_monsterSelect = 0;
@@ -350,6 +357,9 @@ void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, Game
 	case BattleState::EnemyTurn:
 		UpdateEnemyTurn(sceneManager);
 		break;
+	case BattleState::LastBoss:
+		UpdateLastBoss(inputManager);
+		break;
 	case BattleState::EnemyDead:
 		UpdateEnemyDead();
 		break;
@@ -493,6 +503,10 @@ void Battle::Render(GameOver& gameOver, Map& map)
 
 	case BattleState::EnemyTurn:
 		RenderEnemyTurn();
+		break;
+
+	case BattleState::LastBoss:
+		RenderLastBoss();
 		break;
 
 	case BattleState::EnemyDead:
@@ -666,6 +680,113 @@ void Battle::RenderCurrentHp()
 	}
 }
 
+void Battle::UpdateLastBoss(InputManager&inputManager)
+{
+	switch (m_bossBattlePhase)
+	{
+	case BossBattlePhase::Phase1:
+		m_displayMessage = L"1";
+		break;
+	case BossBattlePhase::Phase2:
+		m_displayMessage = L"2";
+		break;
+	case BossBattlePhase::Phase3:
+		m_displayMessage = L"3";
+		break;
+	}
+	printfDx(L"current:%d", m_bossSelect);
+	// 左
+	if (inputManager.IsTrigger(KEY_INPUT_LEFT) || inputManager.IsPadTrigger(PAD_INPUT_LEFT))
+	{
+		m_bossSelect--;
+		if (m_bossSelect < 0)
+		{
+			m_bossSelect = 1;
+		}
+		m_sound->PlayTypeBackStart(SEManager::SoundList::Cursor);
+	}
+
+	// 右
+	if (inputManager.IsTrigger(KEY_INPUT_RIGHT) || inputManager.IsPadTrigger(PAD_INPUT_RIGHT))
+	{
+		m_bossSelect++;
+		if (m_bossSelect > 1)
+		{
+			m_bossSelect = 0;
+		}
+		m_sound->PlayTypeBackStart(SEManager::SoundList::Cursor);
+	}
+	// 決定
+	if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_A))
+	{
+		if (m_bossSelect == 0)
+		{
+			switch (m_bossBattlePhase)
+			{
+			case BossBattlePhase::Phase1:
+				m_isSelect.Phase1 = true;
+				break;
+			case BossBattlePhase::Phase2:
+				m_isSelect.Phase2 = true;
+				break;
+			case BossBattlePhase::Phase3:
+				m_isSelect.Phase3 = true;
+				break;
+			}
+		}
+		m_state = BattleState::Command;
+	}
+}
+void Battle::RenderLastBoss()
+{
+	Vector2 drawLastBossTextPosition = {120,440};
+	Vector2 drawLastBossTextSize = {1040,270};
+	m_image->DrawCommandbox1(drawLastBossTextPosition, drawLastBossTextSize);
+	DrawString(150, 470,m_displayMessage.c_str(), GetColor(255, 255, 255), TRUE);
+	DrawString(150, 600, L"yes　　　　no", GetColor(255, 255, 255), TRUE);
+}
+
+void Battle::CheckLastBossPhase()
+{
+	Enemy* boss = nullptr;
+
+	for (Enemy* enemy : m_enemies)
+	{
+		if (enemy == nullptr)
+		{
+			continue;
+		}
+
+		if (m_bossManager.IsLastBoss(enemy->GetBossNo()))
+		{
+			boss = enemy;
+			break;
+		}
+	}
+
+	if (boss == nullptr)
+	{
+		return;
+	}
+
+	float hpRate =static_cast<float>(boss->GetHp()) /static_cast<float>(boss->GetMaxHp());
+	if (m_bossBattlePhase == BossBattlePhase::Phase1 &&hpRate <= 0.7f)
+	{
+		m_bossBattlePhase = BossBattlePhase::Phase2;
+	}
+	else if (m_bossBattlePhase == BossBattlePhase::Phase2 &&hpRate <= 0.3f)
+	{
+		m_bossBattlePhase = BossBattlePhase::Phase3;
+	}
+}
+bool Battle::IsChackBossSelect()const
+{
+	if ((m_isSelect.Phase1 == false) && (m_isSelect.Phase2 == false) && (m_isSelect.Phase2 == false))
+	{
+		return true;
+	}
+	return false;
+}
 // Attack Select
 void Battle::UpdateAttackSelect(InputManager&inputManager)
 {
@@ -1354,25 +1475,36 @@ void Battle::RenderParty()
 }
 
 // Run
+// Run
 void Battle::UpdateRun()
 {
 	m_displaytextTimer++;
+
 	if (m_displaytextTimer == 1)
 	{
-		int rand = GetRand(1);
-
-		if (rand == 0)
+		// ボス戦では絶対に逃げられない
+		if (m_isBossBattle)
 		{
-			// 逃走成功
-			m_isRunSuccess = true;
-			m_displayMessage = L"にげだした!";
-			m_sound->PlayTypeBackStart(SEManager::SoundList::Run);
+			m_isRunSuccess = false;
+			m_displayMessage = L"戦闘からは逃げられない";
 		}
 		else
 		{
-			// 逃走失敗
-			m_isRunSuccess = false;
-			m_displayMessage = L"にげられなかった...";
+			int rand = GetRand(1);
+
+			if (rand == 0)
+			{
+				// 逃走成功
+				m_isRunSuccess = true;
+				m_displayMessage = L"にげだした!";
+				m_sound->PlayTypeBackStart(SEManager::SoundList::Run);
+			}
+			else
+			{
+				// 逃走失敗
+				m_isRunSuccess = false;
+				m_displayMessage = L"にげられなかった...";
+			}
 		}
 	}
 
@@ -1389,6 +1521,7 @@ void Battle::UpdateRun()
 		{
 			m_state = BattleState::EnemyTurn;
 		}
+
 		m_displaytextTimer = 0;
 	}
 }
@@ -1623,7 +1756,6 @@ void Battle::RenderAnnihilation(GameOver& gameOver)
 // Turn End
 void Battle::EndTurn()
 {
-	m_state = BattleState::Command;
 
 	m_displayMessage.clear();
 	m_displayMessageDamage.clear();
@@ -1663,6 +1795,13 @@ void Battle::EndTurn()
 	}
 	// 次ターンのターゲット
 	m_selectedTargetEnemyIndex = m_targetEnemyIndex;
+	if (m_isLastBoss)
+	{
+		CheckLastBossPhase();
+		m_state = BattleState::LastBoss;
+		return;
+	}
+	m_state = BattleState::Command;
 }
 void Battle::ResetRunSuccess()
 {
@@ -1944,6 +2083,25 @@ void Battle::SetParty(Party* party)
 void Battle::SetEnemies(const std::vector<Enemy*>& enemies)
 {
 	m_enemies = enemies;
+	m_isLastBoss = false;
+	m_bossBattlePhase = BossBattlePhase::None;
+	m_bossTurnCount = 0;
+
+	for (Enemy* enemy : m_enemies)
+	{
+		if (enemy == nullptr)
+		{
+			continue;
+		}
+
+		if (m_bossManager.IsLastBoss(enemy->GetBossNo()))
+		{
+			m_isLastBoss = true;
+			m_bossBattlePhase = BossBattlePhase::Phase1;
+			m_bossTurnCount = 0;
+			break;
+		}
+	}
 	m_targetEnemyIndex = -1;
 	m_selectedTargetEnemyIndex = -1;
 	// 中央の敵を優先

@@ -34,7 +34,6 @@ Game::Game()
 	, m_enemyManager{}
 	, m_party{}
 	, m_sceneManager{m_bossManager,m_party}
-	, m_battle{m_bossManager}
 	, m_key{ 0 }
 	, m_oldKey{ 0 }
 	, m_oldMapNo{ 0 }
@@ -108,7 +107,7 @@ void Game::Update(float elapsedTime)
 
 
 	// ゲームの更新
-	m_sceneManager.Update(m_textManager,m_inputManager,m_sceneManager, m_playerManager, m_enemyManager, m_map, m_party,m_battle,m_accessory);
+	m_sceneManager.Update(m_textManager,m_inputManager,m_sceneManager, m_playerManager, m_enemyManager, m_map, m_party,m_accessory);
 	if (m_sceneManager.IsTitleRequested())
 	{
 		m_sceneManager.ResetTitleRequest();

@@ -12,4 +12,6 @@ public:
     bool IsBossDefeated(int bossNo) const;//指定したボスが撃破(TRUE)されたか
 
     bool IsAllBossDefeated() const;//すべてのボスが撃破(TRUE)されたか
+
+    bool IsLastBoss(int bossNo) const;
 };

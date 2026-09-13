@@ -15,7 +15,11 @@ public:
 		Signboard_2,//看板２
 		Signboard_3,//看板３
 		Signboard_4,//看板４
-		LastBoss,//悪魔撃破時
+		Boss_1,//ボス１撃破時
+		Boss_2,//ボス２撃破時
+		Boss_3,//ボス３撃破時
+		LastBossAlive,//悪魔生存時
+		LastBossDefeated,//悪魔撃破時
 		End,//ゲーム終了時
 		textend,
 	};
@@ -25,6 +29,7 @@ private:
 	Vector2 drawTextBoxSize;
 
 	TextType m_currentTextType;
+	std::wstring m_currentChara;
 	int m_TextCount[TextType::textend];
 	bool m_display;
 	int m_fpsCounter;
@@ -37,6 +42,7 @@ private:
 	std::wstring m_displayText;
 	std::wstring m_currentdisplayText;
 	bool m_gameClear;
+	bool m_gameOver;
 public:
 	TextManager();
 	~TextManager();
@@ -53,13 +59,18 @@ public:
 	void SignBoard_2Text(int count);
 	void SignBoard_3Text(int count);
 	void SignBoard_4Text(int count);
-	void LastBossText(int count);
+	void Boss_1Text(int count);
+	void Boss_2Text(int count);
+	void Boss_3Text(int count);
+	void LastBossAliveText(int count);
+	void LastBossDefeatedText(int count);
 	void EndText(int count);
 
 	void DrawCooperatText();
 	void CooperatText(CooperatList skill);
 
 	bool GameClear();
+	bool GameOver();
 
 	void TypeWriter(InputManager&inputManager);
 	void SkipText();
