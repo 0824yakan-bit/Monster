@@ -106,7 +106,9 @@ void Battle::Initialize(SceneManager* sceneManager)
 	// 敵ターゲット
 	m_targetEnemyIndex = -1;
 	m_selectedTargetEnemyIndex = -1;
-
+	// 敵攻撃エフェクト
+	m_playEnemyAttackEffect = false;
+	m_enemyAttackEffectTimer = 0;
 	// キャラクター・技の選択位置
 	m_displayIndex = 0;
 	m_monsterSelect = 0;
@@ -213,6 +215,13 @@ void Battle::Finalize()
 // Update
 void Battle::Update(InputManager& inputManager, SceneManager* sceneManager, GameOver& gameOver, Map& map, PlayerManager& player)
 {
+	for (Enemy* enemy : m_enemies)
+	{
+		if (enemy != nullptr)
+		{
+			enemy->UpdateShake();
+		}
+	}
 	// 全滅判定
 	m_annihilation = true;
 	for (int i = 0; i < m_party->GetMonsterCount(); i++)
@@ -475,6 +484,27 @@ void Battle::Render(GameOver& gameOver, Map& map)
 		}
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
+	// 敵攻撃エフェクト描画////
+	if (m_playEnemyAttackEffect)
+	{
+		float rate =1.0f -static_cast<float>(m_enemyAttackEffectTimer) /ENEMY_ATTACK_EFFECT_DURATION;
+		int alpha = static_cast<int>(180 * rate);
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+
+		// 敵攻撃用画像
+		if (m_enemyAttackType == 0)
+		{
+			Vector2 position = monsterEffectPosition[m_enemyTargetIndex];
+			DrawEnemyAttackEffect(position, monsterEffectSize);
+		}
+		else
+		{
+			DrawEnemyAttackEffect(drawEffectPosition, drawEffectSize);
+		}
+		
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+	}
+
 	switch (m_state)
 	{
 	case BattleState::Command:
@@ -685,16 +715,26 @@ void Battle::UpdateLastBoss(InputManager&inputManager)
 	switch (m_bossBattlePhase)
 	{
 	case BossBattlePhase::Phase1:
-		m_displayMessage = L"1";
+		m_displayMessage =
+			L"……ここまで来たか\n"
+			L"お前は、この森を救うためにここへ来たのだろう？\n"
+			L"それでも我と戦うというのか？";
 		break;
+
 	case BossBattlePhase::Phase2:
-		m_displayMessage = L"2";
+		m_displayMessage =
+			L"我を倒せば本当に、森が戻ると思っているのか？\n"
+			L"お前はまだ、この森の真実を何も知らない\n"
+			L"それでも我を倒すというのか？";
 		break;
+
 	case BossBattlePhase::Phase3:
-		m_displayMessage = L"3";
+		m_displayMessage =
+			L"……それでも、我を倒すというのか\n"
+			L"この先に待つものを知らず、剣を振るうというのか\n"
+			L"それでもなお、我と戦うのか？";
 		break;
 	}
-	printfDx(L"current:%d", m_bossSelect);
 	// 左
 	if (inputManager.IsTrigger(KEY_INPUT_LEFT) || inputManager.IsPadTrigger(PAD_INPUT_LEFT))
 	{
@@ -742,8 +782,11 @@ void Battle::RenderLastBoss()
 	Vector2 drawLastBossTextPosition = {120,440};
 	Vector2 drawLastBossTextSize = {1040,270};
 	m_image->DrawCommandbox1(drawLastBossTextPosition, drawLastBossTextSize);
-	DrawString(150, 470,m_displayMessage.c_str(), GetColor(255, 255, 255), TRUE);
-	DrawString(150, 600, L"yes　　　　no", GetColor(255, 255, 255), TRUE);
+	DrawString(200, 470,m_displayMessage.c_str(), GetColor(255, 255, 255), TRUE);
+	DrawString(330, 600, L"はい　　　　　　　いいえ", GetColor(255, 255, 255), TRUE);
+	Vector2 commandPosition = { 270 + 300 * m_bossSelect,600 };
+	Vector2 commandSize = { 40,40 };
+	m_image->DrawCommandCursor(commandPosition, commandSize);
 }
 
 void Battle::CheckLastBossPhase()
@@ -781,7 +824,7 @@ void Battle::CheckLastBossPhase()
 }
 bool Battle::IsChackBossSelect()const
 {
-	if ((m_isSelect.Phase1 == false) && (m_isSelect.Phase2 == false) && (m_isSelect.Phase2 == false))
+	if ((m_isSelect.Phase1 == false) && (m_isSelect.Phase2 == false) && (m_isSelect.Phase3 == false))
 	{
 		return true;
 	}
@@ -1110,15 +1153,19 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 		// 敵全滅判定
 		if (AreAllEnemiesDead())
 		{
-			m_deadEnemy = enemy;
-			m_deadEnemyName = enemy->GetName();
+			m_deadEnemy = GetDeadEnemy();
 
-			m_enemyDeadMotion = true;
-			m_enemyDeadOffsetY = 0;
+			if (m_deadEnemy != nullptr)
+			{
+				m_deadEnemyName = m_deadEnemy->GetName();
 
-			m_displaytextTimer = 0;
+				m_enemyDeadMotion = true;
+				m_enemyDeadOffsetY = 0;
 
-			m_state =BattleState::EnemyDead;
+				m_displaytextTimer = 0;
+
+				m_state = BattleState::EnemyDead;
+			}
 
 			return;
 		}
@@ -1290,6 +1337,13 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 					continue;
 				}
 				target->Heal(attacks[index].power);
+				// Battle側のHP表示も更新
+				m_monsterhp[i] = target->GetCurrentHitPoint();
+
+				if (m_monsterhp[i] > target->GetMaxHitPoint())
+				{
+					m_monsterhp[i] = target->GetMaxHitPoint();
+				}
 			}
 			break;
 
@@ -1357,6 +1411,7 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 				int damage = static_cast<int>(attacks[index].power * magnification);
 				// 攻撃
 				target->Damage(damage);
+				target->StartShake(10, 8);
 				int actualDamage = beforeHp - target->GetHp();
 				AddDisplayMessage(DisplayMessageType::Damage, std::wstring(target->GetName()) + L"に" + std::to_wstring(actualDamage) + L"ダメージ！");
 			}
@@ -1402,7 +1457,6 @@ void Battle::RenderAttackAction()
 	}
 	RenderCurrentCommand();
 }
-
 // Tool
 void Battle::UpdateTool(InputManager&inputManager)
 {
@@ -1542,14 +1596,15 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 	}
 
 	m_displaytextTimer++;
-	// 1回だけ攻撃方法を決める
+	// 敵攻撃方法決定
 	if (m_displaytextTimer == 1)
 	{
-		// 0 = 単体攻撃
-		// 1 = 全体攻撃
 		m_enemyAttackType = GetRand(1);
+		Enemy* enemy = GetTargetEnemy();
 
-		// 単体攻撃の場合、攻撃対象を決める
+		m_enemyAttackElement =enemy->GetAttackElement(m_enemyAttackType);
+
+		// 単体攻撃なら対象を決める
 		if (m_enemyAttackType == 0)
 		{
 			std::vector<int> aliveMembers;
@@ -1563,7 +1618,7 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 
 			if (!aliveMembers.empty())
 			{
-				int randomIndex = GetRand(static_cast<int>(aliveMembers.size()) - 1);
+				int randomIndex =GetRand(static_cast<int>(aliveMembers.size()) - 1);
 				m_enemyTargetIndex = aliveMembers[randomIndex];
 			}
 			else
@@ -1573,30 +1628,40 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 			}
 		}
 	}
-
+	// 攻撃エフェクト開始
+	if (m_displaytextTimer == 100)
+	{
+		m_playEnemyAttackEffect = true;
+		m_enemyAttackEffectTimer = 0;
+	}
+	// エフェクト更新
+	if (m_playEnemyAttackEffect)
+	{
+		m_enemyAttackEffectTimer++;
+		if (m_enemyAttackEffectTimer >= ENEMY_ATTACK_EFFECT_DURATION)
+		{
+			m_playEnemyAttackEffect = false;
+		}
+	}
 	// 敵攻撃メッセージ
 	if (m_displaytextTimer <= 60)
 	{
 		m_displayMessage =std::wstring(enemy->GetName()) + L"の攻撃!!";
 	}
-
 	// 単体攻撃
 	else if (m_enemyAttackType == 0 &&m_displaytextTimer <= 120)
 	{
 		Monster* target =m_party->GetMonster(m_enemyTargetIndex);
-
 		if (target == nullptr)
 		{
 			EndTurn();
 			return;
 		}
 
-		m_displayMessage =target->GetName() + L"に"+enemy->GetSingleAttackName();
-		// 120フレーム目にダメージ
+		m_displayMessage =target->GetName() +L"に" +enemy->GetSingleAttackName();
 		if (m_displaytextTimer == 120)
 		{
 			int damage = enemy->GetPower();
-			// 防御中なら半減
 			if (m_requestDefense[m_enemyTargetIndex])
 			{
 				damage /= 2;
@@ -1611,53 +1676,51 @@ void Battle::UpdateEnemyTurn(SceneManager* sceneManager)
 			{
 				m_monsterhp[m_enemyTargetIndex] = 0;
 			}
-			m_displayMessageEnemyAttackDamage[m_enemyTargetIndex] =target->GetName()+ L"に"+ std::to_wstring(actualDamage)+ L"ダメージ";
+
+			m_displayMessageEnemyAttackDamage[m_enemyTargetIndex] =target->GetName() +L"に" +std::to_wstring(actualDamage) +L"ダメージ";
 		}
 	}
-
 	// 全体攻撃
 	else if (m_enemyAttackType == 1 &&m_displaytextTimer <= 120)
 	{
-		m_displayMessage = std::wstring(enemy->GetName()) + L"の"+enemy->GetAllAttackName();
-
-		// 120フレーム目にダメージ
+		m_displayMessage =std::wstring(enemy->GetName()) +L"の" +enemy->GetAllAttackName();
 		if (m_displaytextTimer == 120)
 		{
 			for (int i = 0;i < m_party->GetMonsterCount();i++)
 			{
 				Monster* monster =m_party->GetMonster(i);
-
 				if (monster == nullptr)
 				{
 					continue;
 				}
 
-				// 死亡している仲間には攻撃しない
 				if (m_monsterhp[i] <= 0)
 				{
 					continue;
 				}
 
 				int damage = enemy->GetPower();
-				// 防御中なら半減
 				if (m_requestDefense[i])
 				{
 					damage /= 2;
 				}
 
 				int beforeHp =monster->GetCurrentHitPoint();
-				monster->Damage(damage*0.5);
+				damage /= 2;
+				monster->Damage(damage);
 				int actualDamage =beforeHp - monster->GetCurrentHitPoint();
 				m_monsterhp[i] =monster->GetCurrentHitPoint();
+
 				if (m_monsterhp[i] < 0)
 				{
 					m_monsterhp[i] = 0;
 				}
-				m_displayMessageEnemyAttackDamage[i] =monster->GetName()+ L"に"+ std::to_wstring(actualDamage)+ L"ダメージ";
+
+				m_displayMessageEnemyAttackDamage[i] =monster->GetName() +L"に" +std::to_wstring(actualDamage) +L"ダメージ";
 			}
 		}
 	}
-	// ダメージ表示
+	// 敵ターン終了
 	if (m_displaytextTimer >= 180)
 	{
 		EndTurn();
@@ -1705,7 +1768,22 @@ void Battle::UpdateEnemyDead()
 		if (AreAllEnemiesDead())
 		{
 			m_isEnemyRequested = true;
-			m_bossManager.DefeatBoss(m_deadEnemy->GetBossNo());
+
+			// 倒された敵の中にボスがいるか確認
+			for (Enemy* enemy : m_enemies)
+			{
+				if (enemy == nullptr)
+				{
+					continue;
+				}
+
+				if (enemy->GetHp() <= 0 &&
+					m_bossManager.IsBoss(enemy->GetBossNo()))
+				{
+					m_bossManager.DefeatBoss(enemy->GetBossNo());
+				}
+			}
+
 			return;
 		}
 		m_deadEnemy = nullptr;
@@ -1808,7 +1886,43 @@ void Battle::ResetRunSuccess()
 	m_isRunSuccess = false;
 }
 
+void Battle::DrawEnemyAttackEffect(Vector2 position,Vector2 size)
+{
+	switch (m_enemyAttackElement)
+	{
+	case Monster::CharacteRistics::Normal:
+		m_image->DrawNormal(position, size);
+		break;
 
+	case Monster::CharacteRistics::Fire:
+		m_image->DrawFire(position, size);
+		break;
+
+	case Monster::CharacteRistics::Water:
+		m_image->DrawWater(position, size);
+		break;
+
+	case Monster::CharacteRistics::Grass:
+		m_image->DrawGrass(position, size);
+		break;
+
+	case Monster::CharacteRistics::Soil:
+		m_image->DrawSoil(position, size);
+		break;
+
+	case Monster::CharacteRistics::Wind:
+		m_image->DrawWind(position, size);
+		break;
+
+	case Monster::CharacteRistics::Darkness:
+		m_image->DrawDarkness(position, size);
+		break;
+
+	default:
+		m_image->DrawNormal(position, size);
+		break;
+	}
+}
 // Target
 void Battle::SetTargetEnemyIndex(int index)
 {
@@ -2163,6 +2277,7 @@ void Battle::DamageAllEnemies(int damage)
 
 		int beforeHp = enemy->GetHp();
 		enemy->Damage(damage);
+		enemy->StartShake(10, 8);
 		int actualDamage = beforeHp - enemy->GetHp();
 		m_comboDamageTotal[enemy] += actualDamage;
 	}
@@ -2219,7 +2334,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 	if (waterFlowCombo)
 	{
 		map.WaterFlowsBreak(player);
-		DamageAllEnemies(25+ 15 * map.GetBreakLevel());
+		DamageAllEnemies(10+ 15 * map.GetBreakLevel());
 		if (!m_displayMessageCombo.empty())
 		{
 			m_displayMessageCombo += L"\n";
@@ -2248,7 +2363,7 @@ void Battle::UesElementalAttack(Map& map, PlayerManager& player)
 		{
 			m_displayMessageCombo += L"\n";
 		}
-		AddDisplayMessage(DisplayMessageType::Combo, L"草木が生い茂る！");
+		AddDisplayMessage(DisplayMessageType::Combo, L"草木が生い茂る！\n全体が回復");
 		UsedAttackInfo info;
 		info.element = Monster::CharacteRistics::GrawGrass;
 		info.attackName = L"草！";
@@ -2341,4 +2456,16 @@ bool Battle::IsComboMember(Monster::CharacteRistics type, bool steamcombo, bool 
 		return true;
 	}
 	return false;
+}
+Enemy* Battle::GetDeadEnemy()
+{
+	for (Enemy* enemy : m_enemies)
+	{
+		if (enemy != nullptr && enemy->GetHp() <= 0)
+		{
+			return enemy;
+		}
+	}
+
+	return nullptr;
 }

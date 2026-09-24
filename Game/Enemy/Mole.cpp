@@ -73,6 +73,6 @@ void Mole::OnHit(PlayerManager& playermanager)
 
 void Mole::RenderBattle()
 {
-	//DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
-	m_image->DrawMole(renderPosition, renderSize);
+	Vector2 drawPosition = Shake(renderPosition);
+	m_image->DrawMole(drawPosition, renderSize);
 }

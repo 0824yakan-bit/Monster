@@ -12,6 +12,7 @@ Enemy::Enemy()
     ,moveCounter{}
     ,level      {}
     ,direction  {}
+    , m_attackElement{ Monster::CharacteRistics::Normal,Monster::CharacteRistics::Normal }
 {
 
 }
@@ -154,6 +155,20 @@ void Enemy::SetAttackNames(const std::wstring& singleAttackName, const std::wstr
     m_allAttackName = allAttackName;
 }
 
+void Enemy::SetAttackElements(Monster::CharacteRistics attack1, Monster::CharacteRistics attack2)
+{
+    m_attackElement[0] = attack1;
+    m_attackElement[1] = attack2;
+}
+Monster::CharacteRistics Enemy::GetAttackElement(int index) const
+{
+    if (index < 0 || index >= 2)
+    {
+        return Monster::CharacteRistics::Normal;
+    }
+
+    return m_attackElement[index];
+}
 const std::wstring& Enemy::GetSingleAttackName() const
 {
     return m_singleAttackName;
@@ -162,4 +177,52 @@ const std::wstring& Enemy::GetSingleAttackName() const
 const std::wstring& Enemy::GetAllAttackName() const
 {
     return m_allAttackName;
+}
+void Enemy::StartShake(int duration, int power)
+{
+    m_isShake = true;
+    m_shakeTimer = 0;
+    m_shakeDuration = duration;
+    m_shakePower = power;
+    m_shakeOffset = { 0, 0 };
+}
+
+void Enemy::UpdateShake()
+{
+    if (!m_isShake)
+    {
+        m_shakeOffset = { 0, 0 };
+        return;
+    }
+
+    m_shakeTimer++;
+
+    if (m_shakeTimer >= m_shakeDuration)
+    {
+        m_isShake = false;
+        m_shakeOffset = { 0, 0 };
+        return;
+    }
+
+    m_shakeOffset.x =
+        GetRand(m_shakePower * 2) - m_shakePower;
+
+    m_shakeOffset.y =
+        GetRand(m_shakePower * 2) - m_shakePower;
+}
+
+Vector2 Enemy::GetShakeOffset() const
+{
+    return m_shakeOffset;
+}
+
+Vector2 Enemy::Shake(Vector2 position)
+{
+    Vector2 shakeOffset = GetShakeOffset();
+
+    Vector2 drawPosition = {
+        renderPosition.x + shakeOffset.x,
+        renderPosition.y + shakeOffset.y
+    };
+    return drawPosition;
 }

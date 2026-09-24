@@ -72,6 +72,6 @@ void Wolf::OnHit(PlayerManager&playermanager)
 
 void Wolf::RenderBattle()
 {
-	//DrawBox(500, 150, 650, 300,GetColor(255, 255, 0), TRUE);
-	m_image->DrawWolf(renderPosition, renderSize);
+	Vector2 drawPosition = Shake(renderPosition);
+	m_image->DrawWolf(drawPosition, renderSize);
 }

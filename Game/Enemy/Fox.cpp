@@ -73,6 +73,6 @@ void Fox::OnHit(PlayerManager& playermanager)
 
 void Fox::RenderBattle()
 {
-	//DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
-	m_image->DrawFox(renderPosition, renderSize);
+	Vector2 drawPosition = Shake(renderPosition);
+	m_image->DrawFox(drawPosition, renderSize);
 }

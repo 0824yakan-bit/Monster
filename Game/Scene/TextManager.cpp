@@ -50,8 +50,8 @@ void TextManager::Initialize()
 	m_TextCount[Start]			= 7;
 	m_TextCount[Signboard_1]	= 2;
 	m_TextCount[Signboard_2]	= 2;
-	m_TextCount[Signboard_3]	= 5;
-	m_TextCount[Signboard_4]	= 5;
+	m_TextCount[Signboard_3]	= 1;
+	m_TextCount[Signboard_4]	= 4;
 	m_TextCount[Boss_1] = 2;
 	m_TextCount[Boss_2] = 3;
 	m_TextCount[Boss_3] = 3;

@@ -248,7 +248,7 @@ public:
     bool TryLearnSkill(CooperatList skill);
     // 技を所持しているか確認
     bool HasSkill(CooperatList skill) const;
-
+    void RefreshPartySkills();
     // ボス関連
     void Boss1Defeat();
     void Boss2Defeat();

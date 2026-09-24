@@ -13,5 +13,6 @@ public:
 
     bool IsAllBossDefeated() const;//すべてのボスが撃破(TRUE)されたか
 
+    bool IsBoss(int bossNo)const;
     bool IsLastBoss(int bossNo) const;
 };

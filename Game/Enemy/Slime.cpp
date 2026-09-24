@@ -68,5 +68,6 @@ void Slime::OnHit(PlayerManager&playermanager)
 
 void Slime::RenderBattle()
 {
-	m_image->DrawSlime(renderPosition, renderSize);
+	Vector2 drawPosition = Shake(renderPosition);
+	m_image->DrawSlime(drawPosition, renderSize);
 }

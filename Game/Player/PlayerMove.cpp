@@ -1,6 +1,7 @@
 ﻿#include"pch.h"
 #include"Game/Player/PlayerMove.h"
 
+#include"Game/Screen.h"
 #include"Game/Scene/FieldScene.h"
 #include"Game/Player/PlayerManager.h"
 #include"Game/Enemy/BossManager.h"
@@ -21,6 +22,7 @@ PlayerMove::PlayerMove()
 	,m_hitTreasure	{}
 	,m_hitNextFloor	{}
 	,m_hitFall		{}
+	,m_alpha		{0}
 {
 
 }
@@ -47,6 +49,7 @@ void PlayerMove::Initialize(Map* map, PlayerManager& playermanager)
 	m_fallScale = 1.0f;
 	m_fallTimer = 0;
 	m_fallPosition = { 0,0 };
+	m_alpha = 0;
 }
 
 void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanager,BossManager*bossManager, Accessory* accessory,Party*party)
@@ -212,9 +215,22 @@ void PlayerMove::Update(FieldScene* field, Map* map, PlayerManager* playermanage
 
 void PlayerMove::Render(FieldScene*field,Map*map,PlayerManager*playermanager,Accessory*accessory)
 {
+	if (m_alpha > 0)
+	{
+		m_alpha--;
+	}
 	if(m_hitTreasure)
 	{
 		field->RenderTreasureOpen(*accessory);
+	}
+	// 落下中だけ赤い画面演出
+	if (m_isFalling)
+	{
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, m_alpha);
+
+		DrawBox(0,0,Screen::WIDTH,Screen::HEIGHT,GetColor(255, 0, 0),TRUE);
+
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
 	}
 }
 
@@ -232,6 +248,7 @@ void PlayerMove::ReductionPlayer(PlayerManager& playermanager, Map* map)
 		m_fallTimer = 0;
 		m_fallScale = 1.0f;
 		m_fallPosition = playermanager.m_position;
+		m_alpha = 150;
 	}
 
 	m_fallTimer++;
@@ -326,3 +343,5 @@ Vector2 PlayerMove::FindSafePosition(Map* map, PlayerManager& playermanager)
 	//安全な場所が見つからなかった場合
 	return m_fallPosition;
 }
+
+

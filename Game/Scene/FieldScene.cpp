@@ -169,6 +169,44 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		gameOver.GameOverUpdate(inputManager);
 		return;
 	}
+	// 階段解放状態管理
+	if (m_isStairOpened)
+	{
+		if (inputManager.IsTrigger(KEY_INPUT_RETURN) || inputManager.IsPadTrigger(PAD_INPUT_1))
+		{
+			m_stairOpenTimer = 0;
+			m_isStairOpened = false;
+		}
+		else
+		{
+			m_stairOpenTimer--;
+
+			if (m_stairOpenTimer <= 0)
+			{
+				m_stairOpenTimer = 0;
+				m_isStairOpened = false;
+			}
+		}
+	}
+	if (m_isMonsterReplaceSelect)
+	{
+		UpdateMonsterReplaceSelect(inputManager);
+		return;
+	}
+	map.Update(inputManager, playerManager);
+
+	m_breakLevel = map.GetBreakLevel();
+	// スキル習得表示
+	if (m_isSkillLearned)
+	{
+		m_skillLearnTimer--;
+
+		if (m_skillLearnTimer <= 0)
+		{
+			m_skillLearnTimer = 0;
+			m_isSkillLearned = false;
+		}
+	}
 	if (textManager.GameClear())
 	{
 		gameOver.GameClearUpdate(inputManager);
@@ -218,44 +256,7 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 		textManager.Update(inputManager,*this);
 		return;
 	}
-	// 階段解放状態管理
-	if (m_isStairOpened)
-	{
-		if (inputManager.IsTrigger(KEY_INPUT_RETURN) ||inputManager.IsPadTrigger(PAD_INPUT_1))
-		{
-			m_stairOpenTimer = 0;
-			m_isStairOpened = false;
-		}
-		else
-		{
-			m_stairOpenTimer--;
 
-			if (m_stairOpenTimer <= 0)
-			{
-				m_stairOpenTimer = 0;
-				m_isStairOpened = false;
-			}
-		}
-	}
-	if (m_isMonsterReplaceSelect)
-	{
-		UpdateMonsterReplaceSelect(inputManager);
-		return;
-	}
-	map.Update(inputManager, playerManager);
-
-	m_breakLevel = map.GetBreakLevel();
-	// スキル習得表示
-	if (m_isSkillLearned)
-	{
-		m_skillLearnTimer--;
-
-		if (m_skillLearnTimer <= 0)
-		{
-			m_skillLearnTimer = 0;
-			m_isSkillLearned = false;
-		}
-	}
 
 	//マップ表示・メニュー表示状態管理
 	//if ((inputManager.IsTrigger(KEY_INPUT_X)||inputManager.IsPadTrigger(PAD_INPUT_3)) && !m_isMapActive && !m_isMenuActive)
@@ -635,6 +636,113 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 	{
 		m_image->DrawSlime(drawSlimePosition, drawSlimeSize);
 	}
+	// LastBoss撃破後：階段解放演出
+	if (m_isStairOpened)
+	{
+		// フェードイン
+		int elapsed = 120 - m_stairOpenTimer;
+		int alpha = elapsed * 6;
+
+		if (alpha > 150)
+			alpha = 150;
+		if (alpha < 0)
+			alpha = 0;
+
+		// 背景暗転
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+		DrawBox(0, 0, 1920, 1080, GetColor(0, 0, 0), TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+		// パネル
+		// 外側の影
+		DrawBox(480, 210, 1440, 430, GetColor(0, 0, 0), TRUE);
+
+		// メインパネル
+		DrawBox(500, 190, 1420, 410, GetColor(18, 22, 32), TRUE);
+
+		// 外枠
+		DrawBox(500, 190, 1420, 410, GetColor(100, 180, 255), FALSE);
+
+		// 内側の枠
+		DrawBox(515, 205, 1405, 395, GetColor(50, 70, 100), FALSE);
+
+		// タイトル
+		SetFontSize(42);
+		const wchar_t* title = L"◆ 新たな道が開かれた ◆";
+		int titleWidth = GetDrawStringWidth(title, -1);
+		DrawString(960 - titleWidth / 2, 235, title, GetColor(120, 210, 255), TRUE);
+
+		// 区切り線
+		DrawLine(600, 310, 1320, 310, GetColor(100, 130, 160));
+
+		// メインメッセージ
+		SetFontSize(34);
+		const wchar_t* message = L"どこかの階段が開いたようだ";
+		int messageWidth = GetDrawStringWidth(message, -1);
+		DrawString(960 - messageWidth / 2, 335, message, GetColor(255, 255, 255), TRUE);
+
+		// 決定ボタン表示
+		SetFontSize(22);
+		const wchar_t* button = L"   A   / ENTER で閉じる";
+		int buttonWidth = GetDrawStringWidth(button, -1);
+
+		DrawString(960 - buttonWidth / 2, 450, button, GetColor(120, 210, 255), TRUE);
+		SetFontSize(30);
+	}
+	// スキル習得演出
+	if (m_isSkillLearned)
+	{
+		int elapsed = 120 - m_skillLearnTimer;
+
+		int alpha = 0;
+
+		// フェードイン：30フレーム
+		if (elapsed < 30)
+		{
+			alpha = elapsed * 180 / 30;
+		}
+		// 表示維持：30～90フレーム
+		else if (elapsed < 90)
+		{
+			alpha = 180;
+		}
+		// フェードアウト：90～120フレーム
+		else
+		{
+			alpha = (120 - elapsed) * 180 / 30;
+		}
+
+		if (alpha < 0)
+			alpha = 0;
+
+		if (alpha > 180)
+			alpha = 180;
+
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+		DrawBox(0, 0, Screen::WIDTH, Screen::HEIGHT, GetColor(0, 0, 0), TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+
+		// パネル
+		DrawBox(500, 300, 1420, 520, GetColor(25, 25, 35), TRUE);
+
+		// 金色の枠
+		DrawBox(500, 300, 1420, 520, GetColor(255, 215, 0), FALSE);
+
+		// タイトル
+		SetFontSize(50);
+
+		DrawString(760, 325, L"★ スキル習得！ ★", GetColor(255, 220, 50), TRUE);
+
+		// スキル名
+		SetFontSize(45);
+
+		const wchar_t* skillName = GetSkillName(m_learnedSkill);
+		int width = GetDrawStringWidth(skillName, -1);
+
+		DrawString(960 - width / 2, 420, skillName, GetColor(255, 255, 255), TRUE);
+
+		SetFontSize(30);
+	}
 	if (STtext.m_lastBossAlive == true)
 	{
 		Vector2 drawLastBossPosition = { 23*map.m_chipSize,10 * map.m_chipSize };
@@ -817,113 +925,7 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 		return;
 	}
 
-// LastBoss撃破後：階段解放演出
-	if (m_isStairOpened)
-	{
-		// フェードイン
-		int elapsed = 120 - m_stairOpenTimer;
-		int alpha = elapsed * 6;
-		
-		if (alpha > 150)
-			alpha = 150;
-		if (alpha < 0)
-			alpha = 0;
 
-		// 背景暗転
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-		DrawBox(0, 0,1920, 1080,GetColor(0, 0, 0),TRUE);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
-
-		// パネル
-		// 外側の影
-		DrawBox(480, 210,1440, 430,GetColor(0, 0, 0),TRUE);
-
-		// メインパネル
-		DrawBox(500, 190,1420, 410,GetColor(18, 22, 32),TRUE);
-
-		// 外枠
-		DrawBox(500, 190,1420, 410,GetColor(100, 180, 255),FALSE);
-
-		// 内側の枠
-		DrawBox(515, 205,1405, 395,GetColor(50, 70, 100),FALSE);
-
-		// タイトル
-		SetFontSize(42);
-		const wchar_t* title =L"◆ 新たな道が開かれた ◆";
-		int titleWidth =GetDrawStringWidth(title, -1);
-		DrawString(960 - titleWidth / 2,235,title,GetColor(120, 210, 255),TRUE);
-
-		// 区切り線
-		DrawLine(600, 310,1320, 310,GetColor(100, 130, 160));
-
-		// メインメッセージ
-		SetFontSize(34);
-		const wchar_t* message =L"どこかの階段が開いたようだ";
-		int messageWidth = GetDrawStringWidth(message, -1);
-		DrawString(960 - messageWidth / 2,335,message,GetColor(255, 255, 255),TRUE);
-
-		// 決定ボタン表示
-		SetFontSize(22);
-		const wchar_t* button =	L"   A   / ENTER で閉じる";
-		int buttonWidth =GetDrawStringWidth(button, -1);
-
-		DrawString(960 - buttonWidth / 2,450,button,GetColor(120, 210, 255),TRUE);
-		SetFontSize(30);
-	}
-	// スキル習得演出
-	if (m_isSkillLearned)
-	{
-		int elapsed = 120 - m_skillLearnTimer;
-
-		int alpha = 0;
-
-		// フェードイン：30フレーム
-		if (elapsed < 30)
-		{
-			alpha = elapsed * 180 / 30;
-		}
-		// 表示維持：30～90フレーム
-		else if (elapsed < 90)
-		{
-			alpha = 180;
-		}
-		// フェードアウト：90～120フレーム
-		else
-		{
-			alpha = (120 - elapsed) * 180 / 30;
-		}
-
-		if (alpha < 0)
-			alpha = 0;
-
-		if (alpha > 180)
-			alpha = 180;
-
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
-		DrawBox(0,0,Screen::WIDTH,Screen::HEIGHT,GetColor(0, 0, 0),TRUE);
-		SetDrawBlendMode(DX_BLENDMODE_NOBLEND,0);
-
-		// パネル
-		DrawBox(500, 300,1420, 520,GetColor(25, 25, 35),TRUE);
-
-		// 金色の枠
-		DrawBox(500, 300,1420, 520,GetColor(255, 215, 0),FALSE);
-
-		// タイトル
-		SetFontSize(50);
-
-		DrawString(760, 325,L"★ スキル習得！ ★",GetColor(255, 220, 50),TRUE);
-
-		// スキル名
-		SetFontSize(45);
-
-		const wchar_t* skillName =GetSkillName(m_learnedSkill);
-		int width =GetDrawStringWidth(skillName, -1);
-
-		DrawString(960 - width / 2,420,skillName,GetColor(255, 255, 255),TRUE);
-
-		SetFontSize(30);
-	}
 }
 
 
@@ -1298,7 +1300,109 @@ bool FieldScene::HasSkill(CooperatList skill) const
 
 	return false;
 }
+void FieldScene::RefreshPartySkills()
+{
+	// 更新前に使えた属性を保存
+	std::vector<CooperatList> oldSkills = m_unlockedSkills;
 
+	// 現在のパーティで使える属性技を再構築
+	std::vector<CooperatList> newSkills;
+
+	// 無属性は常に使用可能
+	newSkills.push_back(CooperatList::None);
+
+	for (int i = 0; i < m_party->GetMonsterCount(); i++)
+	{
+		Monster* monster = m_party->GetMonster(i);
+
+		if (monster == nullptr)
+		{
+			continue;
+		}
+
+		const std::vector<Monster::Attack>& attacks = monster->GetAttacks();
+
+		for (const Monster::Attack& attack : attacks)
+		{
+			CooperatList skill = CooperatList::Empty;
+
+			switch (attack.element)
+			{
+			case Monster::CharacteRistics::None:
+			case Monster::CharacteRistics::Normal:
+				skill = CooperatList::None;
+				break;
+
+			case Monster::CharacteRistics::Fire:
+				skill = CooperatList::Fire;
+				break;
+
+			case Monster::CharacteRistics::Water:
+				skill = CooperatList::Water;
+				break;
+
+			case Monster::CharacteRistics::Grass:
+				skill = CooperatList::Grass;
+				break;
+
+			case Monster::CharacteRistics::Soil:
+				skill = CooperatList::Soil;
+				break;
+
+			case Monster::CharacteRistics::Wind:
+				skill = CooperatList::Wind;
+				break;
+
+			case Monster::CharacteRistics::Darkness:
+				skill = CooperatList::Darkness;
+				break;
+
+			case Monster::CharacteRistics::Defense:
+			default:
+				continue;
+			}
+
+			// 重複防止
+			if (skill != CooperatList::Empty &&
+				std::find(newSkills.begin(), newSkills.end(), skill)
+				== newSkills.end())
+			{
+				newSkills.push_back(skill);
+			}
+		}
+	}
+
+	//「新しく使えるようになった属性」を探す
+	for (const auto& skill : newSkills)
+	{
+		// 以前は持っていなかった技なら習得演出
+		if (std::find(oldSkills.begin(), oldSkills.end(), skill)
+			== oldSkills.end())
+		{
+			m_isSkillLearned = true;
+			m_skillLearnTimer = 120;
+			m_learnedSkill = skill;
+
+			// 今回は1つだけ演出する
+			break;
+		}
+	}
+
+	// 現在のパーティで使える属性に更新
+	m_unlockedSkills = newSkills;
+
+	// 選択位置を補正
+	if (m_unlockedSkills.empty())
+	{
+		m_CooperatDetailSelect = 0;
+	}
+	else if (m_CooperatDetailSelect >=
+		static_cast<int>(m_unlockedSkills.size()))
+	{
+		m_CooperatDetailSelect =
+			static_cast<int>(m_unlockedSkills.size()) - 1;
+	}
+}
 //宝箱
 void FieldScene::UpdateTreasureOpen(InputManager& inputManager, PlayerManager& playerManager, Map& map, Accessory& accessory)
 {
@@ -1413,9 +1517,8 @@ void FieldScene::ReceiveJoinedMonster(std::unique_ptr<Monster>monster)
 	//パーティに空きがある
 	if (m_party->GetMonsterCount() < 4)
 	{
-		LearnMonsterSkills(*monster);
-
 		m_party->AddMonster(std::move(monster));
+		RefreshPartySkills();
 
 		return;
 	}
@@ -1476,12 +1579,14 @@ void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 		{
 			return;
 		}
-		//新しいモンスターの技を解放
-		LearnMonsterSkills(*m_pendingJoinedMonster);
 		//古いモンスターを削除
 		m_party->RemoveMonster(m_replaceSelect);
+
 		//新しいモンスターを追加
 		m_party->AddMonster(std::move(m_pendingJoinedMonster));
+
+		//現在のパーティ構成から使える技を再構築
+		RefreshPartySkills();
 		m_isMonsterReplaceSelect = false;
 		m_replaceSelect = 0;
 	}
@@ -1531,5 +1636,7 @@ void FieldScene::RenderMonsterReplaceSelect()
 	}
 
 	DrawString(180, 580, L"↑↓：選択　Enter：交換　Back：やめる", GetColor(255, 255, 255), TRUE);
+	DrawString(180, 630, L"※入れ替えると技が使えなくなる可能性があるぞ", GetColor(255, 255, 255), TRUE);
+
 	SetFontSize(30);
 }

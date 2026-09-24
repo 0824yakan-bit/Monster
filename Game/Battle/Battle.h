@@ -73,7 +73,15 @@ private:
 		USED_DARKNESS = 1 << 5,
 		USED_WIND = 1 << 6
 	};
+	Vector2 monsterEffectPosition[4]
+	{
+		{   0, 0 },   // 1体目
+		{ 320, 0 },   // 2体目
+		{ 640, 0 },   // 3体目
+		{ 960, 0 }    // 4体目
+	};
 
+	Vector2 monsterEffectSize = { 320, 720 };
 	// ポインタ
 	ImageManager* m_image = nullptr;
 	SEManager* m_sound = nullptr;
@@ -92,7 +100,12 @@ private:
 
 	Enemy* m_deadEnemy = nullptr;
 	std::wstring m_deadEnemyName;
-
+	// 敵攻撃エフェクト
+	bool m_playEnemyAttackEffect;
+	int m_enemyAttackEffectTimer;
+	static constexpr int ENEMY_ATTACK_EFFECT_DURATION = 60;
+	int attackIndex;
+	Monster::CharacteRistics m_enemyAttackElement;
 	//ボス
 	BossBattlePhase m_bossBattlePhase;
 	bool m_isLastBoss;
@@ -286,6 +299,8 @@ public:
 	void EndTurn();											// ターン終了処理
 	void ResetRunSuccess();									//にげる状態リセット
 
+	void DrawEnemyAttackEffect(Vector2 position, Vector2 size);
+
 	// 仲間加入状態
 	bool IsJoinWindow() const;
 	bool IsJoinReplace() const;
@@ -329,4 +344,5 @@ public:
 	// 攻撃履歴
 	const std::vector<UsedAttackInfo>&GetUsedAttackOrder() const;								// 攻撃履歴を取得
 	void ClearUsedAttackOrder();								// 攻撃履歴をクリア
+	Enemy* GetDeadEnemy();
 };
