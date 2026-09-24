@@ -18,6 +18,10 @@ class Party;
 class Enemy;
 class BossManager;
 
+enum class BossBattlePhase
+{
+	None,Phase1,Phase2,Phase3
+};
 class Battle
 {
 public:
@@ -31,6 +35,9 @@ public:
 
 	std::vector<UsedAttackInfo> m_usedAttackOrder;
 	std::map<Enemy*, int> m_comboDamageTotal;
+
+	bool m_bossRun;
+	bool m_isBossBattle;
 
 private:
 	// 定数
@@ -49,6 +56,7 @@ private:
 		Party,
 		Run,
 		EnemyTurn,
+		LastBoss,
 		EnemyDead,
 		Annihilation
 	};
@@ -65,7 +73,15 @@ private:
 		USED_DARKNESS = 1 << 5,
 		USED_WIND = 1 << 6
 	};
+	Vector2 monsterEffectPosition[4]
+	{
+		{   0, 0 },   // 1体目
+		{ 320, 0 },   // 2体目
+		{ 640, 0 },   // 3体目
+		{ 960, 0 }    // 4体目
+	};
 
+	Vector2 monsterEffectSize = { 320, 720 };
 	// ポインタ
 	ImageManager* m_image = nullptr;
 	SEManager* m_sound = nullptr;
@@ -84,6 +100,24 @@ private:
 
 	Enemy* m_deadEnemy = nullptr;
 	std::wstring m_deadEnemyName;
+	// 敵攻撃エフェクト
+	bool m_playEnemyAttackEffect;
+	int m_enemyAttackEffectTimer;
+	static constexpr int ENEMY_ATTACK_EFFECT_DURATION = 60;
+	int attackIndex;
+	Monster::CharacteRistics m_enemyAttackElement;
+	//ボス
+	BossBattlePhase m_bossBattlePhase;
+	bool m_isLastBoss;
+	int m_bossTurnCount;
+	int m_bossSelect;
+	struct IsSelect
+	{
+		bool Phase1;
+		bool Phase2;
+		bool Phase3;
+	};
+	IsSelect m_isSelect;
 
 	// 描画関連
 	Vector2 drawBgPosition;
@@ -248,6 +282,11 @@ public:
 	void RenderEnemyTurn();									// 敵ターンの描画
 	void RenderCurrentHp();
 
+	void UpdateLastBoss(InputManager&inputManager);
+	void RenderLastBoss();
+	void CheckLastBossPhase();
+	bool IsChackBossSelect()const;
+
 	// 敵死亡
 	void UpdateEnemyDead();									// 敵死亡演出の更新
 	void RenderEnemyDead();									// 敵死亡演出の描画
@@ -259,6 +298,8 @@ public:
 	// ターン処理
 	void EndTurn();											// ターン終了処理
 	void ResetRunSuccess();									//にげる状態リセット
+
+	void DrawEnemyAttackEffect(Vector2 position, Vector2 size);
 
 	// 仲間加入状態
 	bool IsJoinWindow() const;
@@ -303,4 +344,5 @@ public:
 	// 攻撃履歴
 	const std::vector<UsedAttackInfo>&GetUsedAttackOrder() const;								// 攻撃履歴を取得
 	void ClearUsedAttackOrder();								// 攻撃履歴をクリア
+	Enemy* GetDeadEnemy();
 };

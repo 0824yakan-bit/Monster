@@ -119,20 +119,47 @@ void Transition::FieldtoBattle_4Out(float faderate)
 	int w = Screen::WIDTH;
 	int h = Screen::HEIGHT;
 
-	int offset = static_cast<int>((w + h) * faderate);
+	const int boxSize = 80;
 
-	for (int y = 0; y < h; y++)
+	int columnCount = (w + boxSize - 1) / boxSize;
+	int rowCount = (h + boxSize - 1) / boxSize;
+
+	int totalBoxCount = columnCount * rowCount;
+
+	// faderate = 0.0f → 何もない
+	// faderate = 1.0f → 画面全体が黒
+	int currentBoxCount =
+		static_cast<int>(totalBoxCount * faderate);
+
+	for (int i = 0; i < currentBoxCount; i++)
 	{
-		int x = offset - y;
+		int column = i % columnCount;
+		int row = i / columnCount;
 
-		if (x <= 0)
+		int x = column * boxSize;
+		int y = row * boxSize;
+
+		int right = x + boxSize;
+		int bottom = y + boxSize;
+
+		if (right > w)
 		{
-			DrawBox(0, y,w, y + 1,GetColor(0, 0, 0),TRUE);
+			right = w;
 		}
-		else if (x < w)
+
+		if (bottom > h)
 		{
-			DrawBox(0, y,x, y + 1,GetColor(0, 0, 0),TRUE);
+			bottom = h;
 		}
+
+		DrawBox(
+			x,
+			y,
+			right,
+			bottom,
+			GetColor(0, 0, 0),
+			TRUE
+		);
 	}
 }
 
@@ -224,40 +251,45 @@ void Transition::FieldtoBattle_4In(float faderate)
 	int w = Screen::WIDTH;
 	int h = Screen::HEIGHT;
 
-	int offset = static_cast<int>(
-		(w + h) * (1.0f - faderate)
-		);
+	const int boxSize = 80;
 
-	for (int y = 0; y < h; y++)
+	int columnCount = (w + boxSize - 1) / boxSize;
+	int rowCount = (h + boxSize - 1) / boxSize;
+
+	int totalBoxCount = columnCount * rowCount;
+
+	// 何個のブロックを表示するか
+	int currentBoxCount =
+		static_cast<int>(totalBoxCount * faderate);
+
+	// 上から順番にブロックを配置
+	for (int i = 0; i < currentBoxCount; i++)
 	{
-		int x = offset - y;
+		int x = (i % columnCount) * boxSize;
+		int y = (i / columnCount) * boxSize;
 
-		if (x <= 0)
+		int right = x + boxSize;
+		int bottom = y + boxSize;
+
+		// 画面外にはみ出さないようにする
+		if (right > w)
 		{
-			continue;
+			right = w;
 		}
-		else if (x < w)
+
+		if (bottom > h)
 		{
-			DrawBox(
-				0,
-				y,
-				x,
-				y + 1,
-				GetColor(0, 0, 0),
-				TRUE
-			);
+			bottom = h;
 		}
-		else
-		{
-			DrawBox(
-				0,
-				y,
-				w,
-				y + 1,
-				GetColor(0, 0, 0),
-				TRUE
-			);
-		}
+
+		DrawBox(
+			x,
+			y,
+			right,
+			bottom,
+			GetColor(0, 0, 0),
+			TRUE
+		);
 	}
 }
 
@@ -266,12 +298,16 @@ void Transition::FieldtoBattle_5In(float faderate)
 	int cx = Screen::WIDTH / 2;
 	int cy = Screen::HEIGHT / 2;
 
+	// faderate = 0 → 画面全体が黒
+	// faderate = 1 → 中央だけ黒
+	float rate = 1.0f - faderate;
+
 	int halfW = static_cast<int>(
-		(Screen::WIDTH / 2) * faderate
+		(Screen::WIDTH / 2) * rate
 		);
 
 	int halfH = static_cast<int>(
-		(Screen::HEIGHT / 2) * faderate
+		(Screen::HEIGHT / 2) * rate
 		);
 
 	int left = cx - halfW;

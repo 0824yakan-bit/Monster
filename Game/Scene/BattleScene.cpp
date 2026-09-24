@@ -566,7 +566,7 @@ void BattleScene::SetBattleEnemyPositions()
 		else if (enemy->type == Enemy::EnemyType::Phoenix)
 		{
 			enemy->renderPosition.x = positions[positionIndex] - 300;
-			enemy->renderPosition.y = y - 400;
+			enemy->renderPosition.y = y - 250;
 
 			enemy->renderSize.x = 1000;
 			enemy->renderSize.y = 1000;
@@ -574,7 +574,7 @@ void BattleScene::SetBattleEnemyPositions()
 		else if (enemy->type == Enemy::EnemyType::Dragon)
 		{
 			enemy->renderPosition.x = positions[positionIndex] - 300;
-			enemy->renderPosition.y = y - 400;
+			enemy->renderPosition.y = y - 300;
 
 			enemy->renderSize.x = 1000;
 			enemy->renderSize.y = 1000;
@@ -609,7 +609,10 @@ Enemy* BattleScene::GetTargetEnemy() const
 
 	return m_battle->GetTargetEnemy();
 }
-
+Battle& BattleScene::GetBattle()
+{
+	return *m_battle;
+}
 // Setter
 void BattleScene::SetImage(ImageManager* image)
 {

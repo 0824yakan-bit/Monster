@@ -89,6 +89,8 @@ private:
 
 	//段々崩れる
 	int m_speedrand;
+	int m_leftDirection;
+	int m_rightDirection;
 	int m_leftChangeX[MAP_NUM];
 	int m_leftChangeY[MAP_NUM];
 

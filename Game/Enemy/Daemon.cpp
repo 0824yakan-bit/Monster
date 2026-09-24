@@ -36,7 +36,7 @@ void Daemon::Initialize(Map& map,Party&party, int x, int y,bool isBoss)
 	renderSize.x = 500;
 	renderSize.y = 500;
 
-	SetEnemyStats(map,party, 10, 30);
+	SetEnemyStats(map,party, 10, 60);
 }
 
 void Daemon::Update(Map& map)
@@ -64,5 +64,6 @@ void Daemon::OnHit(PlayerManager& playermanager)
 
 void Daemon::RenderBattle()
 {
-	m_image->DrawDaemon(renderPosition, renderSize);
+	Vector2 drawPosition = Shake(renderPosition);
+	m_image->DrawDaemon(drawPosition, renderSize);
 }

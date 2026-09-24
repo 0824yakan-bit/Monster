@@ -45,3 +45,12 @@ bool BossManager::IsAllBossDefeated() const
     }
     return true;
 }
+bool BossManager::IsBoss(int bossNo) const
+{
+    return bossNo >= 0 && bossNo < 4;
+}
+
+bool BossManager::IsLastBoss(int bossNo) const
+{
+    return bossNo == 3;
+}

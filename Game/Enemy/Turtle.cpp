@@ -66,6 +66,6 @@ void Turtle::OnHit(PlayerManager& playermanager)
 
 void Turtle::RenderBattle()
 {
-	//DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
-	m_image->DrawTurtle(renderPosition, renderSize);
+	Vector2 drawPosition = Shake(renderPosition);
+	m_image->DrawTurtle(drawPosition, renderSize);
 }

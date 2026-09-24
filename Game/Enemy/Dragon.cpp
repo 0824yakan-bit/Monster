@@ -36,7 +36,7 @@ void Dragon::Initialize(Map& map, Party& party, int x, int y,bool isBoss)
 	renderSize.x = 200;
 	renderSize.y = 200;
 
-	SetEnemyStats(map, party, 8, 20);
+	SetEnemyStats(map, party, 8, 50);
 
 }
 
@@ -65,5 +65,6 @@ void Dragon::OnHit(PlayerManager& playermanager)
 
 void Dragon::RenderBattle()
 {
-	m_image->DrawDragon(renderPosition, renderSize);
+	Vector2 drawPosition = Shake(renderPosition);
+	m_image->DrawDragon(drawPosition, renderSize);
 }

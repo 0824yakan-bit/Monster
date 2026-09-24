@@ -21,7 +21,7 @@ SceneManager::~SceneManager()
 
 void SceneManager::Initialize(TextManager& textManager, SEManager&sound,InputManager& inputmanager, SceneManager& sceneManager,PlayerManager&playerManager, Map&map,Party&party,ImageManager&image)
 {
-
+    m_hasOnesActive = false;
     m_currentSceneID = SceneID::Title;
     m_nextSceneID = SceneID::None;
 
@@ -33,6 +33,7 @@ void SceneManager::Initialize(TextManager& textManager, SEManager&sound,InputMan
     m_fieldScene.STtext.m_start = true;
     textManager.SetDisplayText();
     m_battleScene.SetImage(&image);
+    m_gameOver.SetImage(&image);
 
     m_sound = &sound;
     m_titleScene.SetSound(&sound);
@@ -48,16 +49,20 @@ void SceneManager::Initialize(TextManager& textManager, SEManager&sound,InputMan
     {
         m_monsterCurrentDamge[i] = 0;
     }
+    if (!m_hasOnesActive)
+    {
+        m_hasOnesActive = true;
+    }
 }
 
-void SceneManager::Update(TextManager& textManager, InputManager& inputmanager,SceneManager&sceneManager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party,Battle&battle, Accessory& accessory)
+void SceneManager::Update(TextManager& textManager, InputManager& inputmanager,SceneManager&sceneManager,PlayerManager& playerManager, EnemyManager& enemyManager,Map&map,Party&party, Accessory& accessory)
 {
     m_transitionManager.Update();
     switch (m_transitionState)
     {
     case TransitionStateSceneManager::None:
         // 現在シーン更新
-        UpdateCurrentScene(textManager, inputmanager, sceneManager, playerManager, enemyManager, map, party, battle, accessory);
+        UpdateCurrentScene(textManager, inputmanager, sceneManager, playerManager, enemyManager, map, party, m_battleScene.GetBattle(), accessory);
 
         // シーン切り替え要求があれば切り替える
         if (m_nextSceneID != SceneID::None)
@@ -126,7 +131,7 @@ void SceneManager::InitializeCurrentScene(TextManager&textManager,InputManager& 
     switch (m_currentSceneID)
     {
     case SceneID::Title :   m_titleScene .Initialize(inputManager);  break;
-    case SceneID::Field :   m_fieldScene .Initialize(textManager,inputManager,playerManager,map);   break;
+    case SceneID::Field :   m_fieldScene .Initialize(*this,textManager,inputManager,playerManager,map);   break;
     case SceneID::Battle:   m_battleScene.Initialize(inputManager,sceneManager,map,party);   break;
     
     default:      assert(!"シーンIDが不正です");break;
@@ -150,7 +155,7 @@ void SceneManager::UpdateCurrentScene(TextManager&textManager,InputManager&input
 
     case SceneID::Field:
    
-        m_fieldScene.Update(textManager,inputmanager,m_gameOver,playerManager,enemyManager,map,battle,accessory,party);
+        m_fieldScene.Update(textManager,inputmanager,m_gameOver,playerManager,enemyManager,map,m_battleScene.GetBattle(), accessory, party);
 
         if (m_fieldScene.IsBattleRequested())
         {
@@ -224,23 +229,18 @@ void SceneManager::SetFadeOutRequest(Map&map)////フェードアウト時
         {
         case 0:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_1Out);
-            printfDx(L"call_1Out");
             break;
         case 1:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_2Out);
-            printfDx(L"call_2Out");
             break;
         case 2:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_3Out);
-            printfDx(L"call_3Out");
             break;
         case 3:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_4Out);
-            printfDx(L"call_4Out");
             break;
         case 4:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_5Out);
-            printfDx(L"call_5Out");
             break;
         }
     }
@@ -266,23 +266,18 @@ void SceneManager::SetFadeInRequest(Map&map)////フェードイン時
         {
         case 0:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_1In);
-            printfDx(L"call_1In");
             break;
         case 1:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_2In);
-            printfDx(L"call_2In");
             break;
         case 2:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_3In);
-            printfDx(L"call_3In");
             break;
         case 3:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_4In);
-            printfDx(L"call_4In");
             break;
         case 4:
             m_transitionManager.SetFadeType(TransitionManager::FadeType::FieldtoBattle_5In);
-            printfDx(L"call_5In");
             break;
         }
     }

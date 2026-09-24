@@ -47,6 +47,7 @@ public:
     Vector2 renderSize;
 
     int hp;
+    int maxHp;
     int power;
     int level;
 
@@ -66,10 +67,18 @@ private:
     int m_enemyId = -1;
     std::wstring m_singleAttackName;
     std::wstring m_allAttackName;
+    Monster::CharacteRistics m_attackElement[2];
+    bool m_isShake = false;
+    int m_shakeTimer = 0;
+    int m_shakeDuration = 0;
+    int m_shakePower = 0;
+
+    Vector2 m_shakeOffset{ 0, 0 };
 public:
     void Damage(int power);//パーティのpower
     int GetPower()const;
     int GetHp() const;
+    int GetMaxHp()const;
     const wchar_t* GetName() const;
     void SetImage(ImageManager* image);
     Vector2 GetPosition();
@@ -89,8 +98,15 @@ public:
     void SetEnemyId(int id);
     int GetEnemyId() const;
     void SetAttackNames(const std::wstring& singleAttackName,const std::wstring& allAttackName);
+    void SetAttackElements(Monster::CharacteRistics attack1,Monster::CharacteRistics attack2);
+    Monster::CharacteRistics GetAttackElement(int index) const;
     const std::wstring& GetSingleAttackName() const;
     const std::wstring& GetAllAttackName() const;
+    void StartShake(int duration, int power);
+    void UpdateShake();
+
+    Vector2 GetShakeOffset() const;
+    Vector2 Shake(Vector2 position);
 public:
     Enemy();
     virtual ~Enemy() = default;

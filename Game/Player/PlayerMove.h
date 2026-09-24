@@ -35,6 +35,7 @@ private:
 	float m_fallScale;
 	int m_fallTimer;
 	Vector2 m_fallPosition;
+	int m_alpha;
 public:
 
 public:

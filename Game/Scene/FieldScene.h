@@ -37,7 +37,11 @@ public:
         bool m_signboard_2;
         bool m_signboard_3;
         bool m_signboard_4;
-        bool m_lastBoss;
+        bool m_boss_1;
+        bool m_boss_2;
+        bool m_boss_3;
+        bool m_lastBossDefeated;
+        bool m_lastBossAlive;
         bool m_end;
     };
     Text STtext;
@@ -83,9 +87,14 @@ private:
     bool m_annihilation = false;
 
     int m_monsterhp[MAX_PARTY] = {};
+    //ボス状態
+    bool m_hasShownBoss1Text;
+    bool m_hasShownBoss2Text;
+    bool m_hasShownBoss3Text;
 
     //ラストボス状態
-    bool m_hasShownLastBossText;
+    bool m_hasShownLastBossAliveText = false;
+    bool m_hasShownLastBossDefeatedText = false;
 
     // 戦闘関連
     bool m_isBattleRequested = false;
@@ -178,6 +187,7 @@ public:
 
     // 初期化・更新・描画
     void Initialize(
+        SceneManager&sceneManager,
         TextManager& textManager,
         InputManager& inputManager,
         PlayerManager& playerManager,
@@ -238,9 +248,12 @@ public:
     bool TryLearnSkill(CooperatList skill);
     // 技を所持しているか確認
     bool HasSkill(CooperatList skill) const;
-
+    void RefreshPartySkills();
     // ボス関連
-    void LastBossDefeat();
+    void Boss1Defeat();
+    void Boss2Defeat();
+    void Boss3Defeat();
+    void LastBossDefeat(Battle&battle);
 
     // 宝箱関連
     void UpdateTreasureOpen(InputManager& inputManager,PlayerManager& playerManager,Map& map,Accessory& accessory);

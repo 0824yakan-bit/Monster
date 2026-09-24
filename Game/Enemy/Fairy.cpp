@@ -64,5 +64,6 @@ void Fairy::OnHit(PlayerManager& playermanager)
 
 void Fairy::RenderBattle()
 {
-	m_image->DrawFairy(renderPosition, renderSize);
+	Vector2 drawPosition = Shake(renderPosition);
+	m_image->DrawFairy(drawPosition, renderSize);
 }

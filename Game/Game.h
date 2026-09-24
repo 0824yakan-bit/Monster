@@ -53,7 +53,6 @@ private:
 	EnemyManager m_enemyManager;
 	InputManager m_inputManager;
 	SceneManager m_sceneManager;
-	Battle m_battle;
 	Party m_party;
 	Accessory m_accessory;
 	BossManager m_bossManager;

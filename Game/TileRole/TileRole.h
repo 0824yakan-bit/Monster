@@ -21,7 +21,9 @@ enum class TileGroup
 	Grass,
 	Soil,
 	Wind,
-	Darkness
+	Darkness,
+	GrowGrass,
+	Volcazation,
 };
 struct BreakTile
 {

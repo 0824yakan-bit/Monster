@@ -72,6 +72,6 @@ void Golem::OnHit(PlayerManager& playermanager)
 
 void Golem::RenderBattle()
 {
-	//DrawBox(500, 150, 650, 300, GetColor(0, 0, 0), TRUE);
-	m_image->DrawGolem(renderPosition, renderSize);
+	Vector2 drawPosition = Shake(renderPosition);
+	m_image->DrawGolem(drawPosition, renderSize);
 }
