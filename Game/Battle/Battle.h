@@ -201,7 +201,7 @@ private:
 		Damage,
 		Combo
 	};
-
+	
 	struct BattleDisplayMessage
 	{
 		DisplayMessageType type;

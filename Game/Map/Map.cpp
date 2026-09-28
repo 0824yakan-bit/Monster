@@ -99,30 +99,30 @@ void Map::Initialize(const wchar_t* fileName)
 }
 void Map::Update(InputManager& inputManger, PlayerManager& playerManager)
 {
-	// デバッグ用キー
-	if (CheckHitKey(KEY_INPUT_Q)) m_level = 0;
-	if (CheckHitKey(KEY_INPUT_W)) m_level = 1;
-	if (CheckHitKey(KEY_INPUT_E)) m_level = 2;
-	if (CheckHitKey(KEY_INPUT_R)) m_level = 3;
-	if (CheckHitKey(KEY_INPUT_T)) m_level = 4;
+	//// デバッグ用キー
+	//if (CheckHitKey(KEY_INPUT_Q)) m_level = 0;
+	//if (CheckHitKey(KEY_INPUT_W)) m_level = 1;
+	//if (CheckHitKey(KEY_INPUT_E)) m_level = 2;
+	//if (CheckHitKey(KEY_INPUT_R)) m_level = 3;
+	//if (CheckHitKey(KEY_INPUT_T)) m_level = 4;
 
-	if (CheckHitKey(KEY_INPUT_Y)) m_bossManager.DefeatBoss(0);
-	if (CheckHitKey(KEY_INPUT_U)) m_bossManager.DefeatBoss(1);
-	if (CheckHitKey(KEY_INPUT_I)) m_bossManager.DefeatBoss(2);
-	if (CheckHitKey(KEY_INPUT_O)) m_bossManager.DefeatBoss(3);
+	//if (CheckHitKey(KEY_INPUT_Y)) m_bossManager.DefeatBoss(0);
+	//if (CheckHitKey(KEY_INPUT_U)) m_bossManager.DefeatBoss(1);
+	//if (CheckHitKey(KEY_INPUT_I)) m_bossManager.DefeatBoss(2);
+	//if (CheckHitKey(KEY_INPUT_O)) m_bossManager.DefeatBoss(3);
 
-	if (CheckHitKey(KEY_INPUT_1)) m_currentMap = 0;
-	if (CheckHitKey(KEY_INPUT_2)) m_currentMap = 1;
-	if (CheckHitKey(KEY_INPUT_3)) m_currentMap = 2;
-	if (CheckHitKey(KEY_INPUT_4)) m_currentMap = 3;
-	if (CheckHitKey(KEY_INPUT_5)) m_currentMap = 4;
-	if (CheckHitKey(KEY_INPUT_6)) m_currentMap = 5;
-	if (CheckHitKey(KEY_INPUT_7)) m_currentMap = 6;
-	if (CheckHitKey(KEY_INPUT_8)) m_currentMap = 7;
-	if (CheckHitKey(KEY_INPUT_9)) m_currentMap = 8;
-	if (CheckHitKey(KEY_INPUT_0)) m_currentMap = 9;
+	//if (CheckHitKey(KEY_INPUT_1)) m_currentMap = 0;
+	//if (CheckHitKey(KEY_INPUT_2)) m_currentMap = 1;
+	//if (CheckHitKey(KEY_INPUT_3)) m_currentMap = 2;
+	//if (CheckHitKey(KEY_INPUT_4)) m_currentMap = 3;
+	//if (CheckHitKey(KEY_INPUT_5)) m_currentMap = 4;
+	//if (CheckHitKey(KEY_INPUT_6)) m_currentMap = 5;
+	//if (CheckHitKey(KEY_INPUT_7)) m_currentMap = 6;
+	//if (CheckHitKey(KEY_INPUT_8)) m_currentMap = 7;
+	//if (CheckHitKey(KEY_INPUT_9)) m_currentMap = 8;
+	//if (CheckHitKey(KEY_INPUT_0)) m_currentMap = 9;
 
-	// デバッグ用キー終了
+	//// デバッグ用キー終了
 
 
 	m_fogdensity = m_level * 150;
@@ -361,13 +361,7 @@ void Map::Update(InputManager& inputManger, PlayerManager& playerManager)
 		}
 	}
 
-
-	//==================================================
 	// 霧
-	//
-	// m_positionはマス座標なので、そのまま使える
-	//==================================================
-
 	int px =
 		static_cast<int>(playerManager.m_position.x);
 

@@ -89,10 +89,7 @@ void PlayerMove::Update(
 
     m_movetimer--;
 
-    //==================================================
     // 落下判定
-    //==================================================
-
     m_hitFall = map->IsFallRect(
         static_cast<int>(playermanager->m_position.x),
         static_cast<int>(playermanager->m_position.y),
@@ -117,10 +114,7 @@ void PlayerMove::Update(
 
     m_inputManager.Update();
 
-    //==================================================
     // 宝箱
-    //==================================================
-
     m_hitTreasure = map->IsTreasureRect(
         static_cast<int>(playermanager->m_position.x),
         static_cast<int>(playermanager->m_position.y),
@@ -139,11 +133,7 @@ void PlayerMove::Update(
 
         return;
     }
-
-    //==================================================
     // 次の階
-    //==================================================
-
     m_hitNextFloor = map->IsNextFloorRect(
         static_cast<int>(playermanager->m_position.x),
         static_cast<int>(playermanager->m_position.y),
@@ -202,11 +192,7 @@ void PlayerMove::Update(
 
         return;
     }
-
-    //==================================================
     // 看板
-    //==================================================
-
     m_hitSignboard = map->IsSignboardRect(
         static_cast<int>(playermanager->m_position.x),
         static_cast<int>(playermanager->m_position.y),
@@ -241,11 +227,7 @@ void PlayerMove::Update(
             break;
         }
     }
-
-    //==================================================
     // 移動中
-    //==================================================
-
     if (m_isMoving)
     {
         Vector2 direction =
@@ -270,11 +252,7 @@ void PlayerMove::Update(
 
         return;
     }
-
-    //==================================================
     // 通常移動
-    //==================================================
-
     if (!map->m_isTransition)
     {
         Vector2 nextPosition =
@@ -346,18 +324,10 @@ void PlayerMove::Update(
                 // 現在位置を保存
                 playermanager->m_oldposition =
                     playermanager->m_position;
-
-                //==========================================
                 // m_positionは「マス座標」
-                //==========================================
-
                 playermanager->m_position =
                     nextPosition;
-
-                //==========================================
                 // nextPositionを「画面座標」に変換
-                //==========================================
-
                 m_moveTarget.x =
                     nextPosition.x * m_chipsize;
 
@@ -369,11 +339,7 @@ void PlayerMove::Update(
             }
         }
     }
-
-    //==================================================
     // スライム
-    //==================================================
-
     m_hitSlime = map->IsSlimeRect(
         static_cast<int>(playermanager->m_position.x),
         static_cast<int>(playermanager->m_position.y),
@@ -434,11 +400,6 @@ void PlayerMove::ReductionPlayer(
     playermanager.m_drawScale =
         m_fallScale;
 
-    //==================================================
-    // 落下アニメーション
-    // m_positionは変更しない
-    //==================================================
-
     playermanager.m_drawPosition.y += 2.0f;
 
     // 30フレームで落下終了
@@ -449,29 +410,18 @@ void PlayerMove::ReductionPlayer(
         playermanager.m_drawScale = 1.0f;
 
         // 安全な場所を探す
-        Vector2 safePosition =
-            FindSafePosition(map, playermanager);
+        Vector2 safePosition =FindSafePosition(map, playermanager);
 
-        //==============================================
         // 安全な場所は「マス座標」
-        //==============================================
+        playermanager.m_position =safePosition;
 
-        playermanager.m_position =
-            safePosition;
-
-        //==============================================
         // マス座標 → 画面座標
-        //==============================================
+        playermanager.m_drawPosition.x =safePosition.x * m_chipsize;
 
-        playermanager.m_drawPosition.x =
-            safePosition.x * m_chipsize;
-
-        playermanager.m_drawPosition.y =
-            safePosition.y * m_chipsize;
+        playermanager.m_drawPosition.y =safePosition.y * m_chipsize;
 
         // 移動状態をリセット
-        m_moveTarget =
-            playermanager.m_drawPosition;
+        m_moveTarget =playermanager.m_drawPosition;
 
         m_isMoving = false;
     }
@@ -484,9 +434,7 @@ void PlayerMove::Render(FieldScene* field, Map* map, PlayerManager* playermanage
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); } 
 }
 
-Vector2 PlayerMove::FindSafePosition(
-    Map* map,
-    PlayerManager& playermanager)
+Vector2 PlayerMove::FindSafePosition(Map* map,PlayerManager& playermanager)
 {
     // 落下開始地点を基準にする
     // m_fallPositionはマス座標
@@ -506,21 +454,13 @@ Vector2 PlayerMove::FindSafePosition(
                 int tx = centerX + x;
                 int ty = centerY + y;
 
-                //==========================================
-                // 候補地点
-                //
                 // candidateは「マス座標」
-                //==========================================
-
                 Vector2 candidate;
 
                 candidate.x = tx;
                 candidate.y = ty;
 
-                //==========================================
                 // プレイヤー2×2マス全体が安全か確認
-                //==========================================
-
                 bool safe = true;
 
                 for (int py = 0; py < 2; ++py)
@@ -549,13 +489,10 @@ Vector2 PlayerMove::FindSafePosition(
                     continue;
                 }
 
-                //==========================================
                 // 2×2のプレイヤーが壁に入らないか確認
                 //
                 // IsWallRectが「マス座標」を受け取る設計なら
                 // candidateをそのまま渡す
-                //==========================================
-
                 if (map->IsWallRect(
                     tx,
                     ty,

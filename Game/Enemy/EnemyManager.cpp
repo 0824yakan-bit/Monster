@@ -166,111 +166,110 @@ void EnemyManager::Initialize(Map& map, Party& party)
 	}
 }
 
-void EnemyManager::Update(Map&map)
+void EnemyManager::Update(Map& map)
 {
-for(auto it=m_enemies.begin();it!=m_enemies.end();)
-{
-Enemy*enemy=it->get();
+	for (auto it = m_enemies.begin();it != m_enemies.end();)
+	{
+		Enemy* enemy = it->get();
 
-//バトル中の敵は処理しない
-if(enemy->IsBattleEnemy())
-{
-++it;
-continue;
-}
+		//バトル中の敵は処理しない
+		if (enemy->IsBattleEnemy())
+		{
+			++it;
+			continue;
+		}
 
-//Bossは絶対に落ちない
-if(enemy->IsBoss())
-{
-enemy->Update(map);
+		//Bossは絶対に落ちない
+		if (enemy->IsBoss())
+		{
+			enemy->Update(map);
 
-++it;
-continue;
-}
+			++it;
+			continue;
+		}
 
-//すでに落下中の場合
-if(enemy->IsFalling())
-{
-if(ReductionEnemy(*enemy))
-{
-int enemyId=enemy->GetEnemyId();
+		//すでに落下中の場合
+		if (enemy->IsFalling())
+		{
+			if (ReductionEnemy(*enemy))
+			{
+				int enemyId = enemy->GetEnemyId();
 
-if(enemyId>=0)
-{
-m_defeatedEnemies.insert(enemyId);
-}
+				if (enemyId >= 0)
+				{
+					m_defeatedEnemies.insert(enemyId);
+				}
 
-it=m_enemies.erase(it);
-}
-else 
-{
-++it;
-}
+				it = m_enemies.erase(it);
+			}
+			else
+			{
+				++it;
+			}
 
-continue;
-}
+			continue;
+		}
 
-//通常の敵を更新
-enemy->Update(map);
+		//通常の敵を更新
+		enemy->Update(map);
 
-//Fallが1マスでもあれば落下開始
-if(map.IsFallRect(
-enemy->GetPosition().x,
-enemy->GetPosition().y,
-enemy->GetSize().x,
-enemy->GetSize().y))
-{
-ReductionEnemy(*enemy);
-}
+		//Fallが1マスでもあれば落下開始
+		if (map.IsFallRect(
+			enemy->GetPosition().x,
+			enemy->GetPosition().y,
+			enemy->GetSize().x,
+			enemy->GetSize().y))
+		{
+			ReductionEnemy(*enemy);
+		}
 
-++it;
-}
+		++it;
+	}
 }
 void EnemyManager::Render(Map& map)
 {
-for(auto &enemy:m_enemies)
-{
-//Battle専用敵はFieldSceneでは描画しない
-if(enemy->IsBattleEnemy())
-{
-continue;
-}
-enemy->Render(map);
-}
+	for (auto& enemy : m_enemies)
+	{
+		//Battle専用敵はFieldSceneでは描画しない
+		if (enemy->IsBattleEnemy())
+		{
+			continue;
+		}
+		enemy->Render(map);
+	}
 }
 
 void EnemyManager::Finalize()
 {
-for(auto &enemy:m_enemies)
-{
-enemy->Finalize();
-}
-}
-
-void EnemyManager::SetImage(ImageManager*image)
-{
-m_image=image;
+	for (auto& enemy : m_enemies)
+	{
+		enemy->Finalize();
+	}
 }
 
-Enemy*EnemyManager::CheckHit(PlayerManager&playermanager)
+void EnemyManager::SetImage(ImageManager* image)
 {
-for(auto &enemy:m_enemies)
-{
-//Battle専用敵はFieldSceneでは当たり判定しない
-if(enemy->IsBattleEnemy())
-{
-continue;
+	m_image = image;
 }
 
-if(Collisionall::HitCharacter(playermanager,enemy.get()))
+Enemy* EnemyManager::CheckHit(PlayerManager& playermanager)
 {
-enemy->OnHit(playermanager);
+	for (auto& enemy : m_enemies)
+	{
+		//Battle専用敵はFieldSceneでは当たり判定しない
+		if (enemy->IsBattleEnemy())
+		{
+			continue;
+		}
 
-return enemy.get();
-}
-}
+		if (Collisionall::HitCharacter(playermanager, enemy.get()))
+		{
+			enemy->OnHit(playermanager);
 
-return nullptr;
+			return enemy.get();
+		}
+	}
+	return nullptr;
 }
 void EnemyManager::RemoveEnemy(Enemy* enemy)
 {

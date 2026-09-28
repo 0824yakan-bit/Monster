@@ -32,12 +32,18 @@ Battle::Battle(BossManager&bossManager)
 , m_replaceSelect	{}
 , m_joinState		{}
 , m_joinEnemy		{}
+,m_playAttackEffect	{}
+,m_playEnemyAttackEffect{}
+,m_isBossBattle		{}
+,m_enemyAttackElement{}
+,m_enemyAttackEffectTimer{}
 ,m_bossRun{false}
 ,m_isSelect{}
 ,m_isLastBoss{}
 ,m_bossTurnCount{}
 ,m_bossSelect{}
 ,m_bossBattlePhase{}
+,attackIndex{}
 {
 }
 
