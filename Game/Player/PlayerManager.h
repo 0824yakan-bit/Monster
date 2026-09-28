@@ -9,17 +9,20 @@ class PlayerManager
 {
 private:
 	
-	PlayerMove m_playerMove;
 	Map* map;
 	ImageManager* m_image = nullptr;
 
 	static constexpr int M_SPEED = 32;
 
 public:
+	PlayerMove m_playerMove;
+
 	Vector2 m_oldposition;//現在から前のポジション
 	Vector2 m_position;//現在のポジション
+	Vector2 m_drawPosition;//表示用ポジション
 	Vector2 m_currentposition;
 	Vector2 m_size;
+	Vector2 m_drawSize;
 	enum Direction
 	{
 		Up,
@@ -44,5 +47,7 @@ public:
 	int GetSpeed();
 	void SetImage(ImageManager* image);
 	Direction GetDirection()const;
+	void SetPosition(Vector2 position);
+	void SetPosition(int x, int y);
 };
 

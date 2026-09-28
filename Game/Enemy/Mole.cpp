@@ -18,16 +18,16 @@ void Mole::Initialize(Map& map, Party& party, int x, int y, bool isBoss)
 
 	name = L"モグラード";
 
-	position.x = x * map.m_chipSize;
-	position.y = y * map.m_chipSize;
+	position.x = x;
+	position.y = y;
 
 	int enemysize = 2;
 	if (isBoss)
 	{
 		enemysize = 5;
 	}
-	size.x = map.m_chipSize * enemysize;
-	size.y = map.m_chipSize * enemysize;
+	size.x =enemysize;
+	size.y =enemysize;
 
 
 	renderPosition.x = 500;
@@ -52,14 +52,14 @@ void Mole::Update(Map& map)
 	//}
 }
 
-void Mole::Render()
+void Mole::Render(Map& map)
 {
 	Vector2 drawSize;
 
 	drawSize.x = size.x * m_drawScale/100;
 	drawSize.y = size.y * m_drawScale/100;
 
-	m_image->DrawMole(position, drawSize);
+	m_image->DrawMole(position * map.m_chipSize, drawSize * map.m_chipSize);
 }
 
 void Mole::Finalize()

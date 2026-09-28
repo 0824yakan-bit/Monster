@@ -164,6 +164,7 @@
     <ClCompile Include="Game\Player\PlayerManager.cpp" />
     <ClCompile Include="Game\Player\PlayerMove.cpp" />
     <ClCompile Include="Game\Scene\BattleScene.cpp" />
+    <ClCompile Include="Game\Scene\Effect.cpp" />
     <ClCompile Include="Game\Scene\FieldScene.cpp" />
     <ClCompile Include="Game\Scene\GameOver.cpp" />
     <ClCompile Include="Game\Scene\SceneManager.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="Game\Player\PlayerMove.h" />
     <ClInclude Include="Game\Scene\BattleScene.h" />
     <ClInclude Include="Game\Scene\CooperatList.h" />
+    <ClInclude Include="Game\Scene\Effect.h" />
     <ClInclude Include="Game\Scene\FieldScene.h" />
     <ClInclude Include="Game\Scene\GameOver.h" />
     <ClInclude Include="Game\Scene\Scene.h" />

@@ -97,70 +97,119 @@ void Map::Initialize(const wchar_t* fileName)
 		}
 	}
 }
-void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
+void Map::Update(InputManager& inputManger, PlayerManager& playerManager)
 {
-	//デバッグ用キー
-	if (CheckHitKey(KEY_INPUT_Q))m_level = 0;
-	if (CheckHitKey(KEY_INPUT_W))m_level = 1;
-	if (CheckHitKey(KEY_INPUT_E))m_level = 2;
-	if (CheckHitKey(KEY_INPUT_R))m_level = 3;
-	if (CheckHitKey(KEY_INPUT_T))m_level = 4;
+	//// デバッグ用キー
+	//if (CheckHitKey(KEY_INPUT_Q)) m_level = 0;
+	//if (CheckHitKey(KEY_INPUT_W)) m_level = 1;
+	//if (CheckHitKey(KEY_INPUT_E)) m_level = 2;
+	//if (CheckHitKey(KEY_INPUT_R)) m_level = 3;
+	//if (CheckHitKey(KEY_INPUT_T)) m_level = 4;
 
-	if (CheckHitKey(KEY_INPUT_Y))m_bossManager.DefeatBoss(0);//boss1撃破
-	if (CheckHitKey(KEY_INPUT_U))m_bossManager.DefeatBoss(1);//boss2撃破
-	if (CheckHitKey(KEY_INPUT_I))m_bossManager.DefeatBoss(2);//boss3撃破////一回でも戦闘しないと移動してはいけない
-	if (CheckHitKey(KEY_INPUT_O))m_bossManager.DefeatBoss(3);//boss4撃破ラスボス
+	//if (CheckHitKey(KEY_INPUT_Y)) m_bossManager.DefeatBoss(0);
+	//if (CheckHitKey(KEY_INPUT_U)) m_bossManager.DefeatBoss(1);
+	//if (CheckHitKey(KEY_INPUT_I)) m_bossManager.DefeatBoss(2);
+	//if (CheckHitKey(KEY_INPUT_O)) m_bossManager.DefeatBoss(3);
 
-	if (CheckHitKey(KEY_INPUT_1))m_currentMap = 0;//ステージ１に移動
-	if (CheckHitKey(KEY_INPUT_2))m_currentMap = 1;//ステージ２に移動
-	if (CheckHitKey(KEY_INPUT_3))m_currentMap = 2;//ステージ３に移動
-	if (CheckHitKey(KEY_INPUT_4))m_currentMap = 3;//ステージ４に移動
-	if (CheckHitKey(KEY_INPUT_5))m_currentMap = 4;//ステージ５に移動
-	if (CheckHitKey(KEY_INPUT_6))m_currentMap = 5;//ステージ６に移動
-	if (CheckHitKey(KEY_INPUT_7))m_currentMap = 6;//ステージ７に移動
-	if (CheckHitKey(KEY_INPUT_8))m_currentMap = 7;//ステージ８に移動
-	if (CheckHitKey(KEY_INPUT_9))m_currentMap = 8;//ステージ９に移動
-	if (CheckHitKey(KEY_INPUT_0))m_currentMap = 9;//ステージ１０に移動
-	//デバッグ用キー　終了
+	//if (CheckHitKey(KEY_INPUT_1)) m_currentMap = 0;
+	//if (CheckHitKey(KEY_INPUT_2)) m_currentMap = 1;
+	//if (CheckHitKey(KEY_INPUT_3)) m_currentMap = 2;
+	//if (CheckHitKey(KEY_INPUT_4)) m_currentMap = 3;
+	//if (CheckHitKey(KEY_INPUT_5)) m_currentMap = 4;
+	//if (CheckHitKey(KEY_INPUT_6)) m_currentMap = 5;
+	//if (CheckHitKey(KEY_INPUT_7)) m_currentMap = 6;
+	//if (CheckHitKey(KEY_INPUT_8)) m_currentMap = 7;
+	//if (CheckHitKey(KEY_INPUT_9)) m_currentMap = 8;
+	//if (CheckHitKey(KEY_INPUT_0)) m_currentMap = 9;
+
+	//// デバッグ用キー終了
+
 
 	m_fogdensity = m_level * 150;
-	if (m_currentMap == 9)m_fogdensity = 0;
+
+	if (m_currentMap == 9)
+		m_fogdensity = 0;
+
 	int startMap = GetStageStartMap();
 	int endMap = GetStageEndMap();
 
+
+	//==================================================
+	// プレイヤーサイズ
+	//
+	// m_size は「マス数」
+	//==================================================
+
 	int playerW = playerManager.m_size.x;
 	int playerH = playerManager.m_size.y;
+
+
+	//==================================================
+	// 全ボス撃破
+	//==================================================
 
 	if (m_bossManager.IsAllBossDefeated())
 	{
 		// 9番マップへの道を開く
 		OpenBossArea();
-
 	}
 
-	if (m_bossManager.IsBossDefeated(3))//ラスボス撃破後
+
+	//==================================================
+	// ラスボス撃破後
+	//==================================================
+
+	if (m_bossManager.IsBossDefeated(3))
 	{
 		if (m_difference[GAME_CLEAR_MAP][GAME_CLEAR_Y][GAME_CLEAR_X] == false)
 		{
-			//printfDx(L"MapBreak");
 			MapBreak();
 		}
 
 		LastBossDefeated();
 	}
-	if (m_currentMap != 9)//9の画面端は移動不可
+
+
+	//==================================================
+	// 画面端判定
+	//
+	// m_position はマス座標なので、
+	// 画面座標に変換してから Screen と比較する
+	//==================================================
+
+	int playerPixelX =
+		static_cast<int>(playerManager.m_position.x * m_chipSize);
+
+	int playerPixelY =
+		static_cast<int>(playerManager.m_position.y * m_chipSize);
+
+	int playerPixelW =
+		playerW * m_chipSize;
+
+	int playerPixelH =
+		playerH * m_chipSize;
+
+
+	if (m_currentMap != 9)
 	{
+		//==================================================
 		// 右端
-		if (!m_isTransition && playerManager.m_position.x + playerW >= Screen::RIGHT)
+		//==================================================
+
+		if (
+			!m_isTransition &&
+			playerPixelX + playerPixelW >= Screen::RIGHT
+			)
 		{
 			m_moveDir = MoveDir::Right;
 
 			int local = m_currentMap - startMap;
 
 			if (local >= 8)
-				m_nextmap = m_currentMap - 8; // 8→0, 9→1
+				m_nextmap = m_currentMap - 8;
 			else
 				m_nextmap = m_currentMap + 2;
+
 			// 9番マップには通常移動できない
 			if (m_nextmap == 9)
 				m_nextmap = 0;
@@ -168,17 +217,26 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 			m_transition = 0;
 			m_isTransition = true;
 		}
-		//左端から
-		if (!m_isTransition && playerManager.m_position.x <= Screen::LEFT)
+
+
+		//==================================================
+		// 左端
+		//==================================================
+
+		if (
+			!m_isTransition &&
+			playerPixelX <= Screen::LEFT
+			)
 		{
 			m_moveDir = MoveDir::Left;
 
 			int local = m_currentMap - startMap;
 
 			if (local < 2)
-				m_nextmap = m_currentMap + 8; // 0→8, 1→9
+				m_nextmap = m_currentMap + 8;
 			else
 				m_nextmap = m_currentMap - 2;
+
 			// 9番マップには通常移動できない
 			if (m_nextmap == 9)
 				m_nextmap = 8;
@@ -186,8 +244,16 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 			m_transition = 0;
 			m_isTransition = true;
 		}
-		//上から
-		if (!m_isTransition && playerManager.m_position.y <= Screen::TOP)
+
+
+		//==================================================
+		// 上端
+		//==================================================
+
+		if (
+			!m_isTransition &&
+			playerPixelY <= Screen::TOP
+			)
 		{
 			m_moveDir = MoveDir::Up;
 
@@ -195,6 +261,7 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 				m_nextmap = endMap;
 			else
 				m_nextmap = m_currentMap - 1;
+
 			// 9番マップには通常移動できない
 			if (m_nextmap == 9)
 				m_nextmap = 8;
@@ -202,8 +269,16 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 			m_transition = 0;
 			m_isTransition = true;
 		}
+
+
+		//==================================================
 		// 下端
-		if (!m_isTransition &&playerManager.m_position.y + playerH >= Screen::BOTTOM)
+		//==================================================
+
+		if (
+			!m_isTransition &&
+			playerPixelY + playerPixelH >= Screen::BOTTOM
+			)
 		{
 			m_moveDir = MoveDir::Down;
 
@@ -211,6 +286,7 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 				m_nextmap = startMap;
 			else
 				m_nextmap = m_currentMap + 1;
+
 			// 9番マップには通常移動できない
 			if (m_nextmap == 9)
 				m_nextmap = 0;
@@ -219,32 +295,78 @@ void Map::Update(InputManager&inputManger,PlayerManager&playerManager)
 			m_isTransition = true;
 		}
 	}
+
+
+	//==================================================
+	// マップ遷移
+	//==================================================
+
 	if (m_isTransition)
 	{
 		m_transition += 16;
 
-		int limit = (m_moveDir == MoveDir::Up || m_moveDir == MoveDir::Down)
+		int limit =
+			(m_moveDir == MoveDir::Up ||
+				m_moveDir == MoveDir::Down)
 			? Screen::HEIGHT
 			: Screen::WIDTH;
+
 
 		if (m_transition >= limit)
 		{
 			m_currentMap = m_nextmap;
 			m_isTransition = false;
 
+
+			//==================================================
+			// 新しいマップに入ったときのプレイヤー位置
+			//
+			// m_position は「マス座標」
+			// なので m_chipSize は掛けない
+			//==================================================
+
 			if (m_moveDir == MoveDir::Right)
-				playerManager.m_position.x = 0+m_chipSize;
+			{
+				playerManager.SetPosition(Vector2(1, playerManager.m_position.y));
+			}
 			else if (m_moveDir == MoveDir::Left)
-				playerManager.m_position.x = Screen::RIGHT - playerW-m_chipSize;
+			{
+				playerManager.SetPosition(Vector2(MAP_WIDTH - playerW-1, playerManager.m_position.y));
+			}
 			else if (m_moveDir == MoveDir::Up)
-				playerManager.m_position.y = Screen::BOTTOM - playerH-m_chipSize-16;
+			{
+				playerManager.SetPosition(Vector2(playerManager.m_position.x, MAP_HEIGHT - playerH-3));
+			}
 			else if (m_moveDir == MoveDir::Down)
-				playerManager.m_position.y = 0+m_chipSize;
+			{
+				playerManager.SetPosition(Vector2(playerManager.m_position.x, 1));
+			}
+
+
+			//==================================================
+			// マス座標 → 画面座標
+			//==================================================
+
+			playerManager.m_drawPosition.x =
+				playerManager.m_position.x * m_chipSize;
+
+			playerManager.m_drawPosition.y =
+				playerManager.m_position.y * m_chipSize;
+
+			// PlayerMove側も同期
+			playerManager.m_playerMove.SetPosition(playerManager);
+
+
 			m_moveDir = MoveDir::None;
 		}
 	}
-	int px = playerManager.m_position.x / m_chipSize;
-	int py = playerManager.m_position.y / m_chipSize;
+
+	// 霧
+	int px =
+		static_cast<int>(playerManager.m_position.x);
+
+	int py =
+		static_cast<int>(playerManager.m_position.y);
 
 	RevealArea(px, py, 4);
 }
@@ -528,10 +650,10 @@ void Map::MapBreak()
 
 bool Map::IsWallRect(int px, int py, int width, int height) const
 {
-	int left	= px / m_chipSize;
-	int right	= (px + width - 1) / m_chipSize;
-	int top		= py / m_chipSize;
-	int bottom	= (py + height - 1) / m_chipSize;
+	int left	= px;
+	int right	= (px + width - 1);
+	int top		= py;
+	int bottom	= (py + height - 1) ;
 
 	return	GetTileType(left, top)		== TileType::Wall ||
 			GetTileType(right, top)		== TileType::Wall ||
@@ -540,10 +662,10 @@ bool Map::IsWallRect(int px, int py, int width, int height) const
 }
 bool Map::IsTreasureRect(int px, int py, int width, int height) const
 {
-	int left	= px / m_chipSize;
-	int right	= (px + width - 1) / m_chipSize;
-	int top		= py / m_chipSize;
-	int bottom	= (py + height - 1) / m_chipSize;
+	int left	= px ;
+	int right	= (px + width - 1) ;
+	int top		= py ;
+	int bottom	= (py + height - 1) ;
 
 	return	GetTileType	(left, top)		== TileType::Treasure ||
 			GetTileType	(right, top)	== TileType::Treasure ||
@@ -553,10 +675,10 @@ bool Map::IsTreasureRect(int px, int py, int width, int height) const
 
 bool Map::IsNextFloorRect(int px, int py, int width, int height) const
 {
-	int left	= px / m_chipSize;
-	int right	= (px + width - 1) / m_chipSize;
-	int top		= py / m_chipSize;
-	int bottom	= (py + height - 1) / m_chipSize;
+	int left	= px ;
+	int right	= (px + width - 1) ;
+	int top		= py ;
+	int bottom	= (py + height - 1) ;
 
 	return	GetTileType(left, top)		== TileType::NextFloor ||
 			GetTileType(right, top)		== TileType::NextFloor ||
@@ -566,10 +688,10 @@ bool Map::IsNextFloorRect(int px, int py, int width, int height) const
 
 bool Map::IsFallRect(int px, int py, int width, int height) const
 {
-	int left = px / m_chipSize;
-	int right = (px + width - 1) / m_chipSize;
-	int top = py / m_chipSize;
-	int bottom = (py + height - 1) / m_chipSize;
+	int left = px ;
+	int right = (px + width - 1) ;
+	int top = py ;
+	int bottom = (py + height - 1) ;
 
 	return	GetTileType(left, top)		== TileType::Fall ||
 			GetTileType(right, top)		== TileType::Fall ||
@@ -579,10 +701,10 @@ bool Map::IsFallRect(int px, int py, int width, int height) const
 
 bool Map::IsSignboardRect(int px, int py, int width, int height) const
 {
-	int left = px / m_chipSize;
-	int right = (px + width - 1) / m_chipSize;
-	int top = py / m_chipSize;
-	int bottom = (py + height - 1) / m_chipSize;
+	int left = px ;
+	int right = (px + width - 1) ;
+	int top = py ;
+	int bottom = (py + height - 1) ;
 
 	return	GetTileType(left, top)		== TileType::Signboard ||
 			GetTileType(right, top)		== TileType::Signboard ||
@@ -592,10 +714,10 @@ bool Map::IsSignboardRect(int px, int py, int width, int height) const
 
 bool Map::IsSlimeRect(int px, int py, int width, int height) const
 {
-	int left = px / m_chipSize;
-	int right = (px + width - 1) / m_chipSize;
-	int top = py / m_chipSize;
-	int bottom = (py + height - 1) / m_chipSize;
+	int left = px ;
+	int right = (px + width - 1) ;
+	int top = py ;
+	int bottom = (py + height - 1) ;
 
 	// プレイヤーが (5,5) のマスに触れているか
 	if (m_currentMap == 0)
@@ -879,8 +1001,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 		{
 			Vector2 pos = player.GetPosition();
 
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakArea(tx, ty, 0, 1, 0, 1, 96, 1, TileType::Floor, 0);//プレイヤー範囲内宝箱を使用済みにする
 			BreakArea(tx, ty, 0, 1, 0, 1, 97, 1, TileType::Floor, 0);
@@ -895,8 +1017,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 
 			Vector2 pos = player.GetPosition();
 
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakAreaByGroup(tx, ty, -1, 2, -1, 2,TileGroup::Normal,0);
 		}
@@ -907,8 +1029,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 
 			Vector2 pos = player.GetPosition();
 
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakAreaByGroup(tx, ty, -2, 3, -2, 3, TileGroup::Fire, 3);
 
@@ -921,8 +1043,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 
 			Vector2 pos = player.GetPosition();
 
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakAreaByGroup(tx, ty, -3, 4, -3, 4, TileGroup::Water, 1);
 
@@ -934,8 +1056,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 
 			Vector2 pos = player.GetPosition();
 
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakAreaByGroup(tx, ty, -3, 4, -3, 4, TileGroup::Grass, 0);
 		}
@@ -946,8 +1068,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 
 			Vector2 pos = player.GetPosition();
 
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakAreaByGroup(tx, ty, -3, 4, -3, 4, TileGroup::Soil, 5);
 
@@ -959,8 +1081,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 
 			Vector2 pos = player.GetPosition();
 
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			PlayerManager::Direction dir = player.GetDirection();
 
@@ -996,8 +1118,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 
 			Vector2 pos = player.GetPosition();
 
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakAreaByGroup(tx, ty, -6, 7, -6, 7, TileGroup::Darkness, 5);
 
@@ -1009,8 +1131,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 			m_breakEffectPositions.clear();
 
 			Vector2 pos = player.GetPosition();
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakArea(tx, ty, -2, 3, -2, 3, -1, 3, TileType::Floor, 5);
 		}
@@ -1020,8 +1142,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 			m_breakEffectPositions.clear();
 
 			Vector2 pos = player.GetPosition();
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakArea(tx , ty, -6, 7, -6, 7, -1, 291, TileType::Fall, 10);
 			BreakArea(tx, ty, -1, 7, -1, 2, -1, 1, TileType::Floor, 0);
@@ -1052,8 +1174,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 			m_breakEffectPositions.clear();
 
 			Vector2 pos = player.GetPosition();
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 
 			BreakAreaByGroup(tx, ty, -1, 2, -1, 2,TileGroup::GrowGrass, 0);
 		}
@@ -1063,8 +1185,8 @@ bool Map::NextMapSearch(int map, int x, int y)
 			m_breakEffectPositions.clear();
 
 			Vector2 pos = player.GetPosition();
-			int tx = static_cast<int>(pos.x) / m_chipSize;
-			int ty = static_cast<int>(pos.y) / m_chipSize;
+			int tx = static_cast<int>(pos.x) ;
+			int ty = static_cast<int>(pos.y) ;
 			
 			BreakAreaByGroup(tx, ty, -2, 3, -2, 3,TileGroup::Volcazation, 10);
 		}

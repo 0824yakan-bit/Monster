@@ -207,6 +207,15 @@ void FieldScene::Update(TextManager&textManager,InputManager& inputManager,GameO
 			m_isSkillLearned = false;
 		}
 	}
+	if (m_isAddMonster)
+	{
+		m_addMonsterTimer--;
+		if (m_addMonsterTimer <= 0)
+		{
+			m_addMonsterTimer = 0;
+			m_isAddMonster = false;
+		}
+	}
 	if (textManager.GameClear())
 	{
 		gameOver.GameClearUpdate(inputManager);
@@ -636,6 +645,7 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 	{
 		m_image->DrawSlime(drawSlimePosition, drawSlimeSize);
 	}
+	
 	// LastBoss撃破後：階段解放演出
 	if (m_isStairOpened)
 	{
@@ -743,6 +753,48 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 
 		SetFontSize(30);
 	}
+	if (m_isAddMonster)
+	{
+		int elapsed = 150 - m_addMonsterTimer;
+
+		int alpha = 0;
+
+		// フェードイン：30フレーム
+		if (elapsed < 30)
+		{
+			alpha = elapsed * 180 / 30;
+		}
+		// 表示維持：30～90フレーム
+		else if (elapsed < 90)
+		{
+			alpha = 180;
+		}
+		// フェードアウト：90～120フレーム
+		else
+		{
+			alpha = (120 - elapsed) * 180 / 30;
+		}
+
+		if (alpha < 0)
+			alpha = 0;
+
+		if (alpha > 180)
+			alpha = 180;
+
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+		DrawBox(0, 0, Screen::WIDTH, Screen::HEIGHT, GetColor(0, 0, 0), TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0);
+		//パネル
+		DrawBox(-50, 300, 800, 520, GetColor(25, 25, 35), TRUE);
+		//枠
+		DrawBox(-50, 300, 800, 520, GetColor(0, 25,255), FALSE);
+		// タイトル
+		SetFontSize(40);
+
+		DrawFormatString(100, 370,  GetColor(255, 220, 50), L"%lsが仲間に加わった！", m_monsterName.c_str());
+		SetFontSize(30);
+
+	}
 	if (STtext.m_lastBossAlive == true)
 	{
 		Vector2 drawLastBossPosition = { 23*map.m_chipSize,10 * map.m_chipSize };
@@ -751,7 +803,7 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 	}
 	if (!m_isTreasureOpen&&!map.m_isTransition)
 	{
-		enemyManager.Render();
+		enemyManager.Render(map);
 		playerManager.Render(this, &map, &accessory);
 	}
 
@@ -865,14 +917,11 @@ void FieldScene::Render(TextManager& textManager,GameOver&gameOver, PlayerManage
 	if (m_isMapActive)
 	{
 		DrawBox(200, 200, 900, 900, GetColor(0, 0, 0), TRUE);
-		//DrawString(500, 500, L"マップオープン", GetColor(255, 255, 255), TRUE);
 	}
 
 	if (m_isMenuActive)
 	{
 		m_image->DrawCommandbox1(drawMenuBoxPosition, drawMenuBoxSize);
-		//DrawString(500, 500, L"メニューオープン", GetColor(0, 0, 0), TRUE);
-
 
 		int positionx	= 70;
 		int positiony	= 82;
@@ -1363,8 +1412,7 @@ void FieldScene::RefreshPartySkills()
 			}
 
 			// 重複防止
-			if (skill != CooperatList::Empty &&
-				std::find(newSkills.begin(), newSkills.end(), skill)
+			if (skill != CooperatList::Empty &&std::find(newSkills.begin(), newSkills.end(), skill)
 				== newSkills.end())
 			{
 				newSkills.push_back(skill);
@@ -1513,11 +1561,13 @@ void FieldScene::ReceiveJoinedMonster(std::unique_ptr<Monster>monster)
 	{
 		return;
 	}
-
+	int count = m_party->GetMonsterCount();
 	//パーティに空きがある
-	if (m_party->GetMonsterCount() < 4)
+	if (count< 4)
 	{
 		m_party->AddMonster(std::move(monster));
+		m_isAddMonster = true;
+		m_monsterName = m_party->GetMonster(count)->GetName();
 		RefreshPartySkills();
 
 		return;
@@ -1584,7 +1634,8 @@ void FieldScene::UpdateMonsterReplaceSelect(InputManager& inputManager)
 
 		//新しいモンスターを追加
 		m_party->AddMonster(std::move(m_pendingJoinedMonster));
-
+		m_isAddMonster = true;
+		m_monsterName = m_party->GetMonster(m_replaceSelect)->GetName();
 		//現在のパーティ構成から使える技を再構築
 		RefreshPartySkills();
 		m_isMonsterReplaceSelect = false;

@@ -18,16 +18,16 @@ void Daemon::Initialize(Map& map,Party&party, int x, int y,bool isBoss)
 
 	name = L"ディアボロ";
 
-	position.x = x * map.m_chipSize;
-	position.y = y * map.m_chipSize;
+	position.x = x;
+	position.y = y;
 
 	int enemysize = 2;
 	if (isBoss)
 	{
 		enemysize = 10;
 	}
-	size.x = map.m_chipSize * enemysize;
-	size.y = map.m_chipSize * enemysize;
+	size.x = enemysize;
+	size.y = enemysize;
 
 
 	renderPosition.x = 100;
@@ -43,14 +43,14 @@ void Daemon::Update(Map& map)
 {
 }
 
-void Daemon::Render()
+void Daemon::Render(Map&map)
 {
 	Vector2 drawSize;
 
 	drawSize.x = size.x * m_drawScale/100;
 	drawSize.y = size.y * m_drawScale/100;
 
-	m_image->DrawDaemon(position, drawSize);
+	m_image->DrawDaemon(position * map.m_chipSize, drawSize * map.m_chipSize);
 }
 
 void Daemon::Finalize()

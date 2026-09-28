@@ -1,65 +1,88 @@
 ﻿#include "pch.h"
 #include "PlayerManager.h"
 
-#include"Game/ImageManager/ImageManager.h"
+#include "Game/ImageManager/ImageManager.h"
 
 PlayerManager::PlayerManager()
-	:map{}
-	,m_playerMove{}
-	,m_position{0,0}
-	,m_size{0,0}
-	,m_invicible{false}
-	,m_direction{}
+    : map{}
+    , m_playerMove{}
+    , m_position{ 0,0 }
+    , m_oldposition{ 0,0 }
+    , m_drawPosition{ 0,0 }
+    , m_size{ 0,0 }
+    , m_drawSize{ 0,0 }
+    , m_drawScale{ 1.0f }
+    , m_invicible{ false }
+    , m_direction{}
 {
-
 }
+
 PlayerManager::~PlayerManager()
 {
-
 }
 
-
-
-
-void PlayerManager::Initialize(Map*map)
+void PlayerManager::Initialize(Map* map)
 {
-	m_direction = Direction::Right;
-	this->map = map;
+    m_direction = Direction::Right;
 
-	m_oldposition.x = 0;
-	m_oldposition.y = 0;
+    this->map = map;
 
-	m_size.x = map->m_chipSize*2;//＊２はプレイヤーのサイズ拡大率
-	m_size.y = map->m_chipSize*2;
+    // 配列上の位置
+    m_position.x = 3;
+    m_position.y = 6;
 
-	m_position.x = 3*map->m_chipSize;
-	m_position.y = 6*map->m_chipSize;
+    m_oldposition = m_position;
 
-	m_drawScale = 1.0f;
+    // プレイヤーのサイズ（2×2マス）
+    m_size = { 2, 2 };
 
-	m_playerMove.Initialize(map,*this);
+    // 画面上での表示サイズ
+    m_drawSize.x = m_size.x * map->m_chipSize;
+    m_drawSize.y = m_size.y * map->m_chipSize;
 
+    // 配列位置 → 画面位置へ変換
+    m_drawPosition.x = m_position.x * map->m_chipSize;
+    m_drawPosition.y = m_position.y * map->m_chipSize;
+
+    m_drawScale = 1.0f;
+
+    m_playerMove.Initialize(map, *this);
 }
 
-void PlayerManager::Update(FieldScene* field, Map*map,BossManager*bossManager,Accessory*accessory,Party&party)
+void PlayerManager::Update(
+    FieldScene* field,
+    Map* map,
+    BossManager* bossManager,
+    Accessory* accessory,
+    Party& party)
 {
-
-	m_playerMove.Update(field, map,this,bossManager,accessory,&party);
-
+    m_playerMove.Update(
+        field,
+        map,
+        this,
+        bossManager,
+        accessory,
+        &party
+    );
 }
 
-void PlayerManager::Render(FieldScene* field, Map* map, Accessory* accessory)
+void PlayerManager::Render(
+    FieldScene* field,
+    Map* map,
+    Accessory* accessory)
 {
-    Vector2 drawPosition = m_position;
-    Vector2 drawSize = m_size;
+    Vector2 drawPosition = m_drawPosition;
+
+    // 通常時は2×2マス分のサイズ
+    Vector2 drawSize = m_drawSize;
 
     // 落下中だけ縮小
-    drawSize.x = static_cast<int>(m_size.x * m_drawScale);
-    drawSize.y = static_cast<int>(m_size.y * m_drawScale);
+    drawSize.x = static_cast<int>(m_drawSize.x * m_drawScale);
+    drawSize.y = static_cast<int>(m_drawSize.y * m_drawScale);
 
     // 中央を維持したまま縮小
-    drawPosition.x += (m_size.x - drawSize.x) / 2;
-    drawPosition.y += (m_size.y - drawSize.y) / 2;
+    drawPosition.x += (m_drawSize.x - drawSize.x) / 2;
+    drawPosition.y += (m_drawSize.y - drawSize.y) / 2;
 
     switch (m_direction)
     {
@@ -85,26 +108,43 @@ void PlayerManager::Render(FieldScene* field, Map* map, Accessory* accessory)
 
 void PlayerManager::Finalize()
 {
-
-	m_playerMove.Finalize();
-
+    m_playerMove.Finalize();
 }
 
 Vector2 PlayerManager::GetPosition()
 {
-	return m_position;
+    return m_position;
 }
 
-int PlayerManager::GetSpeed()//１マス分移動
+int PlayerManager::GetSpeed()
 {
-	return M_SPEED;
+    // 1マス分の移動速度
+    return M_SPEED;
 }
+
 void PlayerManager::SetImage(ImageManager* image)
 {
-	m_image = image;
+    m_image = image;
 }
 
 PlayerManager::Direction PlayerManager::GetDirection() const
 {
-	return m_direction;
+    return m_direction;
+}
+
+void PlayerManager::SetPosition(Vector2 position)
+{
+    m_position = position;
+
+    // マス座標 → 画面座標
+    m_drawPosition.x =m_position.x * map->m_chipSize;
+
+    m_drawPosition.y =m_position.y * map->m_chipSize;
+
+    m_playerMove.SetPosition(*this);
+}
+
+void PlayerManager::SetPosition(int x, int y)
+{
+    SetPosition(Vector2{ x,y });
 }

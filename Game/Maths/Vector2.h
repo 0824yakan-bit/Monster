@@ -14,6 +14,8 @@ public:
     Vector2& operator+=(const Vector2& v);
     Vector2 operator-(const Vector2& v) const;
     Vector2& operator-=(const Vector2& v);
+    Vector2 operator/(float value) const;
+    Vector2& operator/=(float value);
     Vector2 operator*(float value) const;
 
     bool operator!=(const Vector2& other) const;

@@ -74,7 +74,7 @@ void TileRole::Initialize()////タイル効果未追加
     m_breakGroups[TileGroup::Water] =
     {
         {291, 134, TileType::Wall},//穴291→水134
-        {134, 291, TileType::Fall},//水134→穴291
+        {134, 3, TileType::Floor},//水134→土3
     };
 
     // 草
