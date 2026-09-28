@@ -38,6 +38,22 @@ Vector2& Vector2::operator-=(const Vector2& v)//{x,y}への引き算
     return *this;
 }
 
+Vector2& Vector2::operator/=(float value)
+{
+    x = static_cast<int>(x / value);
+    y = static_cast<int>(y / value);
+
+    return *this;
+}
+
+Vector2 Vector2::operator/(float value) const
+{
+    return Vector2(
+        static_cast<int>(x / value),
+        static_cast<int>(y / value)
+    );
+}
+
 Vector2 Vector2::operator*(float value) const//{x,y}とそれぞれ掛け算
 {
     return Vector2(x * value,y * value);

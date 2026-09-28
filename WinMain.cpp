@@ -81,7 +81,7 @@ int APIENTRY wWinMain(_In_     HINSTANCE hInstance,
 
     // フレームタイマーの生成
     GameLib::FrameTimer frameTimer{ 60 };    // 60FPSを指定
-
+    std::locale::global(std::locale("japanese"));
 
     // ゲームオブジェクトの生成
     Game game;

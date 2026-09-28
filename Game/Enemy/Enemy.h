@@ -113,7 +113,7 @@ public:
 
     virtual void Initialize(Map& map,Party&party,int x,int y,bool isBoss) = 0;
     virtual void Update(Map&map) = 0;
-    virtual void Render() = 0;//マップシーンでの描画
+    virtual void Render(Map&map) = 0;//マップシーンでの描画
     virtual void Finalize() = 0;
 
     virtual void OnHit(PlayerManager& player) = 0;

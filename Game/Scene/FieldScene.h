@@ -157,6 +157,9 @@ private:
     int m_skillsPerPage = 6;
     bool m_isSkillLearned = false;
     int m_skillLearnTimer = 0;
+    bool m_isAddMonster = false;
+    int m_addMonsterTimer = 0;
+    std::wstring m_monsterName;
     bool m_isStairOpened = false;
     bool m_hasShownStairOpened = false;
     int m_stairOpenTimer = 0;

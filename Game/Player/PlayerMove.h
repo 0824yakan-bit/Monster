@@ -24,6 +24,9 @@ private:
 	int m_speed;
 	int m_movetimer;
 	int m_chipsize;
+	Vector2 m_moveTarget;
+	bool m_isMoving;
+	float m_moveSpeed;
 
 	bool m_hitTreasure;
 	bool m_hitFall;
@@ -49,5 +52,6 @@ public:
 
 	void ReductionPlayer(PlayerManager& playermanager, Map* map);
 	Vector2 FindSafePosition(Map* map, PlayerManager& playermanager);
+	void SetPosition(PlayerManager& playerManager);
 };
 

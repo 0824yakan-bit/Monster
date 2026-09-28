@@ -35,7 +35,7 @@ public:
 
     void Initialize(Map& map, Party& party);
     void Update(Map&map);
-    void Render();
+    void Render(Map& map);
     void Finalize();
 
     void SetImage(ImageManager* image);
