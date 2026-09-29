@@ -1172,7 +1172,6 @@ void Battle::UpdateAttackAction(Map& map, PlayerManager& player)
 
 				m_state = BattleState::EnemyDead;
 			}
-
 			return;
 		}
 		// 次のターン

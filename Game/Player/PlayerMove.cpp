@@ -434,15 +434,12 @@ void PlayerMove::Render(FieldScene* field, Map* map, PlayerManager* playermanage
     SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 0); } 
 }
 
-Vector2 PlayerMove::FindSafePosition(Map* map,PlayerManager& playermanager)
+Vector2 PlayerMove::FindSafePosition(Map* map, PlayerManager& playermanager)
 {
     // 落下開始地点を基準にする
     // m_fallPositionはマス座標
-    int centerX =
-        static_cast<int>(m_fallPosition.x);
-
-    int centerY =
-        static_cast<int>(m_fallPosition.y);
+    int centerX = static_cast<int>(m_fallPosition.x);
+    int centerY = static_cast<int>(m_fallPosition.y);
 
     // 周囲を近い順に探す
     for (int radius = 1; radius <= 10; ++radius)
@@ -460,7 +457,7 @@ Vector2 PlayerMove::FindSafePosition(Map* map,PlayerManager& playermanager)
                 candidate.x = tx;
                 candidate.y = ty;
 
-                // プレイヤー2×2マス全体が安全か確認
+                // プレイヤーのサイズ（2×2マス全体）が安全か確認
                 bool safe = true;
 
                 for (int py = 0; py < 2; ++py)
@@ -470,12 +467,7 @@ Vector2 PlayerMove::FindSafePosition(Map* map,PlayerManager& playermanager)
                         int checkX = tx + px;
                         int checkY = ty + py;
 
-                        TileType type =
-                            map->GetTileType(
-                                checkX,
-                                checkY
-                            );
-
+                        TileType type = map->GetTileType(checkX, checkY);
                         // 穴ならアウト
                         if (type == TileType::Fall)
                         {
@@ -490,24 +482,17 @@ Vector2 PlayerMove::FindSafePosition(Map* map,PlayerManager& playermanager)
                 }
 
                 // 2×2のプレイヤーが壁に入らないか確認
-                //
                 // IsWallRectが「マス座標」を受け取る設計なら
                 // candidateをそのまま渡す
-                if (map->IsWallRect(
-                    tx,
-                    ty,
-                    playermanager.m_size.x,
-                    playermanager.m_size.y))
+                if (map->IsWallRect(tx, ty, playermanager.m_size.x, playermanager.m_size.y))
                 {
                     continue;
                 }
-
                 // 2×2全部が安全
                 return candidate;
             }
         }
     }
-
     // 安全な場所が見つからなかった場合
     return m_fallPosition;
 }

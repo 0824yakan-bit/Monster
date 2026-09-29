@@ -295,36 +295,19 @@ void Map::Update(InputManager& inputManger, PlayerManager& playerManager)
 			m_isTransition = true;
 		}
 	}
-
-
-	//==================================================
+	
 	// マップ遷移
-	//==================================================
-
 	if (m_isTransition)
 	{
+		//
 		m_transition += 16;
-
-		int limit =
-			(m_moveDir == MoveDir::Up ||
-				m_moveDir == MoveDir::Down)
-			? Screen::HEIGHT
-			: Screen::WIDTH;
-
-
+		int limit =(m_moveDir == MoveDir::Up ||m_moveDir == MoveDir::Down)? Screen::HEIGHT: Screen::WIDTH;
 		if (m_transition >= limit)
 		{
 			m_currentMap = m_nextmap;
 			m_isTransition = false;
-
-
-			//==================================================
 			// 新しいマップに入ったときのプレイヤー位置
-			//
 			// m_position は「マス座標」
-			// なので m_chipSize は掛けない
-			//==================================================
-
 			if (m_moveDir == MoveDir::Right)
 			{
 				playerManager.SetPosition(Vector2(1, playerManager.m_position.y));
@@ -341,38 +324,23 @@ void Map::Update(InputManager& inputManger, PlayerManager& playerManager)
 			{
 				playerManager.SetPosition(Vector2(playerManager.m_position.x, 1));
 			}
-
-
-			//==================================================
 			// マス座標 → 画面座標
-			//==================================================
-
-			playerManager.m_drawPosition.x =
-				playerManager.m_position.x * m_chipSize;
-
-			playerManager.m_drawPosition.y =
-				playerManager.m_position.y * m_chipSize;
-
+			playerManager.m_drawPosition.x =playerManager.m_position.x * m_chipSize;
+			playerManager.m_drawPosition.y =playerManager.m_position.y * m_chipSize;
 			// PlayerMove側も同期
 			playerManager.m_playerMove.SetPosition(playerManager);
-
-
 			m_moveDir = MoveDir::None;
 		}
 	}
 
 	// 霧
-	int px =
-		static_cast<int>(playerManager.m_position.x);
-
-	int py =
-		static_cast<int>(playerManager.m_position.y);
-
+	int px =static_cast<int>(playerManager.m_position.x);
+	int py =static_cast<int>(playerManager.m_position.y);
 	RevealArea(px, py, 4);
 }
 void Map::Render()
 {
-
+	//m_transitionは「マップ同士の端つながっている位置」「ここからずらしていく」
 	if (m_moveDir == MoveDir::Right)
 	{
 		DrawCurrentMap(-m_transition, 0);
